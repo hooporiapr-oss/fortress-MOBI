@@ -632,7 +632,7 @@ document.getElementById('howToPlayBtn').addEventListener('touchstart',function(e
 var $ = (typeof $ === 'function') ? $ : function(id){ return document.getElementById(id) };
 
 var WARM = {
-  STATION: 3,                 // <<< 1 recall · 2 recognition · 3 fortress
+  STATION: 4,                 // <<< 1 recall · 2 recognition · 3 replay · 4 fortress
   SECONDS: 60,
   KEY_ON:  'cg-warm-active',
   KEY_SC:  'cg-warm-scores',
@@ -640,7 +640,8 @@ var WARM = {
   LIST: [
     { n:1, name:'RECALL',      file:'002-recall.html'      },
     { n:2, name:'RECOGNITION', file:'003-recognition.html' },
-    { n:3, name:'FORTRESS',    file:'001-fortress.html'    }
+    { n:3, name:'REPLAY',      file:'004-replay.html'      },
+    { n:4, name:'FORTRESS',    file:'001-fortress.html'    }
   ],
   on:false, banked:0, until:0, raf:null, ending:false
 };
