@@ -962,7 +962,23 @@ $$('.level-btn').forEach(function(btn){
         $('cellsDisplay').textContent=LEVEL_CELLS[trainingLevel];
     };
 });
-$('letsGoBtn').onclick=function(){showScreen('play');initGame()};
+/* LET'S GO starts the run, it does not just show the board.
+   It used to land on the play screen with everything set up and the
+   first sequence waiting behind a second LET'S GO, so the same button
+   had to be pressed twice to begin. One press now: the board goes up,
+   it counts you in, and the first chain plays.
+
+   startRun is the one way a run begins — the mode screen's button,
+   and the in-game button after a run ends — so every run opens the
+   same way, with a count-in. The rounds inside a run still continue
+   straight through; autoNextRound is untouched. */
+function startRun(){
+    $('playActionBtn').disabled=true;
+    $('playMessage').textContent=t('getReady');
+    $('playMessage').className='play-message-text watch';
+    showCountdown(function(){ startRound() });
+}
+$('letsGoBtn').onclick=function(){ showScreen('play'); initGame(); startRun() };
 var playCourt=$('playCourt');
 var playCells=[];
 var playTimeouts=[];
@@ -1035,7 +1051,7 @@ function initGame(){
     $('playMessage').textContent=t('tapLetsGo');
     $('playMessage').className='play-message-text';
     $('playActionBtn').textContent=t('letsGo');
-    $('playActionBtn').onclick=startRound;
+    $('playActionBtn').onclick=startRun;
     $('playActionBtn').disabled=false;
     hideTimer();
 }
@@ -1222,7 +1238,7 @@ function restartGame(){
     $('playMessage').textContent=t('tapLetsGo');
     $('playMessage').className='play-message-text';
     $('playActionBtn').textContent=t('letsGo');
-    $('playActionBtn').onclick=startRound;
+    $('playActionBtn').onclick=startRun;
     $('playActionBtn').disabled=false;
 }
 function autoNextRound(){
@@ -1239,7 +1255,7 @@ function resetRound(){
     $('playActionBtn').disabled=false;
     updatePlayUI();
 }
-$('playActionBtn').onclick=startRound;
+$('playActionBtn').onclick=startRun;
 initDemoCourt();
 updateUILanguage();
 // A tracked Full Game run should drop the player straight into
