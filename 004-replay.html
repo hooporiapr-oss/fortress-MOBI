@@ -22,14 +22,15 @@ if (localStorage.getItem('rct-mobile-pass') !== '1') {
    a nav bar and the strip hangs below it. This one has no nav, so the
    strip belongs at the very top. */
 :root{
-  --nav-height:0px;
-  --gold:#FFD700;--orange:#FF6B35;
+  --nav-height:50px;
+  --dark:#0a0a0f;
+  --gold:#FFD700;--orange:#FF6B35;--violet:#A78BFA;
   --card:#111118;--text:#FFFFFF;--muted:#8892a0;
   --border:rgba(255,255,255,0.1);
 }
-/* The strip is fixed over the top of the board, so in a warm-up the
-   game screen starts below it instead of underneath it. */
-body.warm #screen-game{padding-top:calc(46px + env(safe-area-inset-top))}
+/* In a warm-up the strip hangs under the nav, so the board starts
+   below both — the same sum the other three games use. */
+body.warm #screen-game{padding-top:calc(var(--nav-height) + 46px + env(safe-area-inset-top))}
 /* Nothing to press during a warm-up: Home would walk out of the run. */
 body.warm #controls{display:none}
 
@@ -261,6 +262,85 @@ body.warm .play-screen{padding-top:calc(var(--nav-height) + 46px + env(safe-area
 body.warm .play-action-btn{display:none}
 /* The board rises to fill what the button was holding down. */
 body.warm .play-container{min-height:0}
+
+/* ══════════════════════════════════════════════════════
+   THE GAME SCREEN, REBUILT ON RECALL'S
+
+   This game came from the Challenge site, where it stands alone and
+   looks like itself: a black screen, three bordered boxes along the
+   top, a court sized in JS and a Home button at the bottom. Next to
+   Recall and Recognition in the gym it read as a different product —
+   same five-by-five, different everything else.
+
+   So the screen is theirs now, declaration for declaration: the same
+   bar across the top, the same stat row with no boxes round it, the
+   same message line, and the same 340px board with a 5px gap, 10px of
+   padding, a 16px corner and cells at 13% behind a 40% border.
+
+   What stays this game's own is its colour. Recall lights orange and
+   Recognition lights gold; Replay lights violet, the way it always
+   has. Identical layout, its own accent — the same relationship those
+   two already have with each other.
+   ══════════════════════════════════════════════════════ */
+.mini-nav{position:fixed;top:0;left:0;right:0;background:var(--card);
+  border-bottom:1px solid var(--border);padding-top:env(safe-area-inset-top);z-index:1000}
+.nav-row{display:flex;align-items:center;justify-content:space-between;height:50px;padding:0 12px}
+.nav-back{display:flex;align-items:center;gap:6px;padding:8px 12px;background:transparent;
+  border:1px solid var(--border);color:var(--muted);border-radius:8px;
+  font-family:'Outfit',sans-serif;font-size:0.75rem;font-weight:600;
+  cursor:pointer;text-decoration:none;transition:all 0.2s}
+.nav-title{font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:2px;color:var(--violet)}
+
+#screen-game{position:fixed;inset:0;display:none;flex-direction:column;align-items:center;
+  background:var(--dark);overflow-y:auto;overflow-x:hidden;
+  padding-top:calc(var(--nav-height) + env(safe-area-inset-top));
+  padding-bottom:env(safe-area-inset-bottom)}
+
+.topbar{display:flex;justify-content:center;gap:16px;margin-bottom:10px;
+  width:100%;max-width:420px;padding:10px 0 0;flex-wrap:nowrap;flex-shrink:0}
+/* Value above label, the way Recall and Recognition read. This game's
+   markup has them the other way round, and column-reverse flips the
+   pair without touching the DOM the script writes into. */
+.top-box{background:none;border:none;border-radius:0;padding:0;text-align:center;min-width:0;
+  display:flex;flex-direction:column-reverse}
+.top-box.official{background:none;border:none}
+.top-label{font-size:0.55rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
+.top-val{font-family:'Bebas Neue',sans-serif;font-size:1.6rem;color:var(--orange)}
+/* The three numbers were individually coloured — white, cyan, cyan —
+   which is this game's old look, not the gym's. Recall and
+   Recognition read one accent across the whole row, so these follow
+   by id, which is what the old rules used and therefore what has to
+   be answered. */
+#hLevel,#hPoints,#hTime{color:var(--orange)}
+
+#msg{text-align:center;min-height:28px;display:flex;align-items:center;justify-content:center;
+  margin-bottom:6px;font-family:'Bebas Neue',sans-serif;font-size:0.9rem;letter-spacing:2px;
+  color:var(--text);transition:all 0.2s;flex-shrink:0}
+#msg.watch{color:var(--gold)}
+#msg.go{color:var(--orange)}
+#msg.miss{color:#FF1493}
+
+.court-area{width:100%;max-width:340px;margin:0 auto;padding:0;
+  flex:0 0 auto;display:block}
+.court{
+  display:grid;grid-template-columns:repeat(5,1fr);grid-template-rows:none;
+  gap:5px;padding:10px;width:auto!important;height:auto!important;
+  background:var(--card);border:2px solid var(--border);border-radius:16px;
+  aspect-ratio:1;position:relative;box-shadow:none;
+  transition:border-color 0.15s,box-shadow 0.15s}
+.cell{aspect-ratio:1;border-radius:6px;
+  background:rgba(255,255,255,0.13);border:2px solid rgba(255,255,255,0.40);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Bebas Neue',sans-serif;color:transparent;
+  cursor:pointer;position:relative;z-index:1;transition:all 0.12s}
+.cell.lit{background:var(--violet)!important;border-color:var(--violet)!important;
+  box-shadow:0 0 22px rgba(167,139,250,.6)!important;color:#fff!important;transform:scale(1.06)}
+.cell.correct{background:#00D9A5!important;border-color:#00D9A5!important;
+  box-shadow:0 0 12px rgba(0,217,165,.5)!important;color:#fff!important;transform:scale(1.02)}
+.cell.wrong{background:rgba(255,20,147,0.3)!important;border-color:#FF1493!important;color:#fff!important}
+.cell.reveal{background:var(--violet)!important;border-color:#22D3EE!important;color:#fff!important;opacity:.55}
+
+@media(max-width:360px){.court-area{max-width:280px}.court{gap:3px;padding:6px}}
 </style>
 </style>
 </head>
@@ -330,6 +410,13 @@ body.warm .play-container{min-height:0}
 <div id="countdown"><div id="bigCount">3</div></div>
 
 <div id="screen-game">
+  <nav class="mini-nav">
+    <div class="nav-row">
+      <a href="fortress-mobile-hub.html" class="nav-back">&larr; Back</a>
+      <div class="nav-title">THE REPLAY</div>
+      <div style="width:74px"></div>
+    </div>
+  </nav>
   <div class="topbar">
     <div class="top-box"><div class="top-label" id="lblLevel">Sequence</div><div class="top-val" id="hLevel">0</div></div>
     <div class="top-box official"><div class="top-label" id="lblPoints">Points</div><div class="top-val" id="hPoints">0</div></div>
@@ -832,10 +919,12 @@ function resizeCourt(){
   var area=document.querySelector('.court-area');
   var court=$('court');
   if(!area||!court)return;
-  var size=Math.min(area.clientWidth, area.clientHeight);
+  /* The board takes its size from CSS now — aspect-ratio inside a
+     340px wrap, exactly as Recall and Recognition do — so nothing is
+     written to width or height here. All that is left is scaling the
+     numbers in the cells to whatever size the board came out. */
+  var size=court.clientWidth;
   if(size<80) { requestAnimationFrame(resizeCourt); return; }
-  court.style.width=size+'px';
-  court.style.height=size+'px';
   // Numbers scale with the cells rather than being fixed.
   cells.forEach(function(c){ c.style.fontSize=Math.round(size*0.062)+'px'; });
 }
