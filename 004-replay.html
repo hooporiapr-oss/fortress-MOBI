@@ -333,12 +333,12 @@ body.warm .play-container{min-height:0}
   display:flex;align-items:center;justify-content:center;
   font-family:'Bebas Neue',sans-serif;color:transparent;
   cursor:pointer;position:relative;z-index:1;transition:all 0.12s}
-.cell.lit{background:var(--violet)!important;border-color:var(--violet)!important;
-  box-shadow:0 0 22px rgba(167,139,250,.6)!important;color:#fff!important;transform:scale(1.06)}
+.cell.lit{background:var(--orange)!important;border-color:var(--orange)!important;
+  box-shadow:0 0 22px rgba(255,107,53,.6)!important;color:#fff!important;transform:scale(1.06)}
 .cell.correct{background:#00D9A5!important;border-color:#00D9A5!important;
   box-shadow:0 0 12px rgba(0,217,165,.5)!important;color:#fff!important;transform:scale(1.02)}
 .cell.wrong{background:rgba(255,20,147,0.3)!important;border-color:#FF1493!important;color:#fff!important}
-.cell.reveal{background:var(--violet)!important;border-color:#22D3EE!important;color:#fff!important;opacity:.55}
+.cell.reveal{background:var(--orange)!important;border-color:var(--gold)!important;color:#fff!important;opacity:.55}
 
 @media(max-width:360px){.court-area{max-width:280px}.court{gap:3px;padding:6px}}
 
@@ -560,6 +560,27 @@ body.warm .play-container{min-height:0}
   background:linear-gradient(135deg,var(--orange),#E55A2B);color:var(--text);
   box-shadow:0 4px 20px rgba(255,107,53,0.3);transition:all 0.3s}
 .letsgo-btn:active{transform:scale(0.98)}
+
+/* ══════════════════════════════════════════════════════
+   THE TURN CLOCK — ten beats to replay the chain
+
+   Recall and Recognition both put a clock on your turn: the screen
+   pulses once a beat with a beep, a bar drains across the top of the
+   board, and if the bar runs out before you finish the round it ends
+   on a wrong beep. This game had no clock at all — you could sit and
+   think for as long as you liked, which made it the one station of
+   the four where the pressure came off.
+
+   Ten beats at 100 BPM is six seconds, the same window the other two
+   give, and the same bar in the same place above the board. */
+#fsStrobe{position:fixed;inset:0;z-index:9998;pointer-events:none;background:var(--orange);opacity:0}
+.timer-wrap{width:100%;max-width:340px;margin:0 auto 6px;height:6px;
+  background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden;
+  opacity:0;transition:opacity 0.2s}
+.timer-wrap.active{opacity:1}
+.timer-bar{height:100%;width:100%;background:var(--orange);border-radius:3px;transition:none}
+.timer-bar.warning{background:var(--gold)}
+.timer-bar.danger{background:#FF1493}
 </style>
 </style>
 </head>
@@ -691,6 +712,8 @@ body.warm .play-container{min-height:0}
   </div>
 </div>
 
+<div id="fsStrobe"></div>
+
 <div id="screen-game">
   <nav class="mini-nav">
     <div class="nav-row">
@@ -705,6 +728,7 @@ body.warm .play-container{min-height:0}
     <div class="top-box"><div class="top-label" id="lblTime">Time</div><div class="top-val" id="hTime">0.0</div></div>
   </div>
   <div id="msg" class="watch"></div>
+  <div class="timer-wrap" id="timerWrap"><div class="timer-bar" id="timerBar"></div></div>
   <div class="court-area"><div class="court" id="court"></div></div>
   <div id="controls">
     <a class="ctrl-btn" href="fortress-mobile-hub.html" id="homeBtn">← Home</a>
@@ -1324,12 +1348,14 @@ WARM.hostRestart = function(){
   /* Straight into another chain, with no count-in: the count-in
      belongs to starting the station, and the minute is running. */
   clrT();
+  stopTurn();
   clearCells();
   beginRun();
 };
 WARM.hostStop = function(){
   phase = 'done';
   clrT();
+  stopTurn();
 };
 /* The lead-in. This game already had its own 3 · 2 · 1, so the hook
    just points at it. */
@@ -1617,6 +1643,70 @@ function flashFrom(i){
   // the whole chain has been shown
   clearCells();
   msg(T('yourTurn'),'go');
+  startTurn();
+}
+
+/* ── THE TURN CLOCK ───────────────────────────────────────────────
+   Ported from Recall, beat for beat: a pulse and a beep every beat
+   while it is your turn, a bar draining over ten of them, and a wrong
+   beep if it empties. The clock belongs to the TURN, not the round —
+   it starts when the chain has finished playing and stops the moment
+   you finish it, miss, or run out. */
+var TURN_BPM = 100;
+var strobeInterval = null, timerRAF = null, turnTimer = null;
+
+function beatMs(){ return 60000 / TURN_BPM }
+function turnMs(){ return Math.round(beatMs() * 10) }
+
+function startFullStrobe(){
+  stopFullStrobe();
+  var el = $('fsStrobe'), ms = beatMs();
+  strobeInterval = setInterval(function(){
+    el.style.transition='none'; el.style.opacity='.35';
+    blip(880);
+    setTimeout(function(){ el.style.transition='opacity .15s'; el.style.opacity='0' },
+               Math.min(120, ms*0.3));
+  }, ms);
+}
+function stopFullStrobe(){
+  if(strobeInterval){ clearInterval(strobeInterval); strobeInterval=null }
+  var el=$('fsStrobe'); if(el){ el.style.transition='none'; el.style.opacity='0' }
+}
+
+function startTimerBar(duration){
+  var started = performance.now();
+  $('timerWrap').classList.add('active');
+  $('timerBar').className='timer-bar';
+  $('timerBar').style.width='100%';
+  (function tick(){
+    var pct = Math.max(0, 1 - (performance.now()-started)/duration);
+    $('timerBar').style.width = (pct*100)+'%';
+    if(pct<0.3) $('timerBar').className='timer-bar danger';
+    else if(pct<0.5) $('timerBar').className='timer-bar warning';
+    if(pct>0 && phase==='running') timerRAF=requestAnimationFrame(tick);
+  })();
+}
+function stopTimerBar(){ if(timerRAF){ cancelAnimationFrame(timerRAF); timerRAF=null } }
+function hideTimer(){ stopTimerBar(); var w=$('timerWrap'); if(w) w.classList.remove('active') }
+
+function startTurn(){
+  stopTurn();
+  startFullStrobe();
+  startTimerBar(turnMs());
+  turnTimer = setTimeout(function(){
+    if(phase!=='running') return;
+    stopTurn();
+    /* Out of time is a miss, and it sounds like one. */
+    blip(180);
+    msg(T('wrong'),'miss');
+    endRun();
+  }, turnMs());
+  timers.push(turnTimer);
+}
+function stopTurn(){
+  if(turnTimer){ clearTimeout(turnTimer); turnTimer=null }
+  stopFullStrobe();
+  hideTimer();
 }
 
 function handleTap(idx){
@@ -1630,11 +1720,13 @@ function handleTap(idx){
     playerIdx++;
 
     if(playerIdx>=sequence.length){
+      stopTurn();
       $('hPoints').textContent=pointsFor(level);
       msg(T('nice'),'go');
       timers.push(setTimeout(nextLevel,BETWEEN_MS));
     }
   }else{
+    stopTurn();
     cells[idx].classList.add('wrong');
     // Show what the answer was — a run that ends without explanation
     // teaches nothing.
@@ -1650,7 +1742,7 @@ function handleTap(idx){
 
 function endRun(){
   if(phase==='done')return;
-  phase='done';clrT();
+  phase='done';clrT();stopTurn();
 
   // The level being attempted was not completed, so the score is the
   // last sequence fully recalled.
