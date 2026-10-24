@@ -83,9 +83,16 @@ html,body{height:100%;overflow-x:hidden;font-family:'Outfit',sans-serif;backgrou
 .court5x5{
   display:grid;grid-template-columns:repeat(5,1fr);grid-template-rows:repeat(5,1fr);
   gap:2.2%;padding:2.2%;margin:0 auto;position:relative;
-  border:2px solid rgba(124,58,237,.35);border-radius:16px;
+  /* The frame takes the colour of whichever target is live, so the
+     whole court answers the sequence instead of one circle doing all
+     the work. --marco and --halo are set from JS as each target
+     lights and on every tap; the violet here is the resting court. */
+  --marco:rgba(124,58,237,.35);
+  --halo:rgba(124,58,237,.2);
+  border:2px solid var(--marco);border-radius:16px;
   background-color:#1a0f2e;
-  box-shadow:0 0 50px rgba(124,58,237,.2),inset 0 0 30px rgba(124,58,237,.05);
+  box-shadow:0 0 50px var(--halo),inset 0 0 30px rgba(124,58,237,.05);
+  transition:border-color .16s ease, box-shadow .16s ease;
 }
 /* The space the court is allowed to fill. It takes everything left
    between the header and the stats strip, and ajustarCancha squares
@@ -101,28 +108,57 @@ html,body{height:100%;overflow-x:hidden;font-family:'Outfit',sans-serif;backgrou
    than Recall's and Recognition's cells on purpose — enough to read as
    a court, not enough to compete with a ball. */
 .cell-filler{border-radius:6px;background:rgba(124,58,237,.11);border:1.5px solid rgba(124,58,237,.34)}
+/* FIVE COLOURED TARGETS.
+
+   They were five identical orange basketballs, so the only thing that
+   told one from another was WHERE it sat. Position is the hardest
+   thing to hold in a growing chain, and it was carrying the whole
+   job alone. A target has a colour as well as a place, which gives
+   you a second way to remember the same sequence — gold, orange,
+   pink, cyan, purple instead of ball, ball, ball, ball, ball.
+
+   Each one is concentric rings drawn in its own colour, with hard
+   stops rather than a blend so the rings stay crisp at any size —
+   and the court is sized to the screen now, so they will be drawn at
+   plenty of sizes. Nothing here is an image: the target scales with
+   the court instead of going soft. */
 .tap-conga{
-  border-radius:50%;position:relative;opacity:0.8;transition:all 0.15s;width:100%;height:100%;padding:0;
+  border-radius:50%;position:relative;opacity:0.78;transition:all 0.15s;width:100%;height:100%;padding:0;
   background:
-    url('data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20100%20100%22%3E%3Cdefs%3E%3CclipPath%20id%3D%22c%22%3E%3Ccircle%20cx%3D%2250%22%20cy%3D%2250%22%20r%3D%2249%22/%3E%3C/clipPath%3E%3C/defs%3E%3Cg%20clip-path%3D%22url%28%23c%29%22%20fill%3D%22none%22%20stroke%3D%22%23231005%22%20stroke-width%3D%223.4%22%3E%3Cline%20x1%3D%2250%22%20y1%3D%22-4%22%20x2%3D%2250%22%20y2%3D%22104%22/%3E%3Cpath%20d%3D%22M%20-4%2050%20Q%2050%20-4%20104%2050%22/%3E%3Cpath%20d%3D%22M%20-4%2050%20Q%2050%20104%20104%2050%22/%3E%3Cellipse%20cx%3D%2250%22%20cy%3D%2250%22%20rx%3D%2224%22%20ry%3D%2249%22/%3E%3C/g%3E%3C/svg%3E'),
-    radial-gradient(circle at 35% 32%,#ffb35c,#ff8c00 55%,#d9660a 85%);
-  background-size:100% 100%,100% 100%;
-  box-shadow:inset 0 -8px 15px rgba(0,0,0,0.35),0 4px 12px rgba(0,0,0,0.4);
+    radial-gradient(circle at 38% 30%,rgba(255,255,255,.30),rgba(255,255,255,0) 58%),
+    radial-gradient(circle at 50% 50%,
+      #FFFFFF 0%,#FFFFFF 13%,
+      var(--conga-color) 13%,var(--conga-color) 30%,
+      #150B26 30%,#150B26 41%,
+      var(--conga-color) 41%,var(--conga-color) 59%,
+      #150B26 59%,#150B26 69%,
+      var(--conga-color) 69%,var(--conga-color) 100%);
+  box-shadow:inset 0 -6px 14px rgba(0,0,0,0.35),0 0 9px var(--conga-glow),0 4px 12px rgba(0,0,0,0.4);
   cursor:pointer;border:none;outline:none;-webkit-tap-highlight-color:transparent
 }
-#conga0{--conga-color:#FFD700;--conga-glow:rgba(255,215,0,0.6);box-shadow:inset 0 -8px 15px rgba(0,0,0,0.35),0 0 15px rgba(255,215,0,0.2),0 4px 12px rgba(0,0,0,0.4)}
-#conga1{--conga-color:#FF6B35;--conga-glow:rgba(255,107,53,0.6);box-shadow:inset 0 -8px 15px rgba(0,0,0,0.35),0 0 15px rgba(255,107,53,0.2),0 4px 12px rgba(0,0,0,0.4)}
-#conga2{--conga-color:#FF1493;--conga-glow:rgba(255,20,147,0.6);box-shadow:inset 0 -8px 15px rgba(0,0,0,0.35),0 0 15px rgba(255,20,147,0.2),0 4px 12px rgba(0,0,0,0.4)}
-#conga3{--conga-color:#00D9D9;--conga-glow:rgba(0,217,217,0.6);box-shadow:inset 0 -8px 15px rgba(0,0,0,0.35),0 0 15px rgba(0,217,217,0.2),0 4px 12px rgba(0,0,0,0.4)}
-#conga4{--conga-color:#9B59B6;--conga-glow:rgba(155,89,182,0.6);box-shadow:inset 0 -8px 15px rgba(0,0,0,0.35),0 0 15px rgba(155,89,182,0.2),0 4px 12px rgba(0,0,0,0.4)}
-.tap-conga.tapped{opacity:1;transform:scale(1.15);box-shadow:0 0 40px var(--conga-glow),0 0 60px var(--conga-glow),0 8px 20px rgba(0,0,0,0.4)}
+#conga0{--conga-color:#FFD700;--conga-glow:rgba(255,215,0,0.45)}
+#conga1{--conga-color:#FF6B35;--conga-glow:rgba(255,107,53,0.45)}
+#conga2{--conga-color:#FF1493;--conga-glow:rgba(255,20,147,0.45)}
+#conga3{--conga-color:#00D9D9;--conga-glow:rgba(0,217,217,0.45)}
+#conga4{--conga-color:#9B59B6;--conga-glow:rgba(155,89,182,0.45)}
+.tap-conga.tapped{opacity:1;transform:scale(1.15);
+  box-shadow:0 0 40px var(--conga-glow),0 0 60px var(--conga-glow),0 8px 20px rgba(0,0,0,0.4)}
+
+/* Lit is the same target gone white-hot — the dark rings turn white
+   and it burns in ITS OWN colour, not gold. Gold for all five was
+   the old behaviour and it threw away the thing the colours are for:
+   whichever target lights, the screen goes that colour. */
 .tap-conga.lit{
-  opacity:1;transform:scale(1.15);
+  opacity:1;transform:scale(1.18);
   background:
-    url('data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20100%20100%22%3E%3Cdefs%3E%3CclipPath%20id%3D%22c2%22%3E%3Ccircle%20cx%3D%2250%22%20cy%3D%2250%22%20r%3D%2249%22/%3E%3C/clipPath%3E%3C/defs%3E%3Cg%20clip-path%3D%22url%28%23c2%29%22%20fill%3D%22none%22%20stroke%3D%22%23231005%22%20stroke-width%3D%223.4%22%3E%3Cline%20x1%3D%2250%22%20y1%3D%22-4%22%20x2%3D%2250%22%20y2%3D%22104%22/%3E%3Cpath%20d%3D%22M%20-4%2050%20Q%2050%20-4%20104%2050%22/%3E%3Cpath%20d%3D%22M%20-4%2050%20Q%2050%20104%20104%2050%22/%3E%3Cellipse%20cx%3D%2250%22%20cy%3D%2250%22%20rx%3D%2224%22%20ry%3D%2249%22/%3E%3C/g%3E%3C/svg%3E'),
-    radial-gradient(circle at 35% 32%,#fff6c2,#ffd700 55%,#e0ac00 85%);
-  background-size:100% 100%,100% 100%;
-  box-shadow:0 0 30px var(--gold),0 0 50px var(--orange),0 8px 20px rgba(255,107,53,0.6)
+    radial-gradient(circle at 50% 50%,
+      #FFFFFF 0%,#FFFFFF 22%,
+      var(--conga-color) 22%,var(--conga-color) 38%,
+      #FFFFFF 38%,#FFFFFF 47%,
+      var(--conga-color) 47%,var(--conga-color) 68%,
+      #FFFFFF 68%,#FFFFFF 76%,
+      var(--conga-color) 76%,var(--conga-color) 100%);
+  box-shadow:0 0 26px var(--conga-color),0 0 58px var(--conga-glow),0 8px 20px rgba(0,0,0,0.45)
 }
 .tap-conga.hit-correct{animation:hitCorrect 0.2s ease-out}
 .tap-conga.hit-wrong{animation:hitWrong 0.3s ease-out}
@@ -130,10 +166,15 @@ html,body{height:100%;overflow-x:hidden;font-family:'Outfit',sans-serif;backgrou
 @keyframes hitWrong{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
 .tap-conga:active{transform:scale(0.95)}
 
-.court5x5.on-fire .tap-conga{box-shadow:0 0 20px rgba(255,107,53,0.4),0 4px 12px rgba(0,0,0,0.4)}
-.court5x5.on-fire .tap-conga.lit{box-shadow:0 0 40px var(--gold),0 0 60px var(--orange),0 8px 20px rgba(255,107,53,0.6)}
-.court5x5.fuego-mode .tap-conga{animation:flamePulse 0.3s ease-in-out infinite alternate;box-shadow:0 0 30px rgba(255,107,53,0.6),0 0 50px rgba(255,69,0,0.4),0 4px 12px rgba(0,0,0,0.4)}
-.court5x5.fuego-mode .tap-conga.lit{box-shadow:0 0 50px var(--gold),0 0 80px var(--orange),0 0 100px rgba(255,69,0,0.5),0 8px 20px rgba(255,107,53,0.6);animation:fuegoBurst 0.15s ease-out}
+/* A STREAK TURNS THE HEAT UP, NOT THE COLOUR DOWN.
+   These rules used to repaint every glow gold and orange once you
+   got hot, which erased the five colours exactly when the chain is
+   longest and you need them most. Now a streak makes each target
+   burn harder in its own colour and adds the fire underneath it. */
+.court5x5.on-fire .tap-conga{box-shadow:inset 0 -6px 14px rgba(0,0,0,0.35),0 0 22px var(--conga-glow),0 4px 12px rgba(0,0,0,0.4)}
+.court5x5.on-fire .tap-conga.lit{box-shadow:0 0 34px var(--conga-color),0 0 70px var(--conga-glow),0 0 90px rgba(255,107,53,0.35),0 8px 20px rgba(0,0,0,0.45)}
+.court5x5.fuego-mode .tap-conga{animation:flamePulse 0.3s ease-in-out infinite alternate;box-shadow:inset 0 -6px 14px rgba(0,0,0,0.35),0 0 28px var(--conga-glow),0 0 44px rgba(255,69,0,0.3),0 4px 12px rgba(0,0,0,0.4)}
+.court5x5.fuego-mode .tap-conga.lit{box-shadow:0 0 42px var(--conga-color),0 0 80px var(--conga-glow),0 0 110px rgba(255,69,0,0.45),0 8px 20px rgba(255,107,53,0.5);animation:fuegoBurst 0.15s ease-out}
 @keyframes flamePulse{0%{transform:scale(1);filter:brightness(1)}100%{transform:scale(1.03);filter:brightness(1.1)}}
 @keyframes fuegoBurst{0%{transform:scale(1.2) translateY(-5px)}50%{transform:scale(1.35) translateY(-8px)}100%{transform:scale(1.2) translateY(-5px)}}
 
@@ -949,6 +990,7 @@ var repShotLog=[];
 var runStartTime=0;
 
 function repStart(){
+pintarCancha();
 repSequence=[];repRound=0;repPlayerIndex=0;repIsPlaying=false;repIsListening=false;repShotLog=[];
 isPlaying=true;
 runStartTime=performance.now();
@@ -999,6 +1041,7 @@ if(idx>=repSequence.length){
 repIsPlaying=false;
 repIsListening=true;
 repPlayerIndex=0;
+pintarCancha();
 repiteloIndicator.textContent='🏀 YOUR TURN! ('+repSequence.length+' taps)';
 repiteloIndicator.className='repitelo-indicator listening';
 var fd=document.getElementById('repDot0');
@@ -1025,6 +1068,7 @@ if(dot)dot.classList.add('played');
    to. Keeping it beat-locked is the point — an arbitrary 260 or 280
    would be faster and wrong, because the ear hears it fighting the
    beat. Half a beat is the fastest step that is still in time. */
+pintarCancha(ci);
 var speed=60000/bpm;
 setTimeout(function(){
 el.classList.remove('lit');
@@ -1032,9 +1076,28 @@ setTimeout(function(){repPlaySequence(idx+1)},speed*0.2);
 },speed*0.3);
 }
 
+/* THE COURT TAKES THE COLOUR OF THE LIVE TARGET.
+   Read off the target itself rather than kept in a second list here,
+   so the five colours are declared once in the CSS and there is no
+   way for the frame to drift out of step with the circle it is
+   supposed to be answering. Passing nothing puts the court back to
+   its resting violet. */
+function pintarCancha(ci){
+  var marco='rgba(124,58,237,.35)', halo='rgba(124,58,237,.2)';
+  if(typeof ci==='number' && tapCongas[ci]){
+    var cs=getComputedStyle(tapCongas[ci]);
+    var c=(cs.getPropertyValue('--conga-color')||'').trim();
+    var g=(cs.getPropertyValue('--conga-glow')||'').trim();
+    if(c){ marco=c; halo=g||c }
+  }
+  congaRow.style.setProperty('--marco',marco);
+  congaRow.style.setProperty('--halo',halo);
+}
+
 function repHandleTap(ci){
 if(!repIsListening||repIsPlaying)return false;
 if(currentMode!=='repitelo')return false;
+pintarCancha(ci);
 var expected=repSequence[repPlayerIndex];
 var dot=document.getElementById('repDot'+repPlayerIndex);
 if(ci===expected){
