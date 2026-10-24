@@ -289,7 +289,7 @@ body.warm .play-container{min-height:0}
   border:1px solid var(--border);color:var(--muted);border-radius:8px;
   font-family:'Outfit',sans-serif;font-size:0.75rem;font-weight:600;
   cursor:pointer;text-decoration:none;transition:all 0.2s}
-.nav-title{font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:2px;color:var(--violet)}
+.nav-title{font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:2px;color:var(--orange)}
 
 #screen-game{position:fixed;inset:0;display:none;flex-direction:column;align-items:center;
   background:var(--dark);overflow-y:auto;overflow-x:hidden;
@@ -341,6 +341,160 @@ body.warm .play-container{min-height:0}
 .cell.reveal{background:var(--violet)!important;border-color:#22D3EE!important;color:#fff!important;opacity:.55}
 
 @media(max-width:360px){.court-area{max-width:280px}.court{gap:3px;padding:6px}}
+
+/* ══════════════════════════════════════════════════════
+   THE START AND END SCREENS, ON RECALL'S TOO
+
+   The board already matched; these two still read as the Challenge
+   site — a radial navy wash, pill buttons pinned to the corners, an
+   italic title and cyan accents. Three screens of one game should not
+   look like two games.
+
+   So the same bar across the top, the same centred 420px column on
+   the same flat dark page, the same title, the same How to Play
+   accordion with its cards and numbered steps, and the same PLAY
+   button. Nothing in the markup moved except the Back and language
+   buttons, which go into the bar where Recall keeps them.
+   ══════════════════════════════════════════════════════ */
+#screen-intro{
+  position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;
+  justify-content:flex-start;
+  background:var(--dark);z-index:100;
+  overflow-y:auto;overflow-x:hidden;
+  padding:calc(var(--nav-height) + env(safe-area-inset-top) + 10px) 15px 24px;
+}
+#screen-intro > *{width:100%;max-width:420px;margin-left:auto;margin-right:auto}
+
+/* Back and the language toggle live in the bar now, not pinned to the
+   corners of the page. */
+.intro-back{position:static;display:flex;align-items:center;gap:6px;
+  padding:8px 12px;border:1px solid var(--border);background:transparent;
+  color:var(--muted);border-radius:8px;
+  font-family:'Outfit',sans-serif;font-size:0.75rem;font-weight:600;
+  letter-spacing:normal;text-transform:none;text-decoration:none;z-index:auto}
+.lang-btn{position:static;padding:5px 8px;border:1px solid var(--border);
+  background:0;color:var(--muted);border-radius:4px;
+  font-size:0.6rem;font-weight:600;letter-spacing:normal;
+  cursor:pointer;min-width:28px;min-height:28px;z-index:auto}
+
+.vrr-title{font-family:'Bebas Neue',sans-serif;font-size:1.8rem;letter-spacing:3px;
+  font-style:normal;font-weight:400;text-transform:uppercase;
+  color:var(--orange);text-shadow:none;margin:0 0 2px;text-align:center}
+.vrr-title span{color:var(--orange)}
+.vrr-sub{font-family:'Outfit',sans-serif;font-size:0.7rem;letter-spacing:normal;
+  text-transform:none;color:var(--muted);margin-bottom:8px;text-align:center}
+
+/* The looping demonstration, in Recall's frame. */
+.demo-wrap{display:flex;flex-direction:column;align-items:center;gap:0;
+  position:relative;margin:34px 0 10px}
+.demo-label{position:absolute;top:-24px;left:50%;transform:translateX(-50%);
+  font-family:'Bebas Neue',sans-serif;font-size:0.7rem;letter-spacing:2px;
+  color:var(--gold);background:rgba(0,0,0,0.85);padding:4px 12px;border-radius:10px;
+  white-space:nowrap;z-index:10;border:1px solid rgba(255,215,0,0.3);transition:all 0.3s}
+.demo-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:3px;padding:6px;
+  background:#1a1a24;border:none;border-radius:12px;
+  width:200px;height:200px;position:relative}
+.demo-cell{aspect-ratio:1;border-radius:4px;
+  background:rgba(255,255,255,0.08);border:2px solid rgba(255,255,255,0.15);
+  display:flex;align-items:center;justify-content:center;position:relative;z-index:1;
+  font-family:'Bebas Neue',sans-serif;font-size:1rem;color:transparent;transition:all 0.15s}
+.demo-cell.lit{background:var(--orange);border-color:var(--gold);
+  box-shadow:0 0 15px rgba(255,107,53,0.6);color:#fff;transform:scale(1.05)}
+.demo-cell.ok{background:#00D9A5;border-color:#00D9A5;
+  box-shadow:0 0 12px rgba(0,217,165,0.5);color:#fff}
+
+/* How to Play, card for card. */
+.htp{width:100%;max-width:380px;margin:12px auto}
+.htp-toggle{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;
+  padding:12px 16px;border-radius:10px;cursor:pointer;transition:all 0.3s;
+  background:linear-gradient(135deg,rgba(255,215,0,0.08),rgba(255,107,53,0.05));
+  border:1px solid rgba(255,215,0,0.2)}
+.htp-toggle-text{font-family:'Bebas Neue',sans-serif;font-size:0.9rem;letter-spacing:2px;
+  text-transform:none;font-weight:400;color:var(--gold)}
+.htp-arrow{color:var(--gold);font-size:0.75rem;transition:transform 0.3s}
+.htp-body.open{max-height:2000px}
+.htp-card{background:var(--card);border:1px solid var(--border);border-radius:12px;
+  padding:15px;margin-top:10px;text-align:left}
+.htp-card-title{font-family:'Bebas Neue',sans-serif;font-size:0.9rem;letter-spacing:2px;
+  text-transform:none;font-weight:400;color:var(--orange);margin-bottom:10px;
+  display:flex;align-items:center;gap:8px}
+.htp-step{display:flex;gap:10px;margin-bottom:10px;align-items:flex-start}
+.htp-step .n{width:22px;height:22px;border-radius:50%;background:var(--orange);
+  color:var(--dark);font-family:'Bebas Neue',sans-serif;font-size:0.75rem;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;border:none}
+.htp-step .tx{font-size:0.75rem;color:var(--text);line-height:1.5}
+.htp-step .tx b{color:var(--gold)}
+.htp-tip{background:rgba(255,215,0,0.08);border-left:3px solid var(--gold);
+  padding:10px 12px;border-radius:0 8px 8px 0;margin-top:12px}
+.htp-tip-title{font-family:'Outfit',sans-serif;font-size:0.6rem;color:var(--gold);
+  text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;font-weight:700}
+.htp-tip-text{font-size:0.7rem;color:var(--muted);line-height:1.4}
+
+/* START, in PLAY NOW's clothes. */
+.big-btn{width:100%;max-width:320px;margin:12px auto 0;display:block;
+  padding:14px 20px;border:none;border-radius:10px;
+  font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:4px;
+  text-transform:uppercase;cursor:pointer;
+  background:linear-gradient(135deg,var(--orange),#E55A2B);color:var(--text);
+  box-shadow:0 4px 20px rgba(255,107,53,0.4);transition:all 0.3s;
+  animation:demoPulse 2s ease-in-out infinite}
+.big-btn:active{transform:scale(0.98)}
+@keyframes demoPulse{0%,100%{box-shadow:0 4px 20px rgba(255,107,53,0.4)}
+                     50%{box-shadow:0 4px 30px rgba(255,107,53,0.7)}}
+.best-line{margin-top:16px;font-size:0.7rem;color:var(--muted);text-align:center}
+.best-line b{color:var(--gold)}
+
+/* The end screen, on the same page. */
+#screen-end{background:var(--dark);
+  padding:calc(var(--nav-height) + env(safe-area-inset-top) + 20px) 20px 24px}
+.final-num{font-family:'Bebas Neue',sans-serif;font-weight:400;color:var(--orange);
+  text-shadow:0 0 60px rgba(255,107,53,.6)}
+.final-label{font-family:'Bebas Neue',sans-serif;letter-spacing:2px;color:var(--muted)}
+.final-stat-cell{border:1px solid var(--border);background:var(--card);border-radius:12px}
+.final-stat-cell.points-cell{border-color:var(--border);background:var(--card)}
+.final-stat-label{font-family:'Outfit',sans-serif;font-size:0.55rem;font-weight:700;
+  letter-spacing:1px;text-transform:uppercase;color:var(--muted)}
+.points-cell .final-stat-label{color:var(--muted)}
+.final-stat-val{font-family:'Bebas Neue',sans-serif;font-size:1.6rem;font-weight:400;color:var(--orange)}
+/* PLAY AGAIN is PLAY NOW: the end screen's main button and the start
+   screen's main button are the same button in Recall, so they are
+   here too. */
+.next-player-btn{margin:24px auto 0;height:auto;padding:14px 20px;width:100%;max-width:320px;
+  border:none;border-radius:10px;
+  font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:4px;font-weight:400;
+  background:linear-gradient(135deg,var(--orange),#E55A2B);color:var(--text);
+  box-shadow:0 4px 20px rgba(255,107,53,0.4)}
+.ctrl-btn{border:1px solid var(--border);background:transparent;color:var(--muted);
+  font-family:'Outfit',sans-serif;font-size:0.75rem;font-weight:600;
+  letter-spacing:normal;text-transform:none;border-radius:8px;height:auto;padding:10px 16px}
+
+/* The badge and the footer line sit in the same two slots Recall uses
+   — above the title and under the button — so the two start screens
+   have the same silhouette, not just the same parts. */
+.demo-badge{display:inline-block;background:rgba(255,107,53,0.15);color:var(--orange);
+  padding:4px 12px;border-radius:15px;font-size:0.55rem;font-weight:700;
+  text-transform:uppercase;letter-spacing:1.5px;margin:0 auto 6px;width:auto!important}
+#screen-intro{text-align:center}
+.gym-promo{display:inline-block;margin:14px auto 0;padding:6px 14px;border-radius:999px;
+  background:rgba(255,215,0,0.06);border:1px solid rgba(255,215,0,0.2);
+  font-size:0.6rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;
+  color:var(--muted);width:auto!important}
+.gym-promo span:last-child{color:var(--gold)}
+
+/* #screen-intro > * sets a 420px column, and being an id selector it
+   also beat the narrower caps on the two controls. Restated at the
+   same weight so How to Play stops at 380 and START at 320, the
+   widths Recall uses. */
+#screen-intro > .htp{max-width:380px}
+#screen-intro > .big-btn{max-width:320px}
+
+/* The secondary button under PLAY AGAIN was the Challenge site's
+   violet-and-cyan outline. It reads as Recall's quiet button now,
+   and it points at the gym rather than at index.html. */
+.box-open-btn{border:1px solid var(--border);background:transparent;color:var(--muted);
+  font-family:'Outfit',sans-serif;font-size:0.75rem;font-weight:600;
+  letter-spacing:normal;text-transform:none;border-radius:8px;height:auto;padding:12px 16px;
+  box-shadow:none}
 </style>
 </style>
 </head>
@@ -360,9 +514,16 @@ body.warm .play-container{min-height:0}
 </div>
 
 <div id="screen-intro">
-  <a class="intro-back" href="fortress-mobile-hub.html" id="introBack">← Back</a>
-  <button class="lang-btn" id="langBtn" onclick="toggleLang()">ES</button>
+  <nav class="mini-nav">
+    <div class="nav-row">
+      <a class="intro-back" href="fortress-mobile-hub.html" id="introBack">&larr; Back</a>
+      <div class="nav-title">THE REPLAY</div>
+      <button class="lang-btn" id="langBtn" onclick="toggleLang()">ES</button>
+    </div>
+  </nav>
+  <div class="demo-badge">FREE</div>
   <div class="vrr-title">THE <span>REPLAY</span></div>
+  <div class="vrr-sub">Watch the chain, replay it in order</div>
 
   <div class="official-banner" id="officialBanner" style="display:none;">
     <div class="ob-kick" id="obKick">Official Run</div>
@@ -405,6 +566,7 @@ body.warm .play-container{min-height:0}
   </div>
   <button class="big-btn" id="bigStart" onclick="handleStartClick()">▶ START</button>
   <div class="best-line" id="bestLine"></div>
+  <div class="gym-promo"><span>Powered by</span> <span>GOSTAR DIGITAL</span></div>
 </div>
 
 <div id="countdown"><div id="bigCount">3</div></div>
@@ -425,7 +587,7 @@ body.warm .play-container{min-height:0}
   <div id="msg" class="watch"></div>
   <div class="court-area"><div class="court" id="court"></div></div>
   <div id="controls">
-    <a class="ctrl-btn" href="index.html" id="homeBtn">← Home</a>
+    <a class="ctrl-btn" href="fortress-mobile-hub.html" id="homeBtn">← Home</a>
   </div>
 </div>
 
@@ -441,7 +603,7 @@ body.warm .play-container{min-height:0}
   <div class="save-status" id="saveStatus"></div>
 
   <button class="next-player-btn" id="againBtn">▶ PLAY AGAIN</button>
-  <a class="box-open-btn" id="backToPledge" href="index.html" style="max-width:300px;margin:14px auto 0;">← Back</a>
+  <a class="box-open-btn" id="backToPledge" href="fortress-mobile-hub.html" style="max-width:320px;margin:12px auto 0;">← Back</a>
 </div>
 
 <script>
