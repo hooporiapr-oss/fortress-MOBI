@@ -75,7 +75,11 @@ html,body{height:100%;overflow-x:hidden;font-family:'Outfit',sans-serif;backgrou
   background-color:#1a0f2e;
   box-shadow:0 0 50px rgba(124,58,237,.2),inset 0 0 30px rgba(124,58,237,.05);
 }
-.cell-filler{border-radius:6px;background:rgba(124,58,237,.05);border:1.5px solid rgba(124,58,237,.15)}
+/* The court texture, raised to match the other two games. Note what is
+   tappable here is the five BALLS, not the boxes, so these stay quieter
+   than Recall's and Recognition's cells on purpose — enough to read as
+   a court, not enough to compete with a ball. */
+.cell-filler{border-radius:6px;background:rgba(124,58,237,.11);border:1.5px solid rgba(124,58,237,.34)}
 .tap-conga{
   border-radius:50%;position:relative;opacity:0.8;transition:all 0.15s;width:100%;height:100%;padding:0;
   background:
