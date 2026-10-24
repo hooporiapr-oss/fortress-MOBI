@@ -34,8 +34,28 @@ html,body{height:100%;overflow-x:hidden;font-family:'Outfit',sans-serif;backgrou
 .container{max-width:500px;margin:0 auto;padding:calc(env(safe-area-inset-top) + 16px) 16px 20px;min-height:100dvh;display:flex;flex-direction:column}
 
 /* Hero */
-.setup-screen{background:var(--dark);min-height:100vh;min-height:100dvh}
-.intro-nav-row{display:flex;align-items:center;justify-content:space-between;width:100%;max-width:440px;margin-bottom:8px}
+/* THE START SCREEN, LAID OUT LIKE THE OTHER THREE.
+   It used to paint a solid dark block inside the 500px column while
+   the page behind it is a purple gradient, so on a desktop it showed
+   as a narrow black strip floating on purple with the content jammed
+   into the top of it and a long dead space below. On a phone the
+   column IS the window, so nobody ever saw it.
+
+   Letting the page show through gives one uniform background edge to
+   edge, the way Recall, Recognition and Replay already read, and
+   centring the block puts it where the eye lands instead of pinning
+   it to the top of a tall empty box. */
+.setup-screen{background:transparent;min-height:100vh;min-height:100dvh;
+  justify-content:center}
+/* Back goes in a bar across the top, where it is on the other three,
+   instead of riding along inside the centred block — a Back button
+   floating in the middle of a desktop window is the sort of thing a
+   coach notices and nobody can explain. */
+.intro-nav-row{position:fixed;top:0;left:0;right:0;z-index:1000;
+  display:flex;align-items:center;justify-content:space-between;
+  height:50px;padding:env(safe-area-inset-top) 12px 0;
+  background:rgba(10,10,15,0.95);border-bottom:1px solid var(--border);
+  backdrop-filter:blur(10px);margin-bottom:0}
 .intro-nav-title{font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:2px;color:var(--gold)}
 .intro-title{font-family:'Bebas Neue',sans-serif;font-size:2.4rem;letter-spacing:6px;color:var(--gold);line-height:1}
 .intro-playbook-btn{width:100%;max-width:400px;padding:14px 18px;border-radius:14px;border:1px solid var(--border);background:rgba(255,255,255,.04);color:var(--text);font-family:'Outfit',sans-serif;font-size:.85rem;font-weight:700;letter-spacing:.5px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .2s}
@@ -167,6 +187,10 @@ html,body{height:100%;overflow-x:hidden;font-family:'Outfit',sans-serif;backgrou
 
 /* Controls */
 .setup-screen{display:flex;flex-direction:column;align-items:center;gap:16px;padding:16px 0 24px}
+/* PLAY was stretching the full width of the column while How to Play
+   stopped at 400px, so the two buttons under the title were different
+   widths. They are a pair; they match now. */
+.setup-screen .play-now-btn{max-width:400px}
 .setup-section{width:100%}
 .setup-label{font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:3px;color:rgba(255,255,255,.35);text-align:center;margin-bottom:6px}
 .setup-row{display:flex;gap:12px;width:100%}
