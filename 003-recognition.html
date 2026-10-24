@@ -36,15 +36,15 @@ html,body{height:100%;overflow-x:hidden;overflow-y:auto;font-family:'Outfit',san
 .demo-label{position:absolute;top:-24px;left:50%;transform:translateX(-50%);font-family:'Bebas Neue',sans-serif;font-size:0.7rem;letter-spacing:2px;color:var(--gold);background:rgba(0,0,0,0.85);padding:4px 12px;border-radius:10px;white-space:nowrap;z-index:10;border:1px solid rgba(255,215,0,0.3);transition:all 0.3s}
 .demo-label.phase-watch{color:var(--gold);border-color:rgba(255,215,0,0.4)}
 .demo-label.phase-echo{color:var(--lime);border-color:rgba(154,205,50,0.4)}
-.demo-label.phase-find{color:var(--teal);border-color:rgba(0,217,165,0.4)}
-.demo-label.phase-success{color:var(--teal);border-color:rgba(0,217,165,0.4)}
+.demo-label.phase-find{color:#00D9A5;border-color:rgba(0,217,165,0.4)}
+.demo-label.phase-success{color:#00D9A5;border-color:rgba(0,217,165,0.4)}
 .demo-court{display:grid;grid-template-columns:repeat(5,1fr);gap:3px;padding:6px;background:#1a1a24;border-radius:12px;border:none;width:200px;height:200px;position:relative}
 .demo-court::before{content:'';position:absolute;inset:0;background:rgba(10,10,15,0.5);border-radius:9px;pointer-events:none}
 .demo-cell{aspect-ratio:1;border-radius:4px;background:rgba(255,255,255,0.08);border:2px solid rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;position:relative;z-index:1;font-family:'Bebas Neue',sans-serif;font-size:0.85rem;color:transparent;transition:all 0.1s}
 .demo-cell.lit{background:var(--gold);border-color:var(--gold);box-shadow:0 0 15px rgba(255,215,0,0.5);transform:scale(1.05);color:var(--dark)}
 .demo-cell.echo-lit{background:var(--lime);border-color:var(--lime);box-shadow:0 0 15px rgba(154,205,50,0.5);transform:scale(1.05);color:var(--dark)}
 .demo-cell.find-target{border-color:var(--lime);box-shadow:0 0 8px rgba(154,205,50,0.4);background:rgba(154,205,50,0.15);color:var(--lime)}
-.demo-cell.correct{background:var(--teal);border-color:var(--teal);box-shadow:0 0 12px rgba(0,217,165,0.5);color:var(--dark)}
+.demo-cell.correct{background:#00D9A5;border-color:#00D9A5;box-shadow:0 0 12px rgba(0,217,165,0.5);color:var(--dark)}
 .demo-cell.reveal-original{border:2px dashed var(--gold);box-shadow:0 0 10px var(--gold);background:rgba(255,215,0,0.15);color:var(--gold)}
 .demo-court.joy-pulse{animation:joyPulse 0.5s ease-out}
 .demo-court.beat-pulse{border-color:var(--gold)!important;box-shadow:0 0 15px rgba(255,215,0,0.4)}
@@ -124,10 +124,10 @@ html,body{height:100%;overflow-x:hidden;overflow-y:auto;font-family:'Outfit',san
 .play-message-text{font-family:'Bebas Neue',sans-serif;font-size:0.9rem;letter-spacing:2px;color:var(--text);transition:all 0.2s}
 .play-message-text.watch{color:var(--gold)}
 .play-message-text.echo{color:var(--lime)}
-.play-message-text.find{color:var(--teal)}
-.play-message-text.perfect{color:var(--teal);text-shadow:0 0 10px var(--teal)}
-.play-message-text.miss{color:var(--pink)}
-.play-message-text.timeout{color:var(--pink)}
+.play-message-text.find{color:#00D9A5}
+.play-message-text.perfect{color:#00D9A5;text-shadow:0 0 10px #00D9A5}
+.play-message-text.miss{color:#FF1493}
+.play-message-text.timeout{color:#FF1493}
 .play-progress{display:flex;align-items:center;gap:8px;margin-bottom:8px}
 .play-progress-label{font-size:0.6rem;color:var(--muted);letter-spacing:1px}
 .play-progress-stars{display:flex;gap:8px}
@@ -137,7 +137,7 @@ html,body{height:100%;overflow-x:hidden;overflow-y:auto;font-family:'Outfit',san
 .timer-wrap.active{opacity:1}
 .timer-bar{height:100%;width:100%;background:var(--lime);border-radius:3px;transition:none}
 .timer-bar.warning{background:var(--gold)}
-.timer-bar.danger{background:var(--pink)}
+.timer-bar.danger{background:#FF1493}
 .play-court-wrap{width:100%;max-width:340px;margin:0 auto}
 .play-court{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;padding:10px;background:var(--card);border:2px solid var(--border);border-radius:16px;aspect-ratio:1;position:relative;transition:border-color 0.15s,box-shadow 0.15s}
 .play-court.beat-pulse{border-color:var(--gold)!important;box-shadow:0 0 15px rgba(255,215,0,0.3)}
@@ -150,12 +150,12 @@ html,body{height:100%;overflow-x:hidden;overflow-y:auto;font-family:'Outfit',san
 .play-cell.echo-lit .cell-num{opacity:0.9}
 .play-cell.find-target{border-color:var(--lime)!important;box-shadow:0 0 8px rgba(154,205,50,0.4);background:rgba(154,205,50,0.15)!important}
 .play-cell.find-target .cell-num{opacity:0.85;color:var(--lime)}
-.play-cell.correct{background:var(--teal)!important;border-color:var(--teal)!important;box-shadow:0 0 15px var(--teal);animation:correctPulse 0.4s}
+.play-cell.correct{background:#00D9A5!important;border-color:#00D9A5!important;box-shadow:0 0 15px #00D9A5;animation:correctPulse 0.4s}
 .play-cell.correct .cell-num{opacity:1}
-.play-cell.wrong{background:var(--pink)!important;border-color:var(--pink)!important;box-shadow:0 0 15px var(--pink);animation:shake 0.4s}
+.play-cell.wrong{background:#FF1493!important;border-color:#FF1493!important;box-shadow:0 0 15px #FF1493;animation:shake 0.4s}
 .play-cell.wrong .cell-num{opacity:1}
-.play-cell.reveal-answer{border-color:var(--teal)!important;box-shadow:0 0 12px var(--teal);background:rgba(0,217,165,0.2)!important}
-.play-cell.reveal-answer .cell-num{opacity:1;color:var(--teal)}
+.play-cell.reveal-answer{border-color:#00D9A5!important;box-shadow:0 0 12px #00D9A5;background:rgba(0,217,165,0.2)!important}
+.play-cell.reveal-answer .cell-num{opacity:1;color:#00D9A5}
 .play-cell.reveal-original{border:2px dashed var(--gold)!important;box-shadow:0 0 10px var(--gold);background:rgba(255,215,0,0.15)!important}
 .play-cell.reveal-original .cell-num{opacity:0.8;color:var(--gold)}
 .play-court.joy-pulse{animation:joyPulse 0.5s ease-out}
@@ -201,6 +201,65 @@ html,body{height:100%;overflow-x:hidden;overflow-y:auto;font-family:'Outfit',san
 .qs-total span{font-size:1.5rem;color:var(--text);margin-left:8px;font-family:'Bebas Neue',sans-serif}
 .qs-next-btn{width:100%;max-width:400px;min-height:56px;border:none;border-radius:16px;background:linear-gradient(135deg,var(--lime),var(--lime-light));color:var(--dark);font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;box-shadow:0 0 30px rgba(154,205,50,.6)}
 .qs-next-btn:active{transform:scale(.98)}
+
+/* ══════════════════════════════════════════════════════
+   THE FIVE-MINUTE WARM-UP
+
+   One minute per station, five stations, no hands. This is the strip
+   across the top that says which station you are on and how much of
+   your minute is left, plus the hand-off card between stations.
+
+   It sits above everything the game draws, because the minute keeps
+   running whatever the game is doing underneath — including the
+   moment a run breaks and restarts.
+   ══════════════════════════════════════════════════════ */
+#warmBar{
+  position:fixed;left:0;right:0;z-index:1500;
+  top:calc(var(--nav-height) + env(safe-area-inset-top));
+  display:none;flex-direction:column;
+  background:#050508;border-bottom:1px solid var(--border);
+}
+body.warm #warmBar{display:flex}
+/* The game screens start below the nav; with the strip in, they start
+   below the strip as well, or it covers the first row of stats. */
+body.warm .screen,
+body.warm .play-screen{padding-top:calc(var(--nav-height) + 46px + env(safe-area-inset-top))}
+#warmFill{height:5px;background:var(--orange);width:100%;
+  transition:background .3s linear}
+#warmFill.warning{background:var(--gold)}
+#warmFill.danger{background:#FF1493}
+#warmRow{display:flex;align-items:center;justify-content:space-between;
+  padding:6px 12px 7px}
+#warmStation{font-family:'Bebas Neue',sans-serif;font-size:.85rem;
+  letter-spacing:2px;color:var(--gold)}
+#warmStation b{color:var(--muted);font-weight:400;margin-right:6px}
+#warmClock{font-family:'Bebas Neue',sans-serif;font-size:1.1rem;
+  letter-spacing:1px;color:var(--text);font-variant-numeric:tabular-nums}
+#warmClock.danger{color:#FF1493}
+
+/* The hand-off. Two and a bit seconds of black with the next station's
+   name on it — long enough to read, short enough that nobody reaches
+   for the screen. Nothing here is tappable on purpose: the warm-up
+   runs itself from the first station to the last. */
+#warmNext{
+  position:fixed;inset:0;z-index:2500;display:none;
+  flex-direction:column;align-items:center;justify-content:center;
+  background:#050508;text-align:center;padding:24px;
+}
+#warmNext.show{display:flex}
+.wn-done{font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:3px;
+  color:#00D9A5;margin-bottom:6px}
+.wn-score{font-family:'Bebas Neue',sans-serif;font-size:3.4rem;
+  color:var(--text);line-height:1;margin-bottom:26px}
+.wn-kick{font-size:.6rem;letter-spacing:3px;text-transform:uppercase;
+  color:var(--muted);margin-bottom:6px}
+.wn-name{font-family:'Bebas Neue',sans-serif;font-size:2.6rem;letter-spacing:4px;
+  color:var(--orange);line-height:1;text-shadow:0 0 30px rgba(255,107,53,.5)}
+.wn-dots{display:flex;gap:7px;margin-top:28px}
+.wn-dot{width:9px;height:9px;border-radius:50%;background:var(--border)}
+.wn-dot.done{background:#00D9A5}
+.wn-dot.now{background:var(--orange);transform:scale(1.35);
+  box-shadow:0 0 10px var(--orange)}
 </style>
 </head>
 <body>
@@ -336,6 +395,19 @@ html,body{height:100%;overflow-x:hidden;overflow-y:auto;font-family:'Outfit',san
 <button class="overlay-btn" id="levelUpBtn">LET'S GO!</button>
 </div>
 </div>
+<div id="warmBar">
+  <div id="warmFill"></div>
+  <div id="warmRow"><span id="warmStation"></span><span id="warmClock">1:00</span></div>
+</div>
+
+<div id="warmNext">
+  <div class="wn-done" id="wnDone"></div>
+  <div class="wn-score" id="wnScore">0</div>
+  <div class="wn-kick" id="wnKick">UP NEXT</div>
+  <div class="wn-name" id="wnName"></div>
+  <div class="wn-dots" id="wnDots"></div>
+</div>
+
 <div id="quarterStatsScreen">
   <div class="qs-title" id="qsTitle">4TH QUARTER COMPLETE!</div>
   <div class="qs-board">
@@ -487,6 +559,203 @@ var TRAINING_ROUNDS=10;
 var gameMode='game';
 var trainingLevel=1;
 
+
+// ══════════════════════════════════════════════════════
+//  THE FIVE-MINUTE WARM-UP — the engine
+//
+//  Five stations, one minute each, start to finish without anybody
+//  touching anything. It runs before class, on a screen at the front
+//  of the room, and the only thing a teacher should have to do is
+//  start it.
+//
+//  THIS BLOCK IS IDENTICAL IN ALL FIVE PROGRAMS. The only line that
+//  changes from file to file is WARM.STATION. Everything else —
+//  the clock, the order, the scores, the hand-off — is the same code,
+//  so a fix made here is a fix made everywhere once it is copied
+//  across. Keep it that way: if a station needs special behaviour,
+//  put it in that station's three hooks below, not in here.
+//
+//  WHAT HAPPENS WHEN YOU MISS. You start again, and your minute keeps
+//  running. It does not end the station. A warm-up that ends early for
+//  whoever misses first is not a warm-up — it is a test, and it leaves
+//  that student watching everyone else for four minutes. What you
+//  scored before the miss is banked, and the next attempt adds to it.
+//
+//  So the station score is the sum of everything you managed inside
+//  your minute, which rewards starting again quickly — exactly the
+//  habit this is meant to build.
+//
+//  THE CLOCK NEVER STOPS, not between attempts and not while the
+//  "wrong order" message is showing. Those seconds are yours, the way
+//  they are on a court.
+// ══════════════════════════════════════════════════════
+var WARM = {
+  STATION: 2,                 // <<< 1 recall · 2 recognition · 3 fortress
+  SECONDS: 60,
+  KEY_ON:  'cg-warm-active',
+  KEY_SC:  'cg-warm-scores',
+  FINAL:   'warmup-final.html',
+  LIST: [
+    { n:1, name:'RECALL',      file:'002-recall.html'      },
+    { n:2, name:'RECOGNITION', file:'003-recognition.html' },
+    { n:3, name:'FORTRESS',    file:'001-fortress.html'    }
+  ],
+  on:false, banked:0, until:0, raf:null, ending:false
+};
+
+/* THE THREE HOOKS. This is the whole contract between the engine and
+   the game underneath it, and it is all that needs rewriting when the
+   block is copied into another station.
+
+     hostScore()   what this attempt is worth right now
+     hostRestart() throw away the broken attempt and start another
+     hostStop()    freeze everything, the minute is over
+
+   Written as functions on WARM rather than called directly, so the
+   engine never has to know a single variable name from the game. */
+WARM.hostScore = function(){
+  return (typeof gameState === 'object' && gameState) ? (gameState.sc || 0) : 0;
+};
+WARM.hostRestart = function(){
+  restartGame();
+  startRound();
+};
+WARM.hostStop = function(){
+  clearAllTimers();
+  stopFullStrobe();
+  hideTimer();
+  isPlaying = false;
+  canTap = false;
+};
+
+function warmOn(){
+  try { return sessionStorage.getItem(WARM.KEY_ON) === '1' } catch(e){ return false }
+}
+function warmScores(){
+  var blank = {};
+  WARM.LIST.forEach(function(s){ blank['s'+s.n] = 0 });
+  try {
+    var raw = sessionStorage.getItem(WARM.KEY_SC);
+    if (!raw) return blank;
+    var got = JSON.parse(raw);
+    WARM.LIST.forEach(function(s){
+      blank['s'+s.n] = parseInt(got['s'+s.n], 10) || 0;
+    });
+    return blank;
+  } catch(e){ return blank }
+}
+function warmWrite(n, points){
+  var all = warmScores();
+  all['s'+n] = points;
+  try { sessionStorage.setItem(WARM.KEY_SC, JSON.stringify(all)) } catch(e){}
+  return all;
+}
+
+/* How long a station lasts. ?seg= shortens it, which exists so the
+   whole five-station run can be walked through in half a minute
+   instead of five — testing a chain by sitting through it is how
+   chains stay untested. */
+function warmSeconds(){
+  var s = 0;
+  try { s = parseInt(new URLSearchParams(location.search).get('seg'), 10) } catch(e){}
+  return (s > 0 && s <= 600) ? s : WARM.SECONDS;
+}
+
+/* And it has to survive the jump to the next station, or only the
+   first one is short and the rest are a minute each — which is the
+   same as not having it. Everything else about the run lives in the
+   session; this is the one thing that travels in the url. */
+function warmQuery(){
+  var s = 0;
+  try { s = parseInt(new URLSearchParams(location.search).get('seg'), 10) } catch(e){}
+  return (s > 0 && s <= 600) ? ('?seg=' + s) : '';
+}
+
+function warmBegin(){
+  WARM.on = true;
+  WARM.banked = 0;
+  WARM.ending = false;
+  document.body.classList.add('warm');
+
+  var me = WARM.LIST[WARM.STATION - 1];
+  $('warmStation').innerHTML = '<b>' + WARM.STATION + '/' + WARM.LIST.length + '</b>' + me.name;
+
+  WARM.until = performance.now() + warmSeconds() * 1000;
+  warmPaint();
+}
+
+function warmLeftMs(){ return Math.max(0, WARM.until - performance.now()) }
+
+function warmPaint(){
+  if (!WARM.on) return;
+  var left = warmLeftMs();
+  var total = warmSeconds() * 1000;
+  var pct = total > 0 ? (left / total) : 0;
+
+  $('warmFill').style.width = (pct * 100) + '%';
+  var secs = Math.ceil(left / 1000);
+  $('warmClock').textContent = Math.floor(secs / 60) + ':' + ('0' + (secs % 60)).slice(-2);
+
+  var fill = $('warmFill'), clock = $('warmClock');
+  fill.className = pct < 0.17 ? 'danger' : (pct < 0.34 ? 'warning' : '');
+  clock.className = pct < 0.17 ? 'danger' : '';
+
+  if (left <= 0){ warmFinishStation(); return }
+  WARM.raf = requestAnimationFrame(warmPaint);
+}
+
+/* A run broke with time still on the clock: bank what it was worth and
+   start another one. The clock is not touched here — that is the whole
+   point of banking rather than ending. */
+function warmAfterMiss(){
+  if (!WARM.on || WARM.ending) return;
+  WARM.banked += WARM.hostScore();
+  WARM.hostRestart();
+}
+
+function warmFinishStation(){
+  if (WARM.ending) return;
+  WARM.ending = true;
+  if (WARM.raf){ cancelAnimationFrame(WARM.raf); WARM.raf = null }
+
+  /* The attempt that was in the air when the buzzer went still counts.
+     It was played inside the minute. */
+  var total = WARM.banked + WARM.hostScore();
+  WARM.hostStop();
+  warmWrite(WARM.STATION, total);
+
+  var last = (WARM.STATION >= WARM.LIST.length);
+  var next = last ? null : WARM.LIST[WARM.STATION];
+
+  $('wnDone').textContent = WARM.LIST[WARM.STATION - 1].name + ' DONE';
+  $('wnScore').textContent = total;
+  $('wnKick').textContent = last ? 'THAT IS THE FIVE MINUTES' : 'UP NEXT';
+  $('wnName').textContent = last ? 'YOUR SCORE' : next.name;
+
+  var dots = $('wnDots');
+  dots.innerHTML = '';
+  WARM.LIST.forEach(function(s){
+    var d = document.createElement('div');
+    d.className = 'wn-dot' + (s.n <= WARM.STATION ? ' done' : '') +
+                  (!last && s.n === WARM.STATION + 1 ? ' now' : '');
+    dots.appendChild(d);
+  });
+
+  $('warmNext').classList.add('show');
+  setTimeout(function(){
+    location.href = (last ? WARM.FINAL : next.file) + warmQuery();
+  }, 2200);
+}
+
+/* Starting the whole thing. Called from the hub, not from here. */
+function warmStartAll(){
+  try {
+    sessionStorage.setItem(WARM.KEY_ON, '1');
+    sessionStorage.removeItem(WARM.KEY_SC);
+  } catch(e){}
+  location.href = WARM.LIST[0].file;
+}
+
 var THIS_QUARTER=4;
 var QUARTER_SEQUENCE=[
   {n:1,label:'1st',file:'/002-recall.html'},
@@ -578,7 +847,12 @@ function stopFullStrobe(){
 }
 function getBeatMs(){return Math.round((60000/BPM)*10)}
 function updatePlayUI(){
-  $('playScore').textContent=gameState.sc; $('playTotal').textContent=gameState.sc;
+  /* In the warm-up the number is the STATION total, not this attempt:
+     after a miss the attempt resets to zero while the banked points
+     are untouched, and showing the attempt would tell a student their
+     minute went back to nothing. */
+  var shown = WARM.on ? (WARM.banked + gameState.sc) : gameState.sc;
+  $('playScore').textContent=shown; $('playTotal').textContent=shown;
   $('playStreak').textContent=gameState.streak;
   if(gameMode==='training'){
     $('playLevelLabel').textContent=t('levelLabel');
@@ -755,6 +1029,9 @@ function roundFail(){
   gameState.streak=0; updatePlayUI();
   if($('playMessage').className.indexOf('timeout')===-1){ $('playMessage').textContent=t('wrong'); $('playMessage').className='play-message-text miss'; }
   showCoach(t('tryAgain'));
+  /* In the warm-up a miss is not the end of anything: it is banked and
+     another attempt starts, with the minute still running. */
+  if(WARM.on){ beatTimers.push(setTimeout(warmAfterMiss,900)); return; }
   beatTimers.push(setTimeout(showFinalScore,1200));
 }
 function autoNextRound(){
@@ -796,7 +1073,15 @@ function restartGame(){
 }
 $('playActionBtn').onclick=startRound;
 initDemoCourt(); updateUILanguage();
-if(isFullGameActive()){
+if(warmOn()){
+  /* Nobody picks a mode in a warm-up: it is the escalating game, it
+     starts now, and the clock is already running. */
+  gameMode='game';
+  showScreen('play');
+  initGame();
+  warmBegin();
+  startRound();
+}else if(isFullGameActive()){
   showScreen('play');
   initGame();
 }else{
