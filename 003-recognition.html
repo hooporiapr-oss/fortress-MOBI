@@ -141,7 +141,16 @@ html,body{height:100%;overflow-x:hidden;overflow-y:auto;font-family:'Outfit',san
 .play-court-wrap{width:100%;max-width:340px;margin:0 auto}
 .play-court{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;padding:10px;background:var(--card);border:2px solid var(--border);border-radius:16px;aspect-ratio:1;position:relative;transition:border-color 0.15s,box-shadow 0.15s}
 .play-court.beat-pulse{border-color:var(--gold)!important;box-shadow:0 0 15px rgba(255,215,0,0.3)}
-.play-cell{aspect-ratio:1;border-radius:6px;background:rgba(255,255,255,0.06);border:2px solid rgba(255,255,255,0.12);display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;z-index:1;transition:all 0.12s}
+/* THE 25 BOXES HAVE TO BE READABLE AT REST.
+   They were a .06 fill behind a .12 border, which on a dark card is
+   close to nothing: you could see the court but not where one box
+   ended and the next began, so tapping a sequence back turned into
+   aiming at a remembered position instead of at a box. The border is
+   what draws a box, so that is what was raised — .12 to .40 — with a
+   smaller lift to the fill. The lit, correct and wrong states are
+   untouched: they are solid colour with a glow and a scale, so they
+   still read instantly against the brighter grid. */
+.play-cell{aspect-ratio:1;border-radius:6px;background:rgba(255,255,255,0.13);border:2px solid rgba(255,255,255,0.40);display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;z-index:1;transition:all 0.12s}
 .play-cell:active:not(.disabled){transform:scale(0.95)}
 .play-cell .cell-num{font-family:'Bebas Neue',sans-serif;font-size:1.2rem;color:var(--dark);opacity:0;transition:opacity 0.1s}
 .play-cell.lit{background:var(--gold)!important;border-color:var(--gold)!important;box-shadow:0 0 22px rgba(255,215,0,0.5);transform:scale(1.06)}
