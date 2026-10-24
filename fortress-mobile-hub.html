@@ -39,14 +39,6 @@ if (localStorage.getItem('rct-mobile-pass') !== '1') {
   .handle-card-name{font-family:'Bebas Neue',sans-serif;font-size:1.6rem;letter-spacing:2px;color:#fff}
   .handle-card-desc{font-size:.72rem;color:var(--muted);margin-top:6px;line-height:1.4}
 
-  .standings-card{
-    display:flex;align-items:center;justify-content:center;gap:8px;
-    max-width:440px;margin:0 auto 18px;padding:14px 18px;
-    border-radius:14px;text-decoration:none;
-    background:rgba(255,215,0,.08);border:1px solid rgba(255,215,0,.3);
-  }
-  .standings-card:active{transform:scale(.98)}
-  .standings-card-text{font-family:'Bebas Neue',sans-serif;font-size:.95rem;letter-spacing:1.5px;color:var(--gold)}
 
   .game-list{display:grid;grid-template-columns:1fr 1fr;gap:10px;max-width:440px;margin:0 auto}
   .quarter-card{display:block;padding:14px 12px;background:var(--card);border:1px solid var(--border);border-radius:14px;text-decoration:none;color:var(--text);transition:all .15s;position:relative;overflow:hidden}
@@ -74,13 +66,10 @@ if (localStorage.getItem('rct-mobile-pass') !== '1') {
   </div>
 
   <div class="handle-label">Featured Challenge</div>
-  <a class="handle-card" href="001-fortress.html">
+  <a class="handle-card" style="margin-bottom:18px" href="001-fortress.html">
     <div class="handle-card-tag">MEMORY &middot; RHYTHM</div>
     <div class="handle-card-name">THE FORTRESS</div>
     <div class="handle-card-desc">Watch a sequence of balls light up, then repeat it exactly. Every round adds one more — how far can you go?</div>
-  </a>
-  <a class="standings-card" href="001-fortress.html#standings">
-    <span class="standings-card-text">🏆 View Standings</span>
   </a>
 
   <div class="handle-label">Memory Games</div>
