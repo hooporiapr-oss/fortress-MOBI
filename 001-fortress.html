@@ -609,14 +609,46 @@ var WARM = {
 
    Written as functions on WARM rather than called directly, so the
    engine never has to know a single variable name from the game. */
+/* ── ONE RULE FOR ALL THREE STATIONS ──────────────────────────────
+   Every station now pays the same way: TEN POINTS PER ITEM IN THE
+   SEQUENCE YOU JUST REPEATED, scaled by how much an item is worth to
+   remember.
+
+   Before this, the three did not agree. Recall and Recognition paid
+   ten per cell; Fortress paid one per ball. A Fortress station landed
+   in single digits beside stations paying in the hundreds, so the
+   warm-up total was really just the other two with a rounding error
+   attached, and the station breakdown said more about which game you
+   happened to be on than about how you played.
+
+   THE SCALING, and why it is not just ten everywhere. Recall and
+   Recognition hide their sequence among 25 cells; Fortress among 5
+   balls. One cell out of 25 is worth twice as much to hold in your
+   head as one ball out of 5 — log2(25) is exactly double log2(5) — so
+   a Fortress item pays five and a cell pays ten.
+
+   WHAT THIS IS NOT. It is an approximation, not a measured
+   equivalence. It counts how much there is to remember and nothing
+   else: Fortress also runs to a 120 BPM beat and asks for rhythm, and
+   none of that is in this number. Equalising it properly means
+   watching kids play both and comparing what they actually score.
+   This gets the station scores into the same order of magnitude so
+   the breakdown means something; it does not make them interchangeable. */
+WARM.PER_ITEM_25 = 10;
 WARM.hostScore = function(){
-  /* Fortress scores a round by its own length — round 6 is worth 6 —
-     and repShotLog already holds every round of this attempt with its
-     points. Summing that is this game's own arithmetic, not a
-     conversion invented here. */
-  var t = 0;
-  try { repShotLog.forEach(function(r){ t += (r.pts || 0) }) } catch(e){}
-  return t;
+  /* repShotLog holds every round of this attempt with its own points,
+     which for Fortress is the round's sequence length. */
+  var largo = 0;
+  try { repShotLog.forEach(function(r){ largo += (r.pts || 0) }) } catch(e){}
+
+  /* The alphabet this run is actually using — the three-drum variant
+     is worth less per item than the five, and reading drumCount keeps
+     that honest instead of assuming five. */
+  var opciones = 5;
+  try { if (typeof drumCount === 'number' && drumCount > 1) opciones = drumCount } catch(e){}
+  var escala = Math.log(opciones) / Math.log(25);
+
+  return Math.round(largo * WARM.PER_ITEM_25 * escala);
 };
 WARM.hostRestart = function(){
   /* Straight back in, with no three-second countdown: the countdown
@@ -627,7 +659,21 @@ WARM.hostStop = function(){
   stopGame();
 };
 
+/* ?warm=1 starts a warm-up from a cold link, without the hub.
+
+   The hub's card uses it, and so does anyone testing a single station
+   on its own. It only ever TURNS IT ON: a station opened with no
+   ?warm= reads the session the way it always did, so landing on
+   station 2 mid-chain never wipes the run already going. */
 function warmOn(){
+  try {
+    if (new URLSearchParams(location.search).get('warm') === '1'){
+      sessionStorage.setItem(WARM.KEY_ON, '1');
+      /* Starting from the first station is a fresh run; joining at any
+         other keeps the scores already banked. */
+      if (WARM.STATION === 1) sessionStorage.removeItem(WARM.KEY_SC);
+    }
+  } catch(e){}
   try { return sessionStorage.getItem(WARM.KEY_ON) === '1' } catch(e){ return false }
 }
 function warmScores(){
