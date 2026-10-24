@@ -309,12 +309,6 @@ html,body{height:100%;overflow-x:hidden;font-family:'Outfit',sans-serif;backgrou
 .powered-strip{text-align:center;padding:12px 0;margin-top:10px;opacity:0.4}
 .powered-strip span{font-family:'Bebas Neue',sans-serif;font-size:0.7rem;color:var(--gold);letter-spacing:2px}
 
-.name-screen{display:none;flex-direction:column;align-items:center;justify-content:center;min-height:calc(100vh - 20px);min-height:calc(100dvh - 20px);text-align:center;padding:16px 0;background:var(--dark);position:relative}
-.name-screen.show{display:flex}
-.name-title{font-family:'Bebas Neue',sans-serif;font-size:2rem;letter-spacing:5px;color:var(--gold);margin-bottom:6px}
-.name-sub{font-size:13px;color:rgba(255,255,255,.5);max-width:320px;margin-bottom:24px;line-height:1.5}
-.name-input{width:100%;max-width:320px;padding:16px;border-radius:16px;border:2px solid rgba(255,215,0,.4);background:rgba(255,255,255,.06);color:var(--cream);font-family:'Outfit',sans-serif;font-size:1.1rem;text-align:center;margin-bottom:16px}
-.name-input:focus{outline:none;border-color:var(--gold)}
 .nav-locked{opacity:.35;pointer-events:none}
 
 .standings-screen{display:none;flex-direction:column;min-height:calc(100vh - 20px);min-height:calc(100dvh - 20px);padding:16px 0;width:100%}
@@ -396,19 +390,6 @@ html,body{height:100%;overflow-x:hidden;font-family:'Outfit',sans-serif;backgrou
 </div>
 
 <button class="stop-btn" id="stopBtn">⏹ STOP</button>
-</div>
-
-<div class="name-screen" id="nameScreen">
-<div class="intro-nav-row" style="position:absolute;top:16px;left:16px;right:16px;width:auto;margin:0">
-<a href="fortress-mobile-hub.html" class="back-btn">← Back</a>
-<div class="intro-nav-title">THE FORTRESS</div>
-<div style="width:68px"></div>
-</div>
-<div class="name-title">WHO'S PLAYING?</div>
-<div class="name-sub">Enter your name so your score can land on the standings board.</div>
-<input type="text" id="playerNameInput" class="name-input" maxlength="20" placeholder="Your name" autocomplete="off">
-<button class="letsgo-btn" id="nameContinueBtn" style="max-width:320px;margin-bottom:12px">▶ Continue</button>
-<button class="setup-stats-btn" id="viewStandingsBtn" style="border:1px solid rgba(255,215,0,.35);border-radius:100px;padding:10px 18px;color:var(--gold)">🏆 View Standings</button>
 </div>
 
 <div class="standings-screen" id="standingsScreen">
@@ -818,7 +799,6 @@ helpOverlay.addEventListener('touchstart',function(e){if(e.target===helpOverlay)
 
 var setupScreen=document.getElementById('setupScreen');
 var playScreen=document.getElementById('playScreen');
-var nameScreen=document.getElementById('nameScreen');
 var standingsScreen=document.getElementById('standingsScreen');
 var stopBtn=document.getElementById('stopBtn');
 var playModeName=document.getElementById('playModeName');
@@ -828,7 +808,6 @@ var MODE_LABELS={repitelo:'THE FORTRESS'};
 function showScreen(name){
 setupScreen.style.display='none';
 playScreen.classList.add('hidden');
-nameScreen.classList.remove('show');
 standingsScreen.classList.remove('show');
 challengeComplete.classList.remove('show');
 
@@ -839,8 +818,6 @@ playScreen.classList.remove('hidden');
 playModeName.textContent=MODE_LABELS[currentMode]||'THE FORTRESS';
 playBpmLabel.textContent=bpm+' BPM';
 window.scrollTo(0,0);
-}else if(name==='name'){
-nameScreen.classList.add('show');
 }else if(name==='standings'){
 standingsScreen.classList.add('show');
 }
@@ -955,10 +932,6 @@ function renderStandings(){
   });
 }
 
-document.getElementById('viewStandingsBtn').addEventListener('click',function(){
-  showScreen('standings');
-  renderStandings();
-});
 document.getElementById('endStandingsBtn').addEventListener('click',function(){
   showScreen('standings');
   renderStandings();
@@ -970,29 +943,15 @@ document.getElementById('standingsRefreshBtn').addEventListener('click',function
   renderStandings();
 });
 
-document.getElementById('nameContinueBtn').addEventListener('click',function(){
-  var input=document.getElementById('playerNameInput');
-  var name=input.value.trim();
-  if(!name){
-    input.focus();
-    input.style.borderColor='#ff4444';
-    setTimeout(function(){input.style.borderColor=''},600);
-    return;
-  }
-  currentPlayerName=name.slice(0,20);
-  showScreen('play');
-  showCountdown(function(){repStart()});
-});
-document.getElementById('playerNameInput').addEventListener('keydown',function(e){
-  if(e.key==='Enter')document.getElementById('nameContinueBtn').click();
-});
-
+/* Straight into the game. This used to stop at a WHO'S PLAYING?
+   screen first, take a name, and only then start — the name existed
+   so a score could be labelled on the standings board. The screen is
+   gone, so these two lines are everything it did once the name was
+   typed: show the court and run the countdown. */
 document.getElementById('startFullGameBtn').onclick=function(){
   initAudio();
-  var input=document.getElementById('playerNameInput');
-  if(currentPlayerName)input.value=currentPlayerName;
-  showScreen('name');
-  setTimeout(function(){input.focus()},50);
+  showScreen('play');
+  showCountdown(function(){repStart()});
 };
 
 stopBtn.onclick=function(){
