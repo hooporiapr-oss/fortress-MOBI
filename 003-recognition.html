@@ -628,7 +628,21 @@ WARM.hostStop = function(){
   canTap = false;
 };
 
+/* ?warm=1 starts a warm-up from a cold link, without the hub.
+
+   The hub's card uses it, and so does anyone testing a single station
+   on its own. It only ever TURNS IT ON: a station opened with no
+   ?warm= reads the session the way it always did, so landing on
+   station 2 mid-chain never wipes the run already going. */
 function warmOn(){
+  try {
+    if (new URLSearchParams(location.search).get('warm') === '1'){
+      sessionStorage.setItem(WARM.KEY_ON, '1');
+      /* Starting from the first station is a fresh run; joining at any
+         other keeps the scores already banked. */
+      if (WARM.STATION === 1) sessionStorage.removeItem(WARM.KEY_SC);
+    }
+  } catch(e){}
   try { return sessionStorage.getItem(WARM.KEY_ON) === '1' } catch(e){ return false }
 }
 function warmScores(){
