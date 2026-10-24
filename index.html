@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>The Fortress Mobile · Enter Code</title>
+<title>The Fortress Mobile</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@400;600;700;900&display=swap" rel="stylesheet">
 <style>
@@ -18,19 +18,14 @@ html,body{height:100%;font-family:'Outfit',sans-serif;background:var(--dark);col
 
 #center{position:fixed;inset:0;z-index:3;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px}
 .site-title{font-family:'Bebas Neue',sans-serif;font-size:2.4rem;letter-spacing:5px;background:linear-gradient(135deg,var(--gold),var(--orange));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:6px}
-.site-sub{font-size:.7rem;font-weight:700;letter-spacing:.3em;text-transform:uppercase;color:var(--muted);margin-bottom:28px}
+.site-sub{font-size:.7rem;font-weight:700;letter-spacing:.3em;text-transform:uppercase;color:var(--muted);margin-bottom:34px}
 
-.code-panel{width:100%;max-width:340px}
-.code-label{font-size:.68rem;font-weight:900;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
-.code-note{font-size:.68rem;color:var(--muted);margin-bottom:16px;line-height:1.4}
-.code-input{width:100%;padding:16px;border-radius:10px;border:2px solid rgba(255,215,0,.4);background:rgba(255,255,255,.06);color:#fff;font-size:1.5rem;font-weight:900;letter-spacing:.3em;text-transform:uppercase;text-align:center;font-family:'Courier New',monospace}
-.code-input:focus{outline:none;border-color:var(--gold);box-shadow:0 0 24px rgba(255,215,0,.3)}
-.code-input.shake{animation:shake .35s}
-@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-10px)}40%{transform:translateX(10px)}60%{transform:translateX(-6px)}80%{transform:translateX(6px)}}
+/* One button where the code panel was. Same width as the panel it
+   replaces, so the page keeps its proportions. */
+.enter-btn{width:100%;max-width:340px;padding:18px;border:none;border-radius:10px;background:linear-gradient(135deg,var(--gold),var(--orange));color:#1a0f0f;font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:.18em;text-transform:uppercase;cursor:pointer;box-shadow:0 4px 24px rgba(255,107,53,.35)}
+.enter-btn:active{transform:scale(.98)}
+.enter-note{font-size:.68rem;color:var(--muted);margin-top:14px;line-height:1.4;max-width:300px}
 
-.enter-btn{width:100%;margin-top:16px;padding:15px;border:none;border-radius:10px;background:linear-gradient(135deg,var(--gold),var(--orange));color:#1a0f0f;font-size:.9rem;font-weight:900;letter-spacing:.1em;text-transform:uppercase;cursor:pointer}
-.enter-btn:disabled{opacity:.6;cursor:default}
-.err{margin-top:14px;color:#ff8888;font-size:.82rem;font-weight:700;min-height:18px}
 .brandmark{margin-top:40px;font-size:.68rem;font-weight:900;letter-spacing:.3em;text-transform:uppercase;color:#4a5058}
 .brandmark b{color:var(--muted);font-style:italic}
 </style>
@@ -44,13 +39,8 @@ html,body{height:100%;font-family:'Outfit',sans-serif;background:var(--dark);col
   <div class="site-title">THE FORTRESS MOBILE</div>
   <div class="site-sub">Memory Basketball</div>
 
-  <div class="code-panel">
-    <div class="code-label">Access Code</div>
-    <div class="code-note">One-time entry — enter your code once and this device stays unlocked, so practicing from home stays quick.</div>
-    <input class="code-input" id="gate-code" maxlength="12" placeholder="• • • •" autocomplete="off" onkeydown="if(event.key==='Enter')tryEnter()">
-    <button class="enter-btn" id="gate-btn" onclick="tryEnter()">Unlock This Device →</button>
-    <div class="err" id="gate-err"></div>
-  </div>
+  <button class="enter-btn" id="enterBtn" onclick="enter()">Start Training →</button>
+  <div class="enter-note">No code needed — tap to start.</div>
 
   <div class="brandmark">Powered by <b>Gostar Digital</b></div>
 </div>
@@ -59,101 +49,46 @@ html,body{height:100%;font-family:'Outfit',sans-serif;background:var(--dark);col
 var $=function(id){return document.getElementById(id)};
 
 // ══════════════════════════════════════════════════════
-//  LICENSE SYSTEM — codes are checked against Supabase.
-//  To issue / expire / revoke codes, use admin.html.
-//  Scoped to product='fortress-mobile' — a code issued for
-//  any other product will NOT unlock this gate, and this
-//  gate's own codes won't unlock any other product either,
-//  even though all licenses live in the same table.
+//  OPEN ENTRY — the access code is gone.
 //
-//  The licenses table is NOT readable from the browser. This
-//  page asks the database one question through the
-//  check_license function — "is this code good for this
-//  product?" — and gets back only a yes or no plus the school
-//  name. Nobody can list the codes, because nothing here can
-//  read the table. Expiry is judged inside that function, on
-//  the database's own clock.
+//  This page used to ask for a license code and check it against
+//  Supabase (check_license, product 'fortress-mobile') before letting
+//  anyone through. That whole layer is removed: no code, no lookup,
+//  no license key kept on the device. Anyone with the link plays.
 //
-//  Persists in localStorage (not sessionStorage), matching
-//  the same low-friction, unlock-once-per-device pattern the
-//  original mobile site used — the whole point here is quick
-//  practice from home, not a re-login every visit.
+//  ONE THING FROM THE OLD GATE HAS TO STAY, and it is not optional.
+//  Every game file in this product starts with:
 //
-//  Note the consequence of that choice: because the unlock is
-//  remembered on the device rather than re-checked each visit,
-//  a license that expires or is revoked later does not lock a
-//  device that already got in. The check below re-runs only
-//  when someone enters a code for the first time on a device.
+//      if (localStorage.getItem('rct-mobile-pass') !== '1')
+//          window.location.replace('index.html');
+//
+//  So a game that finds no pass key sends the player straight back
+//  here. Drop the key as well as the code and the two pages bounce
+//  the player between each other forever — the gate would be gone and
+//  the product would be unreachable, which is the opposite of opening
+//  it up. Setting it here keeps every game file working untouched.
+//
+//  It is set on the way through rather than on page load, so the
+//  landing screen is a real screen somebody arrives at, not a flash
+//  of gold before a redirect.
+//
+//  WHAT WENT WITH THE CODE: the school name. It used to come back
+//  from check_license and travel with the device, and the standings
+//  read it from there. With no license there is nobody to ask, so
+//  runs recorded from this device carry no school. If the standings
+//  need to tell schools apart again, that name has to come from
+//  somewhere else — asking the player once, or a per-school link.
 // ══════════════════════════════════════════════════════
-var SUPABASE_URL = 'https://sdaphocueugzfvjovuxd.supabase.co';
-var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNkYXBob2N1ZXVnemZ2am92dXhkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM2MjQyMDgsImV4cCI6MjA5OTIwMDIwOH0.pDAzf4P6dD9eNEBlnP95SdF5BI-R84-Rdc0vKzYcn7M';
-var PRODUCT = 'fortress-mobile';
-// ══════════════════════════════════════════════════════
-
-// If this device already unlocked once, skip straight through —
-// no need to ever ask again on this device. Same gate-pass key the
-// game files themselves already check for (rct-mobile-pass), since
-// these game files are shared as-is from the original mobile site
-// and already look for this exact key.
-if (localStorage.getItem('rct-mobile-pass') === '1') {
-  window.location.replace('fortress-mobile-hub.html');
-}
-
-var checking = false;
-
-function tryEnter(){
-  if (checking) return;
-
-  var input = $('gate-code').value.trim();
-  if (!input){ return; }
-
-  checking = true;
-  $('gate-btn').disabled = true;
-  $('gate-err').style.color = '';
-  $('gate-err').textContent = 'Checking…';
-
-  fetch(SUPABASE_URL + '/rest/v1/rpc/check_license', {
-    method: 'POST',
-    headers: {
-      'apikey': SUPABASE_ANON_KEY,
-      'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({ p_code: input, p_product: PRODUCT })
-  })
-  .then(function(r){
-    if (!r.ok) throw new Error('lookup failed');
-    return r.json();
-  })
-  .then(function(lic){
-    if (!lic || !lic.ok){
-      return reject('Invalid or expired code — check with your administrator');
-    }
-
-    // valid → unlock this device permanently, then enter. The school
-    // name travels with the device from here on — every game and
-    // the standings view downstream just read it back from here.
+function enter(){
+  try {
     localStorage.setItem('rct-mobile-pass','1');
-    localStorage.setItem('rct-mobile-license', input.toUpperCase());
-    localStorage.setItem('rct-mobile-school', lic.school_name || '');
-    window.location.href = 'fortress-mobile-hub.html';
-  })
-  .catch(function(){
-    // A network or server failure is a different problem from a bad
-    // code, and saying so saves someone hunting for a typo that
-    // isn't there.
-    reject('Connection problem — please try again');
-  });
-}
-
-function reject(msg){
-  checking = false;
-  $('gate-btn').disabled = false;
-  $('gate-err').style.color = '#ff8888';
-  $('gate-err').textContent = msg;
-  var box = $('gate-code');
-  box.classList.remove('shake'); void box.offsetWidth; box.classList.add('shake');
-  box.value=''; box.focus();
+    /* Anything a previous licensed install left behind is cleared, so
+       a device that used to be licensed does not keep claiming a
+       school it can no longer prove. */
+    localStorage.removeItem('rct-mobile-license');
+    localStorage.removeItem('rct-mobile-school');
+  } catch(e){}
+  window.location.href = 'fortress-mobile-hub.html';
 }
 
 // ── 120 beat: visual (strobe + flying gold dots), matching the hub's own ambient effect ──
@@ -175,8 +110,6 @@ function spawnDot(){
 }
 setInterval(beatTick, beatMs);
 beatTick();
-
-$('gate-code').focus();
 </script>
 </body>
 </html>
