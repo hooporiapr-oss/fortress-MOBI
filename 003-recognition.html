@@ -883,7 +883,23 @@ $$('.level-btn').forEach(function(btn){
     $('cellsDisplay').textContent=LEVEL_CELLS[trainingLevel];
   };
 });
-$('letsGoBtn').onclick=function(){showScreen('play');initGame()};
+/* LET'S GO starts the run, it does not just show the board.
+   It used to land on the play screen with everything set up and the
+   first sequence waiting behind a second LET'S GO, so the same button
+   had to be pressed twice to begin. One press now: the board goes up,
+   it counts you in, and the first chain plays.
+
+   startRun is the one way a run begins — the mode screen's button,
+   and the in-game button after a run ends — so every run opens the
+   same way, with a count-in. The rounds inside a run still continue
+   straight through; autoNextRound is untouched. */
+function startRun(){
+  $('playActionBtn').disabled=true;
+  $('playMessage').textContent=t('getReady');
+  $('playMessage').className='play-message-text watch';
+  showCountdown(function(){ startRound() });
+}
+$('letsGoBtn').onclick=function(){ showScreen('play'); initGame(); startRun() };
 var playCourt=$('playCourt'),playCells=[],beatTimers=[],isPlaying=false,phase='idle',canTap=false;
 var originalPattern=[],echoPattern=[],changePos=-1,changedCell=-1,originalCell=-1,beatIndex=0,firstTapDone=false;
 var timerRAF=null,timerStartTime=0,timerDuration=0;
@@ -940,7 +956,7 @@ function initGame(){
   gameState={sc:0,cellCount:getInitialCellCount(),best:0,streak:0,roundsDone:0};
   isPlaying=false;phase='idle';canTap=false;
   updatePlayUI(); $('playMessage').textContent=t('tapLetsGo'); $('playMessage').className='play-message-text';
-  $('playActionBtn').textContent=t('letsGo');$('playActionBtn').onclick=startRound;
+  $('playActionBtn').textContent=t('letsGo');$('playActionBtn').onclick=startRun;
   $('playActionBtn').disabled=false; hideTimer();
 }
 function clearAllTimers(){beatTimers.forEach(function(t){clearTimeout(t)});beatTimers=[]}
@@ -1164,10 +1180,10 @@ function restartGame(){
   gameState={sc:0,cellCount:getInitialCellCount(),best:0,streak:0,roundsDone:0};
   updatePlayUI();hideTimer();clearAllCells();
   $('playMessage').textContent=t('tapLetsGo');$('playMessage').className='play-message-text';
-  $('playActionBtn').textContent=t('letsGo');$('playActionBtn').onclick=startRound;
+  $('playActionBtn').textContent=t('letsGo');$('playActionBtn').onclick=startRun;
   $('playActionBtn').disabled=false;
 }
-$('playActionBtn').onclick=startRound;
+$('playActionBtn').onclick=startRun;
 initDemoCourt(); updateUILanguage();
 if(warmOn()){
   /* Nobody picks a mode in a warm-up: it is the escalating game, it
