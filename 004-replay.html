@@ -1,0 +1,1551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script>
+if (localStorage.getItem('rct-mobile-pass') !== '1') {
+  window.location.replace('index.html');
+}
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>The Replay Challenge</title>
+<style>
+/* THE HANDFUL OF TOKENS THE WARM-UP CHROME EXPECTS.
+   This game was written with literal colours and no variables, while
+   the shared strip and hand-off screen are written against the gym's
+   tokens. Declaring them here lets the shared block be copied in
+   untouched — which is the whole point of it being shared — without
+   disturbing a single colour this game already uses, since it refers
+   to none of these names.
+
+   --nav-height is 0 here on purpose: the other three games sit under
+   a nav bar and the strip hangs below it. This one has no nav, so the
+   strip belongs at the very top. */
+:root{
+  --nav-height:0px;
+  --gold:#FFD700;--orange:#FF6B35;
+  --card:#111118;--text:#FFFFFF;--muted:#8892a0;
+  --border:rgba(255,255,255,0.1);
+}
+/* The strip is fixed over the top of the board, so in a warm-up the
+   game screen starts below it instead of underneath it. */
+body.warm #screen-game{padding-top:calc(46px + env(safe-area-inset-top))}
+/* Nothing to press during a warm-up: Home would walk out of the run. */
+body.warm #controls{display:none}
+
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;background:#000;font-family:Arial,sans-serif;color:#fff;overflow:hidden;user-select:none;-webkit-user-select:none;touch-action:manipulation}
+
+#screen-intro{
+  position:fixed;inset:0;display:flex;flex-direction:column;
+  align-items:center;
+  /* Starting at the top rather than centring. With the demo and the
+     instructions the intro is now taller than a phone screen, and a
+     centred flex column pushes its own top out past the padding —
+     which is what put the title under the pinned buttons. */
+  justify-content:flex-start;
+  background:radial-gradient(ellipse at center,#061524 0%,#000 70%);z-index:100;
+  overflow-y:auto;overflow-x:hidden;
+  /* The Back and language buttons are pinned to the top corners, so
+     the content starts below them rather than under them. */
+  padding:84px 16px 34px;
+}
+.vrr-sub{font-size:.75rem;letter-spacing:.3em;text-transform:uppercase;color:#A78BFA;margin-bottom:8px;text-align:center}
+.vrr-title{font-size:clamp(1.8rem,7vw,2.4rem);font-weight:900;font-style:italic;letter-spacing:.06em;text-transform:uppercase;text-shadow:0 0 40px rgba(167,139,250,.7);margin-bottom:16px;text-align:center}
+.vrr-title span{color:#A78BFA}
+.rule-t{font-size:.9rem;color:#c9b8a8;line-height:1.55;max-width:420px;margin-bottom:22px;text-align:center}
+.rule-t b{color:#fff}
+.big-btn{width:100%;max-width:420px;height:68px;border:none;border-radius:20px;background:linear-gradient(135deg,#A78BFA,#7DD3FC);color:#fff;font-size:1.2rem;font-weight:900;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;box-shadow:0 0 40px rgba(167,139,250,.7);margin-bottom:14px}
+.big-btn:hover{transform:scale(1.03)}
+.big-btn.official{background:linear-gradient(135deg,#22D3EE,#0C7FC4);color:#04121A;box-shadow:0 0 40px rgba(34,211,238,.6)}
+/* ---- the demonstration and the instructions, intro screen only ---- */
+/* The label sits above the grid in its own space rather than
+   overlapping the top edge — it is being read, not decorating. */
+.demo-wrap{display:flex;flex-direction:column;align-items:center;gap:12px;margin:14px 0 20px}
+.demo-label{
+  font-size:.7rem;font-weight:900;letter-spacing:.14em;text-transform:uppercase;
+  background:#050A12;border:1px solid rgba(167,139,250,.35);color:#7DD3FC;
+  padding:7px 16px;border-radius:999px;white-space:nowrap;transition:color .2s,border-color .2s;
+}
+.demo-label.recall{color:#A78BFA;border-color:rgba(167,139,250,.5)}
+.demo-label.good{color:#00D9A5;border-color:rgba(0,217,165,.5)}
+.demo-grid{
+  display:grid;grid-template-columns:repeat(5,1fr);gap:4px;padding:8px;
+  width:190px;height:190px;margin:0 auto;
+  background:#0D1826;border:1px solid rgba(167,139,250,.25);border-radius:14px;
+}
+.demo-cell{
+  border-radius:5px;background:rgba(255,255,255,.05);border:2px solid rgba(255,255,255,.1);
+  display:flex;align-items:center;justify-content:center;
+  font-weight:900;font-size:.85rem;color:transparent;transition:all .15s;
+}
+.demo-cell.lit{background:#A78BFA;border-color:#7DD3FC;color:#04121A;box-shadow:0 0 14px rgba(167,139,250,.55);transform:scale(1.06)}
+.demo-cell.ok{background:#00D9A5;border-color:#5EEAD4;color:#04211A}
+.demo-grid.pulse{animation:demoPulse .5s ease-out}
+@keyframes demoPulse{0%{box-shadow:0 0 0 0 rgba(167,139,250,.55)}60%{box-shadow:0 0 22px 7px rgba(167,139,250,.25)}100%{box-shadow:none}}
+
+.htp{width:100%;max-width:420px;margin:0 0 16px}
+.htp-toggle{
+  display:flex;align-items:center;justify-content:center;gap:9px;width:100%;
+  padding:12px 16px;border-radius:12px;cursor:pointer;font-family:inherit;
+  background:rgba(167,139,250,.06);border:1px solid rgba(167,139,250,.25);
+}
+.htp-toggle-text{font-size:.82rem;font-weight:900;letter-spacing:.12em;text-transform:uppercase;color:#7DD3FC}
+.htp-arrow{color:#7DD3FC;font-size:.7rem;transition:transform .3s}
+.htp-toggle.open .htp-arrow{transform:rotate(180deg)}
+.htp-body{max-height:0;overflow:hidden;transition:max-height .45s ease-out}
+.htp-body.open{max-height:900px}
+.htp-card{background:#0D1826;border:1px solid #1E3550;border-radius:12px;padding:15px;margin-top:10px;text-align:left}
+.htp-card-title{font-size:.8rem;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:#A78BFA;margin-bottom:11px}
+.htp-step{display:flex;gap:10px;margin-bottom:9px;align-items:flex-start}
+.htp-step:last-child{margin-bottom:0}
+.htp-step .n{
+  width:22px;height:22px;border-radius:50%;flex-shrink:0;
+  background:#A78BFA;color:#04121A;font-size:.72rem;font-weight:900;
+  display:flex;align-items:center;justify-content:center;
+}
+.htp-step .tx{font-size:.8rem;color:#CFE3F2;line-height:1.5}
+.htp-step .tx b{color:#7DD3FC}
+.htp-tip{background:rgba(34,211,238,.07);border-left:3px solid #22D3EE;padding:10px 12px;border-radius:0 8px 8px 0;margin-top:12px}
+.htp-tip-title{font-size:.6rem;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:#22D3EE;margin-bottom:4px}
+.htp-tip-text{font-size:.75rem;color:#8AA4BD;line-height:1.45}
+
+.name-input{width:100%;max-width:420px;padding:14px;border-radius:14px;border:2px solid rgba(167,139,250,.4);background:rgba(255,255,255,.05);color:#fff;font-family:Arial,sans-serif;font-size:1rem;text-align:center;margin-bottom:14px}
+.name-input:focus{outline:none;border-color:#A78BFA;box-shadow:0 0 20px rgba(167,139,250,.35)}
+.box-open-btn{width:100%;max-width:420px;height:52px;border:2px solid rgba(167,139,250,.5);background:rgba(167,139,250,.1);border-radius:14px;color:#7DD3FC;font-size:.9rem;font-weight:900;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;margin-top:6px;text-decoration:none;display:flex;align-items:center;justify-content:center}
+.best-line{margin-top:16px;font-size:.85rem;color:#a7adba}
+.best-line b{color:#A78BFA}
+.intro-back{position:fixed;top:16px;left:16px;padding:8px 16px;border:2px solid rgba(255,255,255,.25);background:rgba(0,0,0,.5);color:#fff;font-size:.78rem;font-weight:900;letter-spacing:.08em;text-transform:uppercase;border-radius:999px;text-decoration:none;z-index:60}
+.lang-btn{position:fixed;top:16px;right:16px;padding:8px 14px;border:2px solid rgba(167,139,250,.45);background:rgba(0,0,0,.5);color:#7DD3FC;font-size:.72rem;font-weight:900;letter-spacing:.08em;border-radius:999px;cursor:pointer;z-index:60}
+
+.official-banner{
+  max-width:420px;width:100%;padding:14px 16px;border-radius:14px;
+  border:2px solid rgba(34,211,238,.45);background:rgba(34,211,238,.08);
+  margin-bottom:18px;text-align:center;
+}
+.official-banner .ob-kick{font-size:.6rem;font-weight:900;letter-spacing:.2em;text-transform:uppercase;color:#22D3EE;margin-bottom:5px}
+.official-banner .ob-name{font-size:1.05rem;font-weight:900;color:#fff}
+.official-banner .ob-note{font-size:.78rem;color:#c9b8a8;margin-top:6px;line-height:1.45}
+
+#countdown{position:fixed;inset:0;z-index:250;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.85)}
+#bigCount{font-size:7rem;font-weight:900;color:#A78BFA;text-shadow:0 0 40px #A78BFA,0 0 80px #22D3EE}
+
+#screen-end{position:fixed;inset:0;z-index:300;display:none;flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(ellipse at center,#061524 0%,#000 70%);text-align:center;padding:20px;overflow-y:auto}
+.final-num{font-size:6rem;font-weight:900;color:#A78BFA;line-height:1;text-shadow:0 0 60px rgba(167,139,250,.9)}
+.final-label{font-size:.8rem;letter-spacing:.2em;text-transform:uppercase;color:#a7adba;margin-top:10px}
+.final-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%;max-width:300px;margin:18px auto}
+.final-stat-cell{border-radius:12px;border:2px solid rgba(167,139,250,.35);background:rgba(167,139,250,.06);padding:12px 4px;text-align:center}
+.final-stat-label{font-size:.58rem;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:#7DD3FC;margin-bottom:4px}
+.final-stat-val{font-size:1.3rem;font-weight:900;color:#fff}
+.points-cell{border-color:rgba(34,211,238,.5);background:rgba(34,211,238,.08)}
+.points-cell .final-stat-label{color:#22D3EE}
+.save-status{font-size:.78rem;font-weight:700;margin-top:14px;min-height:18px}
+.next-player-btn{margin-top:24px;height:64px;padding:0 40px;border:none;border-radius:16px;background:linear-gradient(120deg,#A78BFA,#7DD3FC);color:#fff;font-size:1.15rem;font-weight:900;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;box-shadow:0 0 30px rgba(167,139,250,.6)}
+
+#screen-game{position:fixed;inset:0;display:none;flex-direction:column;background:#000;overflow:hidden}
+.topbar{display:flex;justify-content:center;flex-wrap:wrap;gap:6px;padding:10px 10px 4px;flex-shrink:0}
+.top-box{background:rgba(167,139,250,.08);border:1px solid rgba(167,139,250,.3);border-radius:10px;padding:5px 14px;text-align:center;min-width:72px}
+.top-box.official{border-color:rgba(34,211,238,.45);background:rgba(34,211,238,.08)}
+.top-label{font-size:.55rem;color:#a7adba;text-transform:uppercase;letter-spacing:.06em}
+.top-val{font-size:1.3rem;font-weight:900}
+#hLevel{color:#fff}#hPoints{color:#22D3EE}#hTime{color:#22D3EE}
+
+#msg{text-align:center;padding:6px;font-size:1.05rem;font-weight:900;letter-spacing:.08em;text-transform:uppercase;flex-shrink:0;min-height:32px}
+#msg.watch{color:#22D3EE}#msg.go{color:#00D9A5}#msg.miss{color:#FF1493}
+
+/* The court is square, so it fits a phone held upright and a desktop
+   window equally — a 2:1 court forces one or the other to compromise. */
+.court-area{flex:1;display:flex;align-items:center;justify-content:center;min-height:0;padding:8px}
+.court{
+  display:grid;grid-template-columns:repeat(5,1fr);grid-template-rows:repeat(5,1fr);
+  gap:2.2%;padding:2.2%;
+  border:2px solid rgba(167,139,250,.4);border-radius:16px;
+  background:#0D1826;
+  box-shadow:0 0 60px rgba(167,139,250,.22),inset 0 0 40px rgba(167,139,250,.05),0 20px 60px rgba(0,0,0,.8);
+}
+.cell{
+  border-radius:10px;background:rgba(167,139,250,.05);border:2px solid rgba(167,139,250,.28);
+  display:flex;align-items:center;justify-content:center;
+  font-weight:900;color:transparent;cursor:pointer;transition:all .08s;touch-action:manipulation;
+}
+.cell.lit{background:#A78BFA!important;border-color:#22D3EE!important;box-shadow:0 0 22px rgba(167,139,250,.9)!important;color:#fff!important;transform:scale(1.04)}
+.cell.correct{background:#00D9A5!important;border-color:#00D9A5!important;box-shadow:0 0 16px rgba(0,217,165,.7)!important;color:#fff!important}
+.cell.wrong{background:rgba(255,20,147,.35)!important;border-color:#FF1493!important;animation:shake .3s}
+.cell.reveal{background:#A78BFA!important;border-color:#22D3EE!important;color:#fff!important;opacity:.55}
+@keyframes shake{25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+
+#controls{display:flex;justify-content:center;gap:10px;padding:8px 16px 14px;flex-shrink:0}
+.ctrl-btn{height:46px;flex:0 1 170px;max-width:200px;border:2px solid rgba(167,139,250,.5);background:rgba(0,0,0,.4);border-radius:12px;color:#fff;font-size:.92rem;font-weight:900;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;text-decoration:none;display:flex;align-items:center;justify-content:center}
+.qs-val{font-size:1.35rem;font-weight:900;color:var(--text);font-family:'Bebas Neue',sans-serif}
+.qs-total{font-size:1rem;font-weight:900;text-transform:uppercase;letter-spacing:.04em;color:var(--gold);margin-bottom:24px}
+.qs-total span{font-size:1.5rem;color:var(--text);margin-left:8px;font-family:'Bebas Neue',sans-serif}
+.qs-next-btn{width:100%;max-width:400px;min-height:56px;border:none;border-radius:16px;background:linear-gradient(135deg,var(--orange),#ff8a5c);color:#fff;font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;box-shadow:0 0 30px rgba(255,107,53,.6)}
+.qs-next-btn:active{transform:scale(.98)}
+
+/* ══════════════════════════════════════════════════════
+   THE FIVE-MINUTE WARM-UP
+
+   One minute per station, five stations, no hands. This is the strip
+   across the top that says which station you are on and how much of
+   your minute is left, plus the hand-off card between stations.
+
+   It sits above everything the game draws, because the minute keeps
+   running whatever the game is doing underneath — including the
+   moment a run breaks and restarts.
+   ══════════════════════════════════════════════════════ */
+#warmBar{
+  position:fixed;left:0;right:0;z-index:1500;
+  top:calc(var(--nav-height) + env(safe-area-inset-top));
+  display:none;flex-direction:column;
+  background:#050508;border-bottom:1px solid var(--border);
+}
+body.warm #warmBar{display:flex}
+/* The game screens start below the nav; with the strip in, they start
+   below the strip as well, or it covers the first row of stats. */
+body.warm .screen,
+body.warm .play-screen{padding-top:calc(var(--nav-height) + 46px + env(safe-area-inset-top))}
+#warmFill{height:5px;background:var(--orange);width:100%;
+  transition:background .3s linear}
+#warmFill.warning{background:var(--gold)}
+#warmFill.danger{background:#FF1493}
+#warmRow{display:flex;align-items:center;justify-content:space-between;
+  padding:6px 12px 7px}
+#warmStation{font-family:'Bebas Neue',sans-serif;font-size:.85rem;
+  letter-spacing:2px;color:var(--gold)}
+#warmStation b{color:var(--muted);font-weight:400;margin-right:6px}
+#warmClock{font-family:'Bebas Neue',sans-serif;font-size:1.1rem;
+  letter-spacing:1px;color:var(--text);font-variant-numeric:tabular-nums}
+#warmClock.danger{color:#FF1493}
+
+/* The hand-off. Two and a bit seconds of black with the next station's
+   name on it — long enough to read, short enough that nobody reaches
+   for the screen. Nothing here is tappable on purpose: the warm-up
+   runs itself from the first station to the last. */
+#warmNext{
+  position:fixed;inset:0;z-index:2500;display:none;
+  flex-direction:column;align-items:center;justify-content:center;
+  background:#050508;text-align:center;padding:24px;
+}
+#warmNext.show{display:flex}
+.wn-done{font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:3px;
+  color:#00D9A5;margin-bottom:6px}
+.wn-score{font-family:'Bebas Neue',sans-serif;font-size:3.4rem;
+  color:var(--text);line-height:1;margin-bottom:26px}
+.wn-kick{font-size:.6rem;letter-spacing:3px;text-transform:uppercase;
+  color:var(--muted);margin-bottom:6px}
+.wn-name{font-family:'Bebas Neue',sans-serif;font-size:2.6rem;letter-spacing:4px;
+  color:var(--orange);line-height:1;text-shadow:0 0 30px rgba(255,107,53,.5)}
+.wn-dots{display:flex;gap:7px;margin-top:28px}
+.wn-dot{width:9px;height:9px;border-radius:50%;background:var(--border)}
+.wn-dot.done{background:#00D9A5}
+.wn-dot.now{background:var(--orange);transform:scale(1.35);
+  box-shadow:0 0 10px var(--orange)}
+
+/* 3 · 2 · 1 — the lead-in to a station.
+   Ported from The Fortress, which already had it: the same 7rem gold
+   number, the same pop, the same GO!. A warm-up where the three
+   stations count themselves in differently would look like three
+   products in a row instead of one gym. */
+.countdown-overlay{position:fixed;top:0;left:0;width:100%;height:100%;
+  background:rgba(0,0,0,0.85);display:none;justify-content:center;align-items:center;
+  z-index:2400;pointer-events:none}
+.countdown-overlay.show{display:flex}
+.countdown-number{font-family:'Bebas Neue',sans-serif;font-size:7rem;color:var(--gold);
+  text-shadow:0 0 40px var(--gold),0 0 80px var(--orange);animation:countdownPop 0.8s ease-out}
+@keyframes countdownPop{0%{transform:scale(2);opacity:0}50%{transform:scale(1.2);opacity:1}100%{transform:scale(1);opacity:1}}
+
+/* Nothing to press during a warm-up. The station starts itself, misses
+   restart themselves and the next one arrives on its own, so a big
+   LET'S GO button at the bottom is a button that can only do the wrong
+   thing — and it sits exactly where a thumb rests. */
+body.warm .play-action-btn{display:none}
+/* The board rises to fill what the button was holding down. */
+body.warm .play-container{min-height:0}
+</style>
+</style>
+</head>
+<body>
+
+<div id="warmBar">
+  <div id="warmFill"></div>
+  <div id="warmRow"><span id="warmStation"></span><span id="warmClock">1:00</span></div>
+</div>
+
+<div id="warmNext">
+  <div class="wn-done" id="wnDone"></div>
+  <div class="wn-score" id="wnScore">0</div>
+  <div class="wn-kick" id="wnKick">UP NEXT</div>
+  <div class="wn-name" id="wnName"></div>
+  <div class="wn-dots" id="wnDots"></div>
+</div>
+
+<div id="screen-intro">
+  <a class="intro-back" href="fortress-mobile-hub.html" id="introBack">← Back</a>
+  <button class="lang-btn" id="langBtn" onclick="toggleLang()">ES</button>
+  <div class="vrr-title">THE <span>REPLAY</span></div>
+
+  <div class="official-banner" id="officialBanner" style="display:none;">
+    <div class="ob-kick" id="obKick">Official Run</div>
+    <div class="ob-name" id="obPlayer">—</div>
+    <div class="ob-note" id="obNote">This run counts. Your sponsors pay on the points you score, and you only get one.</div>
+  </div>
+
+  <!-- A running demonstration, so a student who has never seen this
+       understands it before reading a word. It loops until they start
+       a run, and stops the moment they do. -->
+  <div class="demo-wrap">
+    <div class="demo-label" id="demoLabel">👀 Watch…</div>
+    <div class="demo-grid" id="demoGrid"></div>
+  </div>
+
+  <div class="htp">
+    <button class="htp-toggle" id="htpToggle" onclick="toggleHtp()">
+      <span>📖</span>
+      <span class="htp-toggle-text" id="htpText">How to play</span>
+      <span class="htp-arrow" id="htpArrow">▼</span>
+    </button>
+    <div class="htp-body" id="htpBody">
+      <div class="htp-card">
+        <div class="htp-card-title" id="cObjective">🎯 What to do</div>
+        <div class="htp-step"><span class="n">1</span><span class="tx" id="cs1"></span></div>
+        <div class="htp-step"><span class="n">2</span><span class="tx" id="cs2"></span></div>
+        <div class="htp-step"><span class="n">3</span><span class="tx" id="cs3"></span></div>
+      </div>
+      <div class="htp-card">
+        <div class="htp-card-title" id="cScoring">⭐ Chain scoring</div>
+        <div class="htp-step"><span class="n">→</span><span class="tx" id="cp1"></span></div>
+        <div class="htp-step"><span class="n">→</span><span class="tx" id="cp2"></span></div>
+        <div class="htp-step"><span class="n">→</span><span class="tx" id="cp3"></span></div>
+        <div class="htp-tip">
+          <div class="htp-tip-title" id="cTipTitle">💡 Tip</div>
+          <div class="htp-tip-text" id="cTip"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <button class="big-btn" id="bigStart" onclick="handleStartClick()">▶ START</button>
+  <div class="best-line" id="bestLine"></div>
+</div>
+
+<div id="countdown"><div id="bigCount">3</div></div>
+
+<div id="screen-game">
+  <div class="topbar">
+    <div class="top-box"><div class="top-label" id="lblLevel">Sequence</div><div class="top-val" id="hLevel">0</div></div>
+    <div class="top-box official"><div class="top-label" id="lblPoints">Points</div><div class="top-val" id="hPoints">0</div></div>
+    <div class="top-box"><div class="top-label" id="lblTime">Time</div><div class="top-val" id="hTime">0.0</div></div>
+  </div>
+  <div id="msg" class="watch"></div>
+  <div class="court-area"><div class="court" id="court"></div></div>
+  <div id="controls">
+    <a class="ctrl-btn" href="index.html" id="homeBtn">← Home</a>
+  </div>
+</div>
+
+<div id="screen-end">
+  <div class="final-num" id="endNum">0</div>
+  <div class="final-label" id="endLabel">Longest Chain Replayed</div>
+
+  <div class="final-stats">
+    <div class="final-stat-cell points-cell"><div class="final-stat-label" id="statPointsLbl">Points</div><div class="final-stat-val" id="endPoints">0</div></div>
+    <div class="final-stat-cell"><div class="final-stat-label" id="statTimeLbl">Time</div><div class="final-stat-val" id="endTime">0.0s</div></div>
+  </div>
+
+  <div class="save-status" id="saveStatus"></div>
+
+  <button class="next-player-btn" id="againBtn">▶ PLAY AGAIN</button>
+  <a class="box-open-btn" id="backToPledge" href="index.html" style="max-width:300px;margin:14px auto 0;">← Back</a>
+</div>
+
+<script>
+function $(id){return document.getElementById(id)}
+
+var SB_URL='https://sdaphocueugzfvjovuxd.supabase.co';
+var SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNkYXBob2N1ZXVnemZ2am92dXhkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM2MjQyMDgsImV4cCI6MjA5OTIwMDIwOH0.pDAzf4P6dD9eNEBlnP95SdF5BI-R84-Rdc0vKzYcn7M';
+
+// ══════════════════════════════════════════════════════
+//  THE RECALL — Challenge edition.
+//
+//  Deliberately simpler than the training version at memorybball:
+//  no modes, no level select, no quarters. A challenge run is one
+//  escalating sequence, so every player's score means the same
+//  thing and can be compared.
+//
+//  PRACTICE vs OFFICIAL works exactly as it does in Fortress —
+//  practice is free and unlimited, an official run needs the
+//  player's own run key, and the database refuses a second one.
+//
+//  POINTS — reaching a sequence of n means 1+2+...+n taps were
+//  performed correctly, so n(n+1)/2. Same formula as every other
+//  game here, which is what lets a program run a different
+//  challenge each season without changing how pledges work.
+// ══════════════════════════════════════════════════════
+var params = new URLSearchParams(window.location.search);
+var CHALLENGE_ID = params.get('c') || null;
+var PLAYER_ID = params.get('p') || null;
+var RUN_KEY = params.get('k');
+
+// A tryout run: the team is deciding which game to use, so the score
+// is kept per player per game on the campaign rather than on any
+// challenge. Nothing official, no run key.
+var TRYOUT = params.get('tryout');
+// A warm-up taken before signing up: counted on the device only,
+// because there is no player to attach it to yet.
+var WARM = params.get('warm');
+var WARM_GAME = params.get('g') || '';
+// A one-run competition: the first score stands, and the game says so
+// rather than quietly keeping the better of two.
+var TRYOUT_ONCE = params.get('once') === '1';
+// A warm-up inside a competition: counted, but never scored.
+var TRYOUT_PRACTICE = params.get('practice') === '1';
+
+// The page a student came from holds their session for this tab and
+// lets it go stale if nothing happens. Playing is something
+// happening, so the clock is kept fresh while they are here.
+if (TRYOUT) {
+  (function keepWarm(){
+    var touch = function(){
+      try {
+        var k = 'fc-sess-' + TRYOUT;
+        var raw = sessionStorage.getItem(k);
+        if (!raw) return;
+        var sess = JSON.parse(raw);
+        sess.t = Date.now();
+        sessionStorage.setItem(k, JSON.stringify(sess));
+      } catch(e){}
+    };
+    touch();
+    setInterval(touch, 30000);
+    document.addEventListener('visibilitychange', function(){
+      if (!document.hidden) touch();
+    });
+  })();
+}
+var IS_OFFICIAL = !TRYOUT && !!(CHALLENGE_ID && PLAYER_ID && RUN_KEY && params.get('official') === '1');
+
+// ══════════════════════════════════════════════════════
+//  THE DEMO LIMIT
+//
+//  Anyone can try this from the site, but a visitor is not a student.
+//  A few rounds is enough to understand it; the programme itself is
+//  what a school licenses, and students in a campaign play without any
+//  limit at all.
+// ══════════════════════════════════════════════════════
+var DEMO_RUNS = 3;
+var DEMO_KEY = 'cp-demo-' + GAME;
+
+// A warm-up before signing up is part of a campaign, not a visitor
+// trying the site — it must never be refused, or a student cannot
+// join at all on a computer somebody else has already used.
+function isDemoPlay(){ return false; }   // juego libre: sin tope
+
+function demoRunsUsed(){
+  try { return parseInt(localStorage.getItem(DEMO_KEY) || '0', 10) || 0; }
+  catch(e){ return 0; }
+}
+function noteDemoRun(){
+  try { localStorage.setItem(DEMO_KEY, String(demoRunsUsed() + 1)); } catch(e){}
+}
+function demoRunsLeft(){ return Math.max(0, DEMO_RUNS - demoRunsUsed()); }
+
+// Shown in place of the start button once the tries are gone.
+function showDemoEnd(){
+  var box = $('screen-intro');
+  if (!box) return;
+
+  // Whoever hits this could be a student whose school runs a campaign,
+  // or a director deciding whether to. The first needs their own link;
+  // the second needs us. Say both, and send nobody to a sales page by
+  // surprise.
+  var btn = $('bigStart');
+  if (btn){
+    btn.textContent = T('demoOver');
+    btn.dataset.locked = '1';
+    btn.onclick = function(e){ if (e) e.preventDefault(); };
+    btn.style.opacity = '.45';
+    btn.style.cursor = 'default';
+  }
+
+  var line = $('bestLine');
+  if (line){
+    line.innerHTML =
+      '<span style="display:block;margin-bottom:10px;">' + T('demoOverNote') + '</span>' +
+      '<a href="contact.html" style="display:inline-block;padding:11px 20px;border-radius:11px;' +
+        'border:1px solid var(--line);color:var(--paper);text-decoration:none;font-weight:800;">' +
+        T('demoTalk') + '</a>';
+  }
+}
+
+var GAME = 'replay';
+
+function pointsFor(level){ return level > 0 ? (level * (level + 1)) / 2 : 0; }
+
+// ---- language ----
+var STR = {
+  en:{
+    demoWatch:'👀 Watch…', demoTap:'Tap 1, 2, 3…', demoPerfect:'✅ Perfect!',
+    htpText:'How to play',
+    cObjective:'🎯 What to do',
+    cs1:'<b>Watch</b> the chain — one cell lights at a time, each with its own note.',
+    cs2:'<b>Listen as well as look</b> — the tune climbs as the chain grows.',
+    cs3:'<b>Replay it</b> in the same order. Every round keeps the chain and adds one more.',
+    cScoring:'⭐ Chain scoring',
+    cp1:'The sequence grows by <b>one cell</b> every round you get right.',
+    cp2:'One wrong tap <b>ends the run</b> — your score is the longest sequence you held.',
+    cp3:'Each round is worth its own number — round 9 banks 9 points. So every round is worth more than the last.',
+    cTipTitle:'💡 Tip',
+    cTip:'Practise as much as you like — nothing counts until you start an official run. Humming the notes back is the trick most people land on.',
+    namePh:'Your name',
+    start:'▶ START', startOfficial:'▶ START OFFICIAL RUN', startPractice:'▶ PRACTICE RUN',
+    officialKick:'Official Run',
+    officialNote:'This run counts. Your sponsors pay on the points you score, and you only get one.',
+    alreadyRun:'Your official run is already in: <b>sequence {L}, {P} points</b>. You can keep practising, but this score is final.',
+    confirmOfficial:'This is your official run. Your sponsors pay on the points you score, and you only get one. Ready?',
+    back:'← Back', backToChallenge:'← Back to my Challenge page', home:'← Home',
+    lblLevel:'Sequence', lblPoints:'Points', lblTime:'Time',
+    getReady:'GET READY...', memorize:'MEMORIZE!', watchChain:'WATCH THE CHAIN', yourTurn:'REPLAY IT',
+    nice:'✅ RECALLED', wrong:'WRONG ORDER',
+    labelPractice:'Practice Run · Longest Sequence',
+    labelOfficial:'Official Run · Longest Sequence',
+    playAgain:'▶ PLAY AGAIN', practiceAgain:'▶ PRACTICE AGAIN', statPoints:'Points', statTime:'Time',
+    worthFree:'{P} points. One padrino at 25¢ a point would be giving {M} — ten of them, {T} for the program.',
+    practiceOnly:'Practice run.',
+    warmCounted:'✓ Warm-up counted. Go back to your page.',
+    tryoutSaved:'✓ Saved to your team tryout.',
+    demoLeft:'Free demo — {N} of 3 tries left.',
+    demoOver:'Demo finished', demoTalk:'Bring this to my program →',
+    demoOverNote:'That is the demo. If your school or team runs Cada Punto, open your own link and play as much as you like.',
+    practiceCount:'Practice {D} of {N}. Go back and play again.',
+    practiceUnlocked:'✓ Practice done. Go back to your page to see what is next.',
+    worthLine:'That is {P} points. In a fundraiser, every padrino backing you at 25¢ a point would be giving {M}.',
+    tryoutAlready:'You have already used your run at this game.',
+    confirmOnce:'One attempt only — whatever you score is your score. Ready?',
+    tryoutFailed:'Could not save that to the tryout — try again.',
+    recording:'Recording your official run…',
+    recorded:'✓ Official run recorded — {P} points.',
+    wasAlready:'Your official run was already recorded. This one was practice.',
+    wrongLink:'This link cannot record an official run — ask your coach for your own link.',
+    noServer:'Could not reach the server — contact your coach before playing again.',
+    bestLine:'Your best practice run: <b>sequence {L}</b> · {P} points'
+  },
+  es:{
+    demoWatch:'👀 Observa…', demoTap:'Toca 1, 2, 3…', demoPerfect:'✅ ¡Perfecto!',
+    htpText:'Cómo jugar',
+    cObjective:'🎯 Qué hacer',
+    cs1:'<b>Observa</b> la cadena — una celda se enciende a la vez, cada una con su nota.',
+    cs2:'<b>Escucha además de mirar</b> — la melodía sube según crece la cadena.',
+    cs3:'<b>Repítela</b> en el mismo orden. Cada ronda conserva la cadena y añade una más.',
+    cScoring:'⭐ Puntuación en cadena',
+    cp1:'La secuencia crece <b>una celda</b> cada ronda que aciertas.',
+    cp2:'Un toque equivocado <b>termina la corrida</b> — tu puntuación es la secuencia más larga que aguantaste.',
+    cp3:'Cada ronda vale su propio número — la ronda 9 suma 9 puntos. Así que cada ronda vale más que la anterior.',
+    cTipTitle:'💡 Consejo',
+    cTip:'Practica todo lo que quieras — nada cuenta hasta que empieces una corrida oficial. Tararear las notas de vuelta es el truco que casi todos descubren.',
+    namePh:'Tu nombre',
+    start:'▶ EMPEZAR', startOfficial:'▶ EMPEZAR CORRIDA OFICIAL', startPractice:'▶ CORRIDA DE PRÁCTICA',
+    officialKick:'Corrida Oficial',
+    officialNote:'Esta corrida cuenta. Tus padrinos pagan por los puntos que anotes, y solo tienes una.',
+    alreadyRun:'Tu corrida oficial ya está hecha: <b>secuencia {L}, {P} puntos</b>. Puedes seguir practicando, pero esa puntuación es final.',
+    confirmOfficial:'Esta es tu corrida oficial. Tus padrinos pagan por los puntos que anotes, y solo tienes una. ¿Listo?',
+    back:'← Atrás', backToChallenge:'← Volver a mi página del Reto', home:'← Inicio',
+    lblLevel:'Secuencia', lblPoints:'Puntos', lblTime:'Tiempo',
+    getReady:'PREPÁRATE...', memorize:'¡MEMORIZA!', watchChain:'OBSERVA LA CADENA', yourTurn:'REPÍTELA',
+    nice:'✅ RECORDADO', wrong:'ORDEN INCORRECTO',
+    labelPractice:'Práctica · Secuencia más larga',
+    labelOfficial:'Corrida Oficial · Secuencia más larga',
+    playAgain:'▶ JUGAR OTRA VEZ', practiceAgain:'▶ PRACTICAR OTRA VEZ', statPoints:'Puntos', statTime:'Tiempo',
+    worthFree:'{P} puntos. Un padrino a 25¢ por punto estaría dando {M} — diez de ellos, {T} para el programa.',
+    practiceOnly:'Corrida de práctica.',
+    warmCounted:'✓ Calentamiento contado. Regresa a tu página.',
+    tryoutSaved:'✓ Guardado en la prueba de tu equipo.',
+    demoLeft:'Demo gratis — te quedan {N} de 3 intentos.',
+    demoOver:'Demo terminado', demoTalk:'Quiero esto en mi programa →',
+    demoOverNote:'Hasta ahí llega el demo. Si tu escuela o equipo usa Cada Punto, abre tu propio enlace y juega todo lo que quieras.',
+    practiceCount:'Práctica {D} de {N}. Regresa y juega otra vez.',
+    practiceUnlocked:'✓ Práctica completa. Regresa a tu página para ver qué sigue.',
+    worthLine:'Son {P} puntos. En una recaudación, cada padrino que te apoye a 25¢ por punto estaría dando {M}.',
+    tryoutAlready:'Ya usaste tu corrida en este juego.',
+    confirmOnce:'Un solo intento — lo que anotes es tu puntuación. ¿Listo?',
+    tryoutFailed:'No se pudo guardar en la prueba — intenta otra vez.',
+    recording:'Guardando tu corrida oficial…',
+    recorded:'✓ Corrida oficial guardada — {P} puntos.',
+    wasAlready:'Tu corrida oficial ya estaba guardada. Esta fue práctica.',
+    wrongLink:'Este enlace no puede guardar una corrida oficial — pídele a tu entrenador tu propio enlace.',
+    noServer:'No se pudo conectar al servidor — habla con tu entrenador antes de jugar otra vez.',
+    bestLine:'Tu mejor práctica: <b>secuencia {L}</b> · {P} puntos'
+  }
+};
+
+var LANG = 'en';
+try { LANG = localStorage.getItem('fc-lang') || ((navigator.language||'').toLowerCase().indexOf('es')===0 ? 'es' : 'en'); } catch(e){}
+
+function T(key, vals){
+  var out = (STR[LANG] && STR[LANG][key]) || STR.en[key] || key;
+  if (vals) Object.keys(vals).forEach(function(k){ out = out.split('{'+k+'}').join(vals[k]); });
+  return out;
+}
+
+function applyLang(){
+  // the instruction cards and the demo label
+  ['cObjective','cScoring','cs1','cs2','cs3','cp1','cp2','cp3','cTipTitle','cTip','htpText']
+    .forEach(function(id){ var el=$(id); if(el) el.innerHTML = T(id); });
+  document.documentElement.lang = LANG;
+  $('obKick').textContent = T('officialKick');
+  $('lblLevel').textContent = T('lblLevel');
+  $('lblPoints').textContent = T('lblPoints');
+  $('lblTime').textContent = T('lblTime');
+  $('statPointsLbl').textContent = T('statPoints');
+  $('statTimeLbl').textContent = T('statTime');
+  $('againBtn').textContent = TRYOUT_PRACTICE ? T('practiceAgain') : T('playAgain');
+  $('langBtn').textContent = LANG === 'en' ? 'ES' : 'EN';
+  var linked = CHALLENGE_ID && PLAYER_ID;
+  $('introBack').textContent = linked ? T('backToChallenge') : T('back');
+  $('homeBtn').textContent = linked ? T('backToChallenge') : T('home');
+  $('backToPledge').textContent = linked ? T('backToChallenge') : T('back');
+  if (!$('bigStart').dataset.locked) $('bigStart').textContent = IS_OFFICIAL ? T('startOfficial') : T('start');
+
+  // A visitor should know this is a demo before the tries run out.
+  if (isDemoPlay()){
+    var line = $('bestLine');
+    if (line){
+      line.textContent = demoRunsLeft() > 0
+        ? T('demoLeft').split('{N}').join(demoRunsLeft())
+        : T('demoOverNote');
+    }
+  }
+  if (!$('obNote').dataset.locked) $('obNote').textContent = T('officialNote');
+}
+
+function toggleLang(){
+  LANG = LANG === 'en' ? 'es' : 'en';
+  try { localStorage.setItem('fc-lang', LANG); } catch(e){}
+  applyLang();
+  loadBest();
+}
+
+// Back links keep the player on their own challenge page.
+// A student practising arrived from their own page, so their name is
+// already known. Asking for it again invites somebody to type a
+// different one and think they have changed who they are.
+(function nameFromTheLink(){
+  if (!(TRYOUT && PLAYER_ID)) return;
+  fetch(SB_URL + '/rest/v1/rpc/player_name', {
+    method: 'POST',
+    headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY,
+               'Content-Type': 'application/json' },
+    body: JSON.stringify({ p_id: PLAYER_ID })
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(rows){
+    if (!rows || !rows.length) return;
+    currentPlayerName = String(rows[0].name).slice(0, 20);
+    var shown = $('obPlayer');
+    if (shown) shown.textContent = rows[0].name;
+  })
+  .catch(function(){});
+})();
+
+(function setBackLink(){
+  if (WARM){
+    var w = 'index.html' + encodeURIComponent(WARM);
+    ['introBack','homeBtn','backToPledge'].forEach(function(id){
+      var el = $(id); if (el) el.href = w;
+    });
+    return;
+  }
+  if (TRYOUT){
+    var t = 'index.html' + encodeURIComponent(TRYOUT);
+    ['introBack','homeBtn','backToPledge'].forEach(function(id){
+      var el = $(id); if (el) el.href = t;
+    });
+    return;
+  }
+  if (CHALLENGE_ID && PLAYER_ID){
+    var back = 'index.html' + encodeURIComponent(CHALLENGE_ID) + '&p=' + encodeURIComponent(PLAYER_ID)
+             + (RUN_KEY ? '&k=' + encodeURIComponent(RUN_KEY) : '');
+    $('introBack').href = back;
+    $('homeBtn').href = back;
+    $('backToPledge').href = back;
+  }
+})();
+
+(function initOfficial(){
+  if (!IS_OFFICIAL) return;
+
+  $('officialBanner').style.display='block';
+  $('bigStart').className='big-btn official';
+  $('againBtn').style.display='none';
+
+  fetch(SB_URL + '/rest/v1/rpc/player_name', {
+    method: 'POST',
+    headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY,
+               'Content-Type': 'application/json' },
+    body: JSON.stringify({ p_id: PLAYER_ID })
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(rows){
+    if (rows && rows.length){
+      $('obPlayer').textContent = rows[0].name;
+      currentPlayerName = String(rows[0].name).slice(0, 20);
+    }
+  })
+  .catch(function(){});
+
+  fetch(SB_URL + '/rest/v1/challenge_runs?challenge_id=eq.' + encodeURIComponent(CHALLENGE_ID)
+        + '&player_id=eq.' + encodeURIComponent(PLAYER_ID) + '&game=eq.' + GAME
+        + '&select=level_reached,points', {
+    headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY }
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(rows){
+    if (rows && rows.length){
+      $('obNote').innerHTML = T('alreadyRun', { L: rows[0].level_reached, P: rows[0].points });
+      $('obNote').dataset.locked='1';
+      $('bigStart').className='big-btn';
+      $('bigStart').textContent=T('startPractice');
+      $('bigStart').dataset.locked='1';
+      IS_OFFICIAL = false;
+    }
+  })
+  .catch(function(){});
+})();
+
+// ══════════════════════════════════════════════════════
+//  THE DEMONSTRATION
+//
+//  Runs on the intro screen only and shares nothing with the game —
+//  its own grid, its own timers, its own cells. It stops the moment a
+//  run starts, so it can never compete with the real thing for
+//  attention or for the clock.
+// ══════════════════════════════════════════════════════
+var demoCells=[], demoTimers=[], demoOn=false;
+
+function demoClearTimers(){ demoTimers.forEach(clearTimeout); demoTimers=[]; }
+function demoLater(fn, ms){ demoTimers.push(setTimeout(fn, ms)); }
+
+function buildDemo(){
+  var g = $('demoGrid');
+  if (!g) return;
+  g.innerHTML=''; demoCells=[];
+  for (var i=0;i<25;i++){
+    var c=document.createElement('div');
+    c.className='demo-cell';
+    g.appendChild(c); demoCells.push(c);
+  }
+}
+
+function demoPattern(n){
+  var pool=[]; for(var i=0;i<25;i++)pool.push(i);
+  for(var j=pool.length-1;j>0;j--){
+    var k=Math.floor(Math.random()*(j+1));
+    var t=pool[j]; pool[j]=pool[k]; pool[k]=t;
+  }
+  return pool.slice(0,n);
+}
+
+function demoRound(){
+  if (!demoOn) return;
+  var pat = demoPattern(4);
+  var lbl = $('demoLabel');
+  var FL = 460, GAP = 150;
+
+  demoCells.forEach(function(c){ c.className='demo-cell'; c.textContent=''; });
+  lbl.textContent = T('demoWatch'); lbl.className='demo-label';
+
+  // shown one at a time, the way the game shows it
+  pat.forEach(function(idx,n){
+    demoLater(function(){
+      if (!demoOn) return;
+      if (n > 0){
+        demoCells[pat[n-1]].classList.remove('lit');
+        demoCells[pat[n-1]].textContent='';
+      }
+      demoCells[idx].classList.add('lit');
+      demoCells[idx].textContent = n+1;
+    }, 500 + n*(FL+GAP));
+  });
+
+  var shownBy = 500 + pat.length*(FL+GAP);
+
+  demoLater(function(){
+    if (!demoOn) return;
+    demoCells.forEach(function(c){ c.className='demo-cell'; c.textContent=''; });
+    lbl.textContent = T('demoTap'); lbl.className='demo-label recall';
+  }, shownBy);
+
+  pat.forEach(function(idx,i){
+    demoLater(function(){
+      if (!demoOn) return;
+      demoCells[idx].classList.add('ok');
+      demoCells[idx].textContent = i+1;
+    }, shownBy + 400 + i*360);
+  });
+
+  demoLater(function(){
+    if (!demoOn) return;
+    lbl.textContent = T('demoPerfect'); lbl.className='demo-label good';
+    $('demoGrid').classList.add('pulse');
+    setTimeout(function(){ var g=$('demoGrid'); if(g) g.classList.remove('pulse'); }, 500);
+  }, shownBy + 400 + pat.length*360 + 200);
+
+  demoLater(demoRound, shownBy + 400 + pat.length*360 + 1600);
+}
+
+function startDemo(){
+  if (demoOn) return;
+  demoOn = true;
+  buildDemo();
+  demoRound();
+}
+function stopDemo(){
+  demoOn = false;
+  demoClearTimers();
+}
+
+function toggleHtp(){
+  $('htpToggle').classList.toggle('open');
+  $('htpBody').classList.toggle('open');
+}
+
+// ---- the game ----
+var GRID = 25;
+var START_LENGTH = 2;
+var SHOW_MS = 2400;      // how long the numbers stay visible
+var BETWEEN_MS = 800;
+
+var phase='idle';
+var sequence=[];
+var playerIdx=0;
+var level=0;
+var best=0;
+var timers=[];
+var cells=[];
+var runStartTime=0;
+var currentPlayerName='';
+
+function clrT(){timers.forEach(clearTimeout);timers=[]}
+function msg(t,c){var e=$('msg');e.textContent=t;e.className=c||'watch'}
+
+// The court is square and sized to whatever space is available, so it
+// fills a phone held upright and a desktop window equally well.
+function resizeCourt(){
+  var area=document.querySelector('.court-area');
+  var court=$('court');
+  if(!area||!court)return;
+  var size=Math.min(area.clientWidth, area.clientHeight);
+  if(size<80) { requestAnimationFrame(resizeCourt); return; }
+  court.style.width=size+'px';
+  court.style.height=size+'px';
+  // Numbers scale with the cells rather than being fixed.
+  cells.forEach(function(c){ c.style.fontSize=Math.round(size*0.062)+'px'; });
+}
+window.addEventListener('resize',resizeCourt);
+window.addEventListener('orientationchange',function(){setTimeout(resizeCourt,220)});
+document.addEventListener('fullscreenchange',function(){setTimeout(resizeCourt,220)});
+
+function buildCourt(){
+  var court=$('court');
+  court.innerHTML='';cells=[];
+  for(var i=0;i<GRID;i++){
+    var c=document.createElement('div');
+    c.className='cell';
+    (function(idx){
+      c.addEventListener('pointerdown',function(e){e.preventDefault();handleTap(idx)});
+    })(i);
+    court.appendChild(c);
+    cells.push(c);
+  }
+  resizeCourt();
+}
+
+function clearCells(){
+  cells.forEach(function(c){ c.className='cell'; c.textContent=''; });
+}
+
+var audioCtx=null;
+function ensureAudio(){ if(!audioCtx){ try{audioCtx=new(window.AudioContext||window.webkitAudioContext)()}catch(e){} } }
+function blip(freq){
+  if(!audioCtx)return;
+  try{
+    var o=audioCtx.createOscillator(), g=audioCtx.createGain();
+    o.type='sine'; o.frequency.value=freq||440;
+    o.connect(g); g.connect(audioCtx.destination);
+    g.gain.setValueAtTime(.16,audioCtx.currentTime);
+    g.gain.exponentialRampToValueAtTime(.01,audioCtx.currentTime+.12);
+    o.start(); o.stop(audioCtx.currentTime+.13);
+  }catch(e){}
+}
+
+var BPM=100;
+var STARTING_CELLS=3;
+var LEVEL_CELLS={1:3,2:4,3:5,4:6,5:7};
+var TRAINING_ROUNDS=10;
+var gameMode='game';
+
+
+// ══════════════════════════════════════════════════════
+//  THE FIVE-MINUTE WARM-UP — the engine
+//
+//  Five stations, one minute each, start to finish without anybody
+//  touching anything. It runs before class, on a screen at the front
+//  of the room, and the only thing a teacher should have to do is
+//  start it.
+//
+//  THIS BLOCK IS IDENTICAL IN ALL FIVE PROGRAMS. The only line that
+//  changes from file to file is WARM.STATION. Everything else —
+//  the clock, the order, the scores, the hand-off — is the same code,
+//  so a fix made here is a fix made everywhere once it is copied
+//  across. Keep it that way: if a station needs special behaviour,
+//  put it in that station's three hooks below, not in here.
+//
+//  WHAT HAPPENS WHEN YOU MISS. You start again, and your minute keeps
+//  running. It does not end the station. A warm-up that ends early for
+//  whoever misses first is not a warm-up — it is a test, and it leaves
+//  that student watching everyone else for four minutes. What you
+//  scored before the miss is banked, and the next attempt adds to it.
+//
+//  So the station score is the sum of everything you managed inside
+//  your minute, which rewards starting again quickly — exactly the
+//  habit this is meant to build.
+//
+//  THE CLOCK NEVER STOPS, not between attempts and not while the
+//  "wrong order" message is showing. Those seconds are yours, the way
+//  they are on a court.
+// ══════════════════════════════════════════════════════
+var WARM = {
+  STATION: 3,                 // <<< 1 recall · 2 recognition · 3 replay · 4 fortress
+  SECONDS: 60,
+  KEY_ON:  'cg-warm-active',
+  KEY_SC:  'cg-warm-scores',
+  FINAL:   'warmup-final.html',
+  LIST: [
+    { n:1, name:'RECALL',      file:'002-recall.html'      },
+    { n:2, name:'RECOGNITION', file:'003-recognition.html' },
+    { n:3, name:'REPLAY',      file:'004-replay.html'      },
+    { n:4, name:'FORTRESS',    file:'001-fortress.html'    }
+  ],
+  on:false, banked:0, until:0, raf:null, ending:false
+};
+
+/* THE THREE HOOKS. This is the whole contract between the engine and
+   the game underneath it, and it is all that needs rewriting when the
+   block is copied into another station.
+
+     hostScore()   what this attempt is worth right now
+     hostRestart() throw away the broken attempt and start another
+     hostStop()    freeze everything, the minute is over
+
+   Written as functions on WARM rather than called directly, so the
+   engine never has to know a single variable name from the game. */
+WARM.hostScore = function(){
+  /* The header already shows pointsFor(level) for every chain fully
+     recalled, so the game's own displayed truth is the score — no
+     second tally here to drift out of step with it.
+
+     Times ten to land on the gym's scale: ten points per cell per
+     round, the same rate Recall and Recognition pay, so a station of
+     Replay is worth what a station of either of those is worth. */
+  var mostrado = 0;
+  try { mostrado = parseInt($('hPoints').textContent, 10) || 0 } catch(e){}
+  return mostrado * 10;
+};
+WARM.hostRestart = function(){
+  /* Straight into another chain, with no count-in: the count-in
+     belongs to starting the station, and the minute is running. */
+  clrT();
+  clearCells();
+  beginRun();
+};
+WARM.hostStop = function(){
+  phase = 'done';
+  clrT();
+};
+/* The lead-in. This game already had its own 3 · 2 · 1, so the hook
+   just points at it. */
+WARM.hostCountdown = function(cb){
+  if (typeof countdownThen === 'function') countdownThen(cb); else cb();
+};
+
+/* ?warm=1 starts a warm-up from a cold link, without the hub.
+
+   The hub is what normally switches it on, and until that exists this
+   is the only way in. It outlives the hub, though: a teacher with the
+   link on a tab, a bookmark on the room's screen, and a tester who
+   wants station 3 on its own all want to start one from a URL.
+
+   It only ever TURNS IT ON. A station with no ?warm= reads the session
+   the way it always did, so landing on station 2 mid-chain does not
+   wipe the run that is already going. */
+function warmOn(){
+  try {
+    if (new URLSearchParams(location.search).get('warm') === '1'){
+      sessionStorage.setItem(WARM.KEY_ON, '1');
+      /* Starting from the first station means starting a fresh run; any
+         other station is being joined, so the scores so far stay. */
+      if (WARM.STATION === 1) sessionStorage.removeItem(WARM.KEY_SC);
+    }
+  } catch(e){}
+  try { return sessionStorage.getItem(WARM.KEY_ON) === '1' } catch(e){ return false }
+}
+function warmScores(){
+  var blank = {};
+  WARM.LIST.forEach(function(s){ blank['s'+s.n] = 0 });
+  try {
+    var raw = sessionStorage.getItem(WARM.KEY_SC);
+    if (!raw) return blank;
+    var got = JSON.parse(raw);
+    WARM.LIST.forEach(function(s){
+      blank['s'+s.n] = parseInt(got['s'+s.n], 10) || 0;
+    });
+    return blank;
+  } catch(e){ return blank }
+}
+function warmWrite(n, points){
+  var all = warmScores();
+  all['s'+n] = points;
+  try { sessionStorage.setItem(WARM.KEY_SC, JSON.stringify(all)) } catch(e){}
+  return all;
+}
+
+/* How long a station lasts. ?seg= shortens it, which exists so the
+   whole five-station run can be walked through in half a minute
+   instead of five — testing a chain by sitting through it is how
+   chains stay untested. */
+function warmSeconds(){
+  var s = 0;
+  try { s = parseInt(new URLSearchParams(location.search).get('seg'), 10) } catch(e){}
+  return (s > 0 && s <= 600) ? s : WARM.SECONDS;
+}
+
+/* And it has to survive the jump to the next station, or only the
+   first one is short and the rest are a minute each — which is the
+   same as not having it. Everything else about the run lives in the
+   session; this is the one thing that travels in the url. */
+function warmQuery(){
+  var s = 0;
+  try { s = parseInt(new URLSearchParams(location.search).get('seg'), 10) } catch(e){}
+  return (s > 0 && s <= 600) ? ('?seg=' + s) : '';
+}
+
+/* Starting a station: count it in, THEN start the minute.
+   The three seconds are not taken out of the minute. A station that
+   began the instant the page loaded meant the first sequence played
+   while the player was still reading which game they had landed on,
+   and the clock was already eating. Counting in costs three seconds
+   of the warm-up and buys an honest minute at every station.
+
+   The game itself is handed over as a callback rather than started
+   here, so the engine still knows nothing about the game under it —
+   and nothing is playable until GO!. */
+function warmBegin(onGo){
+  WARM.on = true;
+  WARM.banked = 0;
+  WARM.ending = false;
+  document.body.classList.add('warm');
+
+  var me = WARM.LIST[WARM.STATION - 1];
+  $('warmStation').innerHTML = '<b>' + WARM.STATION + '/' + WARM.LIST.length + '</b>' + me.name;
+
+  /* The strip shows a full, still clock through the countdown, so it
+     never looks like time is already going. */
+  var secs = warmSeconds();
+  $('warmClock').textContent = Math.floor(secs / 60) + ':' + ('0' + (secs % 60)).slice(-2);
+  $('warmClock').className = '';
+  $('warmFill').style.width = '100%';
+  $('warmFill').className = '';
+
+  WARM.hostCountdown(function(){
+    WARM.until = performance.now() + warmSeconds() * 1000;
+    warmPaint();
+    if (typeof onGo === 'function') onGo();
+  });
+}
+
+function warmLeftMs(){ return Math.max(0, WARM.until - performance.now()) }
+
+function warmPaint(){
+  if (!WARM.on) return;
+  var left = warmLeftMs();
+  var total = warmSeconds() * 1000;
+  var pct = total > 0 ? (left / total) : 0;
+
+  $('warmFill').style.width = (pct * 100) + '%';
+  var secs = Math.ceil(left / 1000);
+  $('warmClock').textContent = Math.floor(secs / 60) + ':' + ('0' + (secs % 60)).slice(-2);
+
+  var fill = $('warmFill'), clock = $('warmClock');
+  fill.className = pct < 0.17 ? 'danger' : (pct < 0.34 ? 'warning' : '');
+  clock.className = pct < 0.17 ? 'danger' : '';
+
+  if (left <= 0){ warmFinishStation(); return }
+  WARM.raf = requestAnimationFrame(warmPaint);
+}
+
+/* A run broke with time still on the clock: bank what it was worth and
+   start another one. The clock is not touched here — that is the whole
+   point of banking rather than ending. */
+function warmAfterMiss(){
+  if (!WARM.on || WARM.ending) return;
+  WARM.banked += WARM.hostScore();
+  WARM.hostRestart();
+}
+
+function warmFinishStation(){
+  if (WARM.ending) return;
+  WARM.ending = true;
+  if (WARM.raf){ cancelAnimationFrame(WARM.raf); WARM.raf = null }
+
+  /* The attempt that was in the air when the buzzer went still counts.
+     It was played inside the minute. */
+  var total = WARM.banked + WARM.hostScore();
+  WARM.hostStop();
+  warmWrite(WARM.STATION, total);
+
+  var last = (WARM.STATION >= WARM.LIST.length);
+  var next = last ? null : WARM.LIST[WARM.STATION];
+
+  $('wnDone').textContent = WARM.LIST[WARM.STATION - 1].name + ' DONE';
+  $('wnScore').textContent = total;
+  $('wnKick').textContent = last ? 'THAT IS THE FIVE MINUTES' : 'UP NEXT';
+  $('wnName').textContent = last ? 'YOUR SCORE' : next.name;
+
+  var dots = $('wnDots');
+  dots.innerHTML = '';
+  WARM.LIST.forEach(function(s){
+    var d = document.createElement('div');
+    d.className = 'wn-dot' + (s.n <= WARM.STATION ? ' done' : '') +
+                  (!last && s.n === WARM.STATION + 1 ? ' now' : '');
+    dots.appendChild(d);
+  });
+
+  $('warmNext').classList.add('show');
+  setTimeout(function(){
+    location.href = (last ? WARM.FINAL : next.file) + warmQuery();
+  }, 2200);
+}
+
+/* Starting the whole thing. Called from the hub, not from here. */
+function warmStartAll(){
+  try {
+    sessionStorage.setItem(WARM.KEY_ON, '1');
+    sessionStorage.removeItem(WARM.KEY_SC);
+  } catch(e){}
+  location.href = WARM.LIST[0].file;
+}
+
+function pickCells(n){
+  var pool=[];
+  for(var i=0;i<GRID;i++)pool.push(i);
+  for(var j=pool.length-1;j>0;j--){
+    var k=Math.floor(Math.random()*(j+1));
+    var tmp=pool[j];pool[j]=pool[k];pool[k]=tmp;
+  }
+  return pool.slice(0,n);
+}
+
+function startRun(){
+  if(phase==='running')return;
+  stopDemo();
+  ensureAudio();
+  if(audioCtx&&audioCtx.state==='suspended')audioCtx.resume();
+  /* Fullscreen is for a run you chose to start. In a warm-up the
+     next station is one navigation away, and dropping in and out of
+     fullscreen between stations is a flicker nobody asked for. */
+  if(!WARM.on){ try{ if(!document.fullscreenElement && document.documentElement.requestFullscreen){ document.documentElement.requestFullscreen().catch(function(){}); } }catch(e){} }
+
+  $('screen-intro').style.display='none';
+  $('screen-end').style.display='none';
+  $('screen-game').style.display='flex';
+  buildCourt();
+
+  requestAnimationFrame(function(){
+    requestAnimationFrame(function(){
+      resizeCourt();
+      countdownThen(function(){ resizeCourt(); beginRun(); });
+    });
+  });
+}
+
+function countdownThen(cb){
+  $('countdown').style.display='flex';
+  var n=3;$('bigCount').textContent=n;
+  var iv=setInterval(function(){
+    n--;
+    if(n<=0){clearInterval(iv);$('countdown').style.display='none';cb()}
+    else{$('bigCount').textContent=n}
+  /* One second a beat, like the count-in at the other three stations.
+     This game counted in at 800ms, which inside the chain made its
+     lead-in visibly shorter than the one before and the one after. */
+  },1000);
+}
+
+function beginRun(){
+  phase='running';
+  sequence=[];
+  level=START_LENGTH-1;
+  runStartTime=performance.now();
+  $('hLevel').textContent='0';$('hPoints').textContent='0';$('hTime').textContent='0.0';
+  msg(T('getReady'),'go');
+  timers.push(setTimeout(nextLevel,900));
+  requestAnimationFrame(tickTimer);
+}
+
+function tickTimer(){
+  if(phase!=='running')return;
+  $('hTime').textContent=((performance.now()-runStartTime)/1000).toFixed(1);
+  requestAnimationFrame(tickTimer);
+}
+
+// A chain that keeps everything already learned and adds one more
+// cell each round. Each cell has its own note, so the chain is heard
+// as well as seen — two ways to remember the same thing.
+var FLASH_MS = 520;      // how long each cell stays lit
+var FLASH_GAP = 180;     // silence between cells
+
+// Rising notes, so a longer chain climbs — a tune rather than a list.
+var NOTES = [262,294,330,349,392,440,494,523,587,659,698,784,880,988,1047,
+             1175,1319,1397,1568,1760,1976,2093,2349,2637,2794];
+
+function nextLevel(){
+  if(phase!=='running')return;
+  level++;
+  playerIdx=0;
+
+  // Everything from before stays; one new cell joins the end.
+  if (sequence.length === 0){
+    sequence = pickCells(START_LENGTH);
+  } else {
+    sequence.push(Math.floor(Math.random()*GRID));
+  }
+
+  $('hLevel').textContent=level;
+  clearCells();
+  msg(T('watchChain'),'watch');
+
+  timers.push(setTimeout(function(){ flashFrom(0); }, 450));
+}
+
+function flashFrom(i){
+  if(phase!=='running')return;
+
+  if (i > 0){
+    var prev = sequence[i-1];
+    cells[prev].classList.remove('lit');
+    cells[prev].textContent='';
+  }
+
+  if (i < sequence.length){
+    var idx = sequence[i];
+    cells[idx].classList.add('lit');
+    cells[idx].textContent = i+1;
+    blip(NOTES[i % NOTES.length]);
+    timers.push(setTimeout(function(){ flashFrom(i+1); }, FLASH_MS + FLASH_GAP));
+    return;
+  }
+
+  // the whole chain has been shown
+  clearCells();
+  msg(T('yourTurn'),'go');
+}
+
+function handleTap(idx){
+  if(phase!=='running')return;
+  if($('msg').textContent!==T('yourTurn'))return;   // still memorizing
+
+  if(idx===sequence[playerIdx]){
+    cells[idx].classList.add('correct');
+    cells[idx].textContent=playerIdx+1;
+    blip(NOTES[playerIdx % NOTES.length]);
+    playerIdx++;
+
+    if(playerIdx>=sequence.length){
+      $('hPoints').textContent=pointsFor(level);
+      msg(T('nice'),'go');
+      timers.push(setTimeout(nextLevel,BETWEEN_MS));
+    }
+  }else{
+    cells[idx].classList.add('wrong');
+    // Show what the answer was — a run that ends without explanation
+    // teaches nothing.
+    sequence.forEach(function(s,n){
+      if(!cells[s].classList.contains('correct')){
+        cells[s].classList.add('reveal');
+        cells[s].textContent=n+1;
+      }
+    });
+    endRun();
+  }
+}
+
+function endRun(){
+  if(phase==='done')return;
+  phase='done';clrT();
+
+  // The level being attempted was not completed, so the score is the
+  // last sequence fully recalled.
+  var finalLevel=Math.max(0, level-1);
+  var finalTime=(performance.now()-runStartTime)/1000;
+
+  msg(T('wrong'),'miss');
+  /* In the warm-up a miss ends nothing: it is banked and another
+     chain starts, with the minute still running. */
+  if(WARM.on){ timers.push(setTimeout(warmAfterMiss,900)); return; }
+  timers.push(setTimeout(function(){ showFinal(finalLevel,finalTime); },1100));
+}
+
+function showFinal(finalLevel,finalTime){
+  var points=pointsFor(finalLevel);
+
+  if(finalLevel>best){best=finalLevel;saveBest()}
+
+  $('endNum').textContent=finalLevel;
+  $('endPoints').textContent=points;
+  $('endTime').textContent=finalTime.toFixed(1)+'s';
+  $('screen-game').style.display='none';
+  $('screen-end').style.display='flex';
+
+  var status=$('saveStatus');
+
+  if(TRYOUT && PLAYER_ID){
+    $('endLabel').textContent=T('labelPractice');
+    status.style.color='#a7adba';
+    recordTryout(finalLevel, status);
+    return;
+  }
+
+  if (WARM){
+    try {
+      var k = 'cp-warm-' + WARM + '-' + (WARM_GAME || GAME);
+      localStorage.setItem(k, String((parseInt(localStorage.getItem(k) || '0', 10) || 0) + 1));
+    } catch(e){}
+    $('endLabel').textContent = T('labelPractice');
+    status.style.color = '#8AA4BD';
+    status.textContent = T('warmCounted');
+    return;
+  }
+
+  if(!IS_OFFICIAL){
+    $('endLabel').textContent=T('labelPractice');
+    status.style.color='#7d8ba3';
+
+    // Somebody playing from the site has just seen a number. This is
+    // the moment it means something — what that same run would have
+    // raised for a program.
+    if (isDemoPlay() && points > 0){
+      status.innerHTML = T('worthFree')
+        .split('{P}').join(points)
+        .split('{M}').join('$' + (points * 0.25).toFixed(2))
+        .split('{T}').join('$' + (points * 0.25 * 10).toFixed(2));
+    } else {
+      status.textContent=T('practiceOnly');
+    }
+    if(CHALLENGE_ID && PLAYER_ID) recordPractice(finalLevel);
+    return;
+  }
+
+  $('endLabel').textContent=T('labelOfficial');
+  status.style.color='#a7adba';
+  status.textContent=T('recording');
+
+  fetch(SB_URL+'/rest/v1/rpc/record_official_run',{
+    method:'POST',
+    headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json'},
+    body:JSON.stringify({
+      p_challenge:CHALLENGE_ID, p_player:PLAYER_ID, p_key:RUN_KEY,
+      p_level:finalLevel, p_points:points, p_time:Number(finalTime.toFixed(2)),
+      p_game:GAME
+    })
+  })
+  .then(function(r){ if(!r.ok) throw new Error('failed'); return r.json(); })
+  .then(function(out){
+    if(out && out.ok){
+      status.style.color='#00D9A5';
+      status.textContent=T('recorded',{P:points});
+      IS_OFFICIAL=false;
+      return;
+    }
+    if(out && out.reason==='already'){
+      status.style.color='#22D3EE';
+      status.textContent=T('wasAlready');
+      IS_OFFICIAL=false;
+      return;
+    }
+    status.style.color='#ff6b35';
+    status.textContent=T('wrongLink');
+  })
+  .catch(function(e){
+    status.style.color='#ff6b35';
+    status.textContent=T('noServer');
+    console.error('Challenge run write:',e);
+  });
+}
+
+function recordPractice(finalLevel){
+  if (WARM.on) return;
+  var base=SB_URL+'/rest/v1/challenge_practice';
+  var headers={'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':'return=representation'};
+  var filter='?challenge_id=eq.'+encodeURIComponent(CHALLENGE_ID)
+           +'&player_id=eq.'+encodeURIComponent(PLAYER_ID)
+           +'&game=eq.'+GAME;
+
+  fetch(base+filter+'&select=best_level,runs',{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}})
+  .then(function(r){return r.json()})
+  .then(function(rows){
+    if(rows && rows.length){
+      var row=rows[0];
+      return fetch(base+filter,{method:'PATCH',headers:headers,body:JSON.stringify({
+        best_level:Math.max(row.best_level||0,finalLevel),
+        runs:(row.runs||0)+1,
+        updated_at:new Date().toISOString()
+      })});
+    }
+    return fetch(base,{method:'POST',headers:headers,body:JSON.stringify({
+      challenge_id:CHALLENGE_ID, player_id:PLAYER_ID, game:GAME,
+      best_level:finalLevel, runs:1
+    })});
+  })
+  .catch(function(e){console.error('Practice record:',e)});
+}
+
+// Keeps this player's best for this game in this campaign. Only ever
+// moves upward, so a bad run never lowers what the team is judged on.
+// Warming up. The database counts it and says whether the official
+// run has unlocked yet, so the player is told where they stand.
+function recordCompetitionPractice(finalLevel, status){
+  if (WARM.on) return;
+  fetch(SB_URL + '/rest/v1/rpc/record_practice', {
+    method: 'POST',
+    headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY, 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      p_campaign: TRYOUT, p_player: PLAYER_ID, p_game: GAME, p_level: finalLevel
+    })
+  })
+  .then(function(r){ if (!r.ok) throw new Error('practice'); return r.json(); })
+  .then(function(){
+    // The run is counted; the score above already says how it went,
+    // so there is nothing worth adding underneath it.
+    status.textContent = '';
+  })
+  .catch(function(e){
+    console.error('Practice:', e);
+    status.style.color = '#ff6b35';
+    status.textContent = T('tryoutFailed');
+  });
+}
+
+function recordTryout(finalLevel, status){
+  /* A warm-up is not a tryout and not a practice run. Nothing from
+     one is written anywhere. */
+  if (WARM.on) return;
+  if (TRYOUT_PRACTICE) return recordCompetitionPractice(finalLevel, status);
+  var base = SB_URL + '/rest/v1/campaign_tryouts';
+  var headers = {
+    'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY,
+    'Content-Type': 'application/json', 'Prefer': 'return=representation'
+  };
+  var filter = '?campaign_id=eq.' + encodeURIComponent(TRYOUT)
+             + '&player_id=eq.' + encodeURIComponent(PLAYER_ID)
+             + '&game=eq.' + GAME;
+
+  fetch(base + filter + '&select=best_level,runs', {
+    headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY }
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(rows){
+    if (rows && rows.length){
+      var row = rows[0];
+      if (TRYOUT_ONCE){
+        // A score already exists and only one attempt is allowed, so
+        // nothing is written — the first run is the result.
+        status.style.color = '#ffd35a';
+        status.textContent = T('tryoutAlready');
+        return;
+      }
+      return fetch(base + filter, { method:'PATCH', headers:headers, body:JSON.stringify({
+        best_level: Math.max(row.best_level || 0, finalLevel),
+        runs: (row.runs || 0) + 1,
+        updated_at: new Date().toISOString()
+      })});
+    }
+    return fetch(base, { method:'POST', headers:headers, body:JSON.stringify({
+      campaign_id: TRYOUT, player_id: PLAYER_ID, game: GAME,
+      best_level: finalLevel, runs: 1
+    })});
+  })
+  .then(function(){
+    status.style.color = '#00D9A5';
+    status.innerHTML = T('tryoutSaved') +
+      '<span style="display:block;margin-top:6px;color:#8AA4BD;font-weight:700;">' +
+      T('worthLine').split('{P}').join(pointsFor(finalLevel))
+                   .split('{M}').join('$' + (pointsFor(finalLevel) * 0.25).toFixed(2)) +
+      '</span>';
+  })
+  .catch(function(e){
+    console.error('Tryout record:', e);
+    status.style.color = '#ff6b35';
+    status.textContent = T('tryoutFailed');
+  });
+}
+
+var BEST_KEY='fc-replay-best';
+function loadBest(){
+  best=0;
+  try{best=parseInt(localStorage.getItem(BEST_KEY)||'0',10)||0}catch(e){}
+  $('bestLine').innerHTML = best>0 ? T('bestLine',{L:best,P:pointsFor(best)}) : '';
+}
+function saveBest(){try{localStorage.setItem(BEST_KEY,String(best))}catch(e){}}
+
+
+function handleStartClick(){
+  if (TRYOUT_ONCE && !confirm(T('confirmOnce'))) return;
+  if(IS_OFFICIAL){
+    if(!confirm(T('confirmOfficial'))) return;
+    startRun();
+    return;
+  }
+  if (isDemoPlay()){
+    if (demoRunsLeft() <= 0){ showDemoEnd(); return; }
+    noteDemoRun();
+  }
+  // The name comes from the student's own page when they arrive
+  // from it, and is simply not needed for free play.
+  startRun();
+}
+
+
+$('againBtn').addEventListener('click',function(){
+  phase='idle';
+  $('screen-end').style.display='none';
+  $('screen-intro').style.display='flex';
+  loadBest();
+  startDemo();
+});
+
+applyLang();
+loadBest();
+
+/* In a warm-up this station starts itself: no intro, no demo loop, no
+   button. The board goes up, the count-in runs, and the minute starts
+   on GO! — exactly as the other three stations do.
+
+   It mirrors startRun's own sequence rather than calling it, because
+   startRun does its own countdown; here the engine owns the count-in
+   so the clock can start after it rather than during it. */
+if (warmOn()){
+  $('screen-intro').style.display='none';
+  $('screen-end').style.display='none';
+  $('screen-game').style.display='flex';
+  ensureAudio();
+  buildCourt();
+  requestAnimationFrame(function(){
+    requestAnimationFrame(function(){
+      resizeCourt();
+      warmBegin(function(){ resizeCourt(); beginRun(); });
+    });
+  });
+} else {
+  startDemo();
+}
+</script>
+</body>
+</html>
