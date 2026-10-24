@@ -495,6 +495,71 @@ body.warm .play-container{min-height:0}
   font-family:'Outfit',sans-serif;font-size:0.75rem;font-weight:600;
   letter-spacing:normal;text-transform:none;border-radius:8px;height:auto;padding:12px 16px;
   box-shadow:none}
+
+/* ══════════════════════════════════════════════════════
+   THE MODE SCREEN
+
+   Recall and Recognition both put one screen between PLAY NOW and the
+   board: pick Game or Training, pick a level if you picked Training,
+   then LET'S GO. Replay went straight from START to the countdown, so
+   it was the only one of the three that never asked.
+
+   Same screen, declaration for declaration — the two tiers side by
+   side, the level grid that appears only for Training, the cells line
+   underneath and the same LET'S GO button.
+
+   WHAT TRAINING MEANS HERE. Recall's Training fixes how many cells
+   you get. This game's chain grows from two every time, so Training
+   fixes where the chain STARTS: level 3 opens on a three-cell chain
+   and grows from there. Same idea — a level you choose instead of a
+   run that always begins at the bottom — expressed in the terms this
+   game already has.
+   ══════════════════════════════════════════════════════ */
+#screen-mode{position:fixed;inset:0;display:none;flex-direction:column;
+  align-items:center;background:var(--dark);z-index:110;
+  overflow-y:auto;overflow-x:hidden;
+  padding:calc(var(--nav-height) + env(safe-area-inset-top) + 10px) 15px 40px}
+#screen-mode.show{display:flex}
+.trophy-container{width:100%;max-width:420px;margin:0 auto;padding:15px 0 40px;text-align:left}
+.trophy-header{text-align:center;margin-bottom:20px}
+.trophy-icon{font-size:2.5rem;margin-bottom:5px}
+.trophy-title{font-family:'Bebas Neue',sans-serif;font-size:1.8rem;letter-spacing:3px;
+  color:var(--gold);margin-bottom:4px}
+.trophy-subtitle{font-size:0.75rem;color:var(--muted)}
+.bpm-section{margin-bottom:20px}
+.bpm-section-title{font-family:'Bebas Neue',sans-serif;font-size:0.85rem;letter-spacing:2px;
+  color:var(--text);margin-bottom:10px;text-align:center}
+.bpm-tier{background:var(--card);border:2px solid var(--border);border-radius:14px;
+  padding:15px;margin-bottom:10px;cursor:pointer;transition:all 0.3s}
+.bpm-tier:active{transform:scale(0.98)}
+.bpm-tier.active{border-color:var(--orange);background:rgba(255,107,53,0.08)}
+.bpm-tier-header{display:flex;align-items:center;justify-content:space-between}
+.bpm-tier-left{display:flex;align-items:center;gap:10px}
+.bpm-tier-icon{font-size:1.3rem}
+.bpm-tier-name{font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:1px;color:var(--text)}
+.bpm-tier-bpm{font-size:0.6rem;color:var(--muted)}
+.mode-row{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.mode-row .bpm-tier{margin-bottom:0}
+.level-section{background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:15px;margin-bottom:20px}
+.level-section.hidden{display:none}
+.level-section-title{font-size:0.6rem;color:var(--muted);text-transform:uppercase;
+  letter-spacing:1.5px;text-align:center;margin-bottom:10px}
+.level-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.level-btn{aspect-ratio:1;border:2px solid var(--border);background:transparent;border-radius:8px;
+  font-family:'Bebas Neue',sans-serif;font-size:1rem;color:var(--muted);cursor:pointer;
+  transition:all 0.2s;display:flex;align-items:center;justify-content:center}
+.level-btn:active{transform:scale(0.95)}
+.level-btn.active{border-color:var(--orange);color:var(--orange);background:rgba(255,107,53,0.1)}
+.level-info{display:flex;justify-content:space-between;align-items:center;
+  margin-top:12px;padding-top:12px;border-top:1px solid var(--border)}
+.level-info-label{font-size:0.65rem;color:var(--muted)}
+.level-info-value{font-family:'Bebas Neue',sans-serif;font-size:0.9rem;color:var(--orange)}
+.letsgo-btn{width:100%;padding:16px 24px;border:none;border-radius:12px;
+  font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:4px;cursor:pointer;
+  background:linear-gradient(135deg,var(--orange),#E55A2B);color:var(--text);
+  box-shadow:0 4px 20px rgba(255,107,53,0.3);transition:all 0.3s}
+.letsgo-btn:active{transform:scale(0.98)}
 </style>
 </style>
 </head>
@@ -570,6 +635,61 @@ body.warm .play-container{min-height:0}
 </div>
 
 <div id="countdown"><div id="bigCount">3</div></div>
+
+<div id="screen-mode">
+  <nav class="mini-nav">
+    <div class="nav-row">
+      <a class="intro-back" href="#" id="modeBack">&larr; Back</a>
+      <div class="nav-title">THE REPLAY</div>
+      <div style="width:74px"></div>
+    </div>
+  </nav>
+  <div class="trophy-container">
+    <div class="trophy-header">
+      <div class="trophy-icon">&#127942;</div>
+      <h1 class="trophy-title">YOUR TROPHY ROOM</h1>
+      <p class="trophy-subtitle">THE REPLAY Progress</p>
+    </div>
+    <div class="bpm-section">
+      <div class="bpm-section-title">SELECT MODE</div>
+      <div class="mode-row">
+        <div class="bpm-tier active" id="modeGame" data-mode="game">
+          <div class="bpm-tier-header"><div class="bpm-tier-left">
+            <span class="bpm-tier-icon">&#127918;</span>
+            <div class="bpm-tier-info">
+              <div class="bpm-tier-name">GAME</div>
+              <div class="bpm-tier-bpm">Escalating</div>
+            </div>
+          </div></div>
+        </div>
+        <div class="bpm-tier" id="modeTraining" data-mode="training">
+          <div class="bpm-tier-header"><div class="bpm-tier-left">
+            <span class="bpm-tier-icon">&#127947;</span>
+            <div class="bpm-tier-info">
+              <div class="bpm-tier-name">TRAINING</div>
+              <div class="bpm-tier-bpm">Fixed Start</div>
+            </div>
+          </div></div>
+        </div>
+      </div>
+    </div>
+    <div class="level-section hidden" id="levelSection">
+      <div class="level-section-title">SELECT LEVEL</div>
+      <div class="level-grid" id="levelGrid">
+        <button class="level-btn active" data-level="1">1</button>
+        <button class="level-btn" data-level="2">2</button>
+        <button class="level-btn" data-level="3">3</button>
+        <button class="level-btn" data-level="4">4</button>
+        <button class="level-btn" data-level="5">5</button>
+      </div>
+      <div class="level-info">
+        <span class="level-info-label">Chain starts at:</span>
+        <span class="level-info-value" id="cellsDisplay">1</span>
+      </div>
+    </div>
+    <button class="letsgo-btn" id="letsGoBtn">LET'S GO!</button>
+  </div>
+</div>
 
 <div id="screen-game">
   <nav class="mini-nav">
@@ -1433,7 +1553,7 @@ function countdownThen(cb){
 function beginRun(){
   phase='running';
   sequence=[];
-  level=START_LENGTH-1;
+  level=startLength()-1;
   runStartTime=performance.now();
   $('hLevel').textContent='0';$('hPoints').textContent='0';$('hTime').textContent='0.0';
   msg(T('getReady'),'go');
@@ -1464,7 +1584,7 @@ function nextLevel(){
 
   // Everything from before stays; one new cell joins the end.
   if (sequence.length === 0){
-    sequence = pickCells(START_LENGTH);
+    sequence = pickCells(startLength());
   } else {
     sequence.push(Math.floor(Math.random()*GRID));
   }
@@ -1747,10 +1867,74 @@ function loadBest(){
 function saveBest(){try{localStorage.setItem(BEST_KEY,String(best))}catch(e){}}
 
 
+/* ── THE MODE SCREEN ──────────────────────────────────────────────
+   One screen between START and the board, the same one Recall and
+   Recognition put there. Game runs as it always has; Training opens
+   the chain at the level you pick instead of always at two.
+
+   An official or tryout run skips it: that run is scored and has to
+   be the same run for everybody, so there is nothing to choose. */
+var replayMode = 'game';
+var replayLevel = 1;
+var LEVEL_START = {1:1, 2:2, 3:3, 4:4, 5:5};
+
+function startLength(){
+  return replayMode === 'training' ? (LEVEL_START[replayLevel] || 1) : START_LENGTH;
+}
+
+function showModeScreen(){
+  stopDemo();
+  $('screen-intro').style.display='none';
+  $('screen-end').style.display='none';
+  $('screen-mode').classList.add('show');
+}
+function hideModeScreen(){
+  $('screen-mode').classList.remove('show');
+}
+
+function paintMode(){
+  $('modeGame').classList.toggle('active', replayMode==='game');
+  $('modeTraining').classList.toggle('active', replayMode==='training');
+  $('levelSection').classList.toggle('hidden', replayMode!=='training');
+  var btns=$('levelGrid').querySelectorAll('.level-btn');
+  for(var i=0;i<btns.length;i++){
+    btns[i].classList.toggle('active', parseInt(btns[i].getAttribute('data-level'),10)===replayLevel);
+  }
+  $('cellsDisplay').textContent = startLength();
+}
+
+function wireModeScreen(){
+  if(!$('screen-mode')) return;
+  $('modeGame').addEventListener('click',function(){ replayMode='game'; paintMode() });
+  $('modeTraining').addEventListener('click',function(){ replayMode='training'; paintMode() });
+  var btns=$('levelGrid').querySelectorAll('.level-btn');
+  for(var i=0;i<btns.length;i++){
+    (function(btn){
+      btn.addEventListener('click',function(){
+        replayLevel=parseInt(btn.getAttribute('data-level'),10)||1;
+        replayMode='training';
+        paintMode();
+      });
+    })(btns[i]);
+  }
+  $('modeBack').addEventListener('click',function(e){
+    e.preventDefault();
+    hideModeScreen();
+    $('screen-intro').style.display='flex';
+    startDemo();
+  });
+  $('letsGoBtn').addEventListener('click',function(){
+    hideModeScreen();
+    startRun();
+  });
+  paintMode();
+}
+
 function handleStartClick(){
   if (TRYOUT_ONCE && !confirm(T('confirmOnce'))) return;
   if(IS_OFFICIAL){
     if(!confirm(T('confirmOfficial'))) return;
+    replayMode='game';
     startRun();
     return;
   }
@@ -1760,20 +1944,22 @@ function handleStartClick(){
   }
   // The name comes from the student's own page when they arrive
   // from it, and is simply not needed for free play.
-  startRun();
+  showModeScreen();
 }
 
 
 $('againBtn').addEventListener('click',function(){
   phase='idle';
   $('screen-end').style.display='none';
-  $('screen-intro').style.display='flex';
   loadBest();
-  startDemo();
+  /* Straight back to the mode screen, so a second run can be a
+     different mode without walking back through the intro. */
+  showModeScreen();
 });
 
 applyLang();
 loadBest();
+wireModeScreen();
 
 /* In a warm-up this station starts itself: no intro, no demo loop, no
    button. The board goes up, the count-in runs, and the minute starts
