@@ -340,6 +340,65 @@ html,body{height:100%;overflow-x:hidden;font-family:'Outfit',sans-serif;backgrou
 .tap-log-empty{width:100%;text-align:center;color:rgba(255,255,255,.4);font-size:.8rem;padding:8px}
 
 @media(min-width:400px){.bori-hero-title{font-size:2.8rem}.intro-title{font-size:2.8rem}.court5x5{width:320px;height:320px}}
+
+/* ══════════════════════════════════════════════════════
+   THE FIVE-MINUTE WARM-UP
+
+   One minute per station, five stations, no hands. This is the strip
+   across the top that says which station you are on and how much of
+   your minute is left, plus the hand-off card between stations.
+
+   It sits above everything the game draws, because the minute keeps
+   running whatever the game is doing underneath — including the
+   moment a run breaks and restarts.
+   ══════════════════════════════════════════════════════ */
+#warmBar{
+  position:fixed;left:0;right:0;z-index:1500;
+  top:calc(var(--nav-height) + env(safe-area-inset-top));
+  display:none;flex-direction:column;
+  background:#050508;border-bottom:1px solid var(--border);
+}
+body.warm #warmBar{display:flex}
+/* The game screens start below the nav; with the strip in, they start
+   below the strip as well, or it covers the first row of stats. */
+body.warm .screen,
+body.warm .play-screen{padding-top:calc(var(--nav-height) + 46px + env(safe-area-inset-top))}
+#warmFill{height:5px;background:var(--orange);width:100%;
+  transition:background .3s linear}
+#warmFill.warning{background:var(--gold)}
+#warmFill.danger{background:#FF1493}
+#warmRow{display:flex;align-items:center;justify-content:space-between;
+  padding:6px 12px 7px}
+#warmStation{font-family:'Bebas Neue',sans-serif;font-size:.85rem;
+  letter-spacing:2px;color:var(--gold)}
+#warmStation b{color:var(--muted);font-weight:400;margin-right:6px}
+#warmClock{font-family:'Bebas Neue',sans-serif;font-size:1.1rem;
+  letter-spacing:1px;color:var(--text);font-variant-numeric:tabular-nums}
+#warmClock.danger{color:#FF1493}
+
+/* The hand-off. Two and a bit seconds of black with the next station's
+   name on it — long enough to read, short enough that nobody reaches
+   for the screen. Nothing here is tappable on purpose: the warm-up
+   runs itself from the first station to the last. */
+#warmNext{
+  position:fixed;inset:0;z-index:2500;display:none;
+  flex-direction:column;align-items:center;justify-content:center;
+  background:#050508;text-align:center;padding:24px;
+}
+#warmNext.show{display:flex}
+.wn-done{font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:3px;
+  color:#00D9A5;margin-bottom:6px}
+.wn-score{font-family:'Bebas Neue',sans-serif;font-size:3.4rem;
+  color:var(--text);line-height:1;margin-bottom:26px}
+.wn-kick{font-size:.6rem;letter-spacing:3px;text-transform:uppercase;
+  color:var(--muted);margin-bottom:6px}
+.wn-name{font-family:'Bebas Neue',sans-serif;font-size:2.6rem;letter-spacing:4px;
+  color:var(--orange);line-height:1;text-shadow:0 0 30px rgba(255,107,53,.5)}
+.wn-dots{display:flex;gap:7px;margin-top:28px}
+.wn-dot{width:9px;height:9px;border-radius:50%;background:var(--border)}
+.wn-dot.done{background:#00D9A5}
+.wn-dot.now{background:var(--orange);transform:scale(1.35);
+  box-shadow:0 0 10px var(--orange)}
 </style>
 </head>
 <body>
@@ -367,6 +426,19 @@ html,body{height:100%;overflow-x:hidden;font-family:'Outfit',sans-serif;backgrou
 <div class="intro-footer-dot"></div>
 <div class="intro-footer-text">Powered by <b>Gostar Digital</b></div>
 </div>
+</div>
+
+<div id="warmBar">
+  <div id="warmFill"></div>
+  <div id="warmRow"><span id="warmStation"></span><span id="warmClock">1:00</span></div>
+</div>
+
+<div id="warmNext">
+  <div class="wn-done" id="wnDone"></div>
+  <div class="wn-score" id="wnScore">0</div>
+  <div class="wn-kick" id="wnKick">UP NEXT</div>
+  <div class="wn-name" id="wnName"></div>
+  <div class="wn-dots" id="wnDots"></div>
 </div>
 
 <div class="play-screen hidden" id="playScreen">
@@ -475,6 +547,213 @@ var challengeComplete=document.getElementById('challengeComplete'),challengeResu
 
 document.getElementById('howToPlayBtn').addEventListener('click',function(){showHelp('repitelo')});
 document.getElementById('howToPlayBtn').addEventListener('touchstart',function(e){e.preventDefault();showHelp('repitelo')},{passive:false});
+
+
+// ══════════════════════════════════════════════════════
+//  THE FIVE-MINUTE WARM-UP — the engine
+//
+//  Five stations, one minute each, start to finish without anybody
+//  touching anything. It runs before class, on a screen at the front
+//  of the room, and the only thing a teacher should have to do is
+//  start it.
+//
+//  THIS BLOCK IS IDENTICAL IN ALL FIVE PROGRAMS. The only line that
+//  changes from file to file is WARM.STATION. Everything else —
+//  the clock, the order, the scores, the hand-off — is the same code,
+//  so a fix made here is a fix made everywhere once it is copied
+//  across. Keep it that way: if a station needs special behaviour,
+//  put it in that station's three hooks below, not in here.
+//
+//  WHAT HAPPENS WHEN YOU MISS. You start again, and your minute keeps
+//  running. It does not end the station. A warm-up that ends early for
+//  whoever misses first is not a warm-up — it is a test, and it leaves
+//  that student watching everyone else for four minutes. What you
+//  scored before the miss is banked, and the next attempt adds to it.
+//
+//  So the station score is the sum of everything you managed inside
+//  your minute, which rewards starting again quickly — exactly the
+//  habit this is meant to build.
+//
+//  THE CLOCK NEVER STOPS, not between attempts and not while the
+//  "wrong order" message is showing. Those seconds are yours, the way
+//  they are on a court.
+// ══════════════════════════════════════════════════════
+/* Fortress has no $() helper of its own — it calls
+   document.getElementById directly throughout. The shared block
+   expects one, so it brings its own rather than being rewritten:
+   that keeps this block identical to the copy in the other two
+   stations, which is the whole point of it being shared. */
+var $ = (typeof $ === 'function') ? $ : function(id){ return document.getElementById(id) };
+
+var WARM = {
+  STATION: 3,                 // <<< 1 recall · 2 recognition · 3 fortress
+  SECONDS: 60,
+  KEY_ON:  'cg-warm-active',
+  KEY_SC:  'cg-warm-scores',
+  FINAL:   'warmup-final.html',
+  LIST: [
+    { n:1, name:'RECALL',      file:'002-recall.html'      },
+    { n:2, name:'RECOGNITION', file:'003-recognition.html' },
+    { n:3, name:'FORTRESS',    file:'001-fortress.html'    }
+  ],
+  on:false, banked:0, until:0, raf:null, ending:false
+};
+
+/* THE THREE HOOKS. This is the whole contract between the engine and
+   the game underneath it, and it is all that needs rewriting when the
+   block is copied into another station.
+
+     hostScore()   what this attempt is worth right now
+     hostRestart() throw away the broken attempt and start another
+     hostStop()    freeze everything, the minute is over
+
+   Written as functions on WARM rather than called directly, so the
+   engine never has to know a single variable name from the game. */
+WARM.hostScore = function(){
+  /* Fortress scores a round by its own length — round 6 is worth 6 —
+     and repShotLog already holds every round of this attempt with its
+     points. Summing that is this game's own arithmetic, not a
+     conversion invented here. */
+  var t = 0;
+  try { repShotLog.forEach(function(r){ t += (r.pts || 0) }) } catch(e){}
+  return t;
+};
+WARM.hostRestart = function(){
+  /* Straight back in, with no three-second countdown: the countdown
+     belongs to starting a run, and the minute is already running. */
+  repStart();
+};
+WARM.hostStop = function(){
+  stopGame();
+};
+
+function warmOn(){
+  try { return sessionStorage.getItem(WARM.KEY_ON) === '1' } catch(e){ return false }
+}
+function warmScores(){
+  var blank = {};
+  WARM.LIST.forEach(function(s){ blank['s'+s.n] = 0 });
+  try {
+    var raw = sessionStorage.getItem(WARM.KEY_SC);
+    if (!raw) return blank;
+    var got = JSON.parse(raw);
+    WARM.LIST.forEach(function(s){
+      blank['s'+s.n] = parseInt(got['s'+s.n], 10) || 0;
+    });
+    return blank;
+  } catch(e){ return blank }
+}
+function warmWrite(n, points){
+  var all = warmScores();
+  all['s'+n] = points;
+  try { sessionStorage.setItem(WARM.KEY_SC, JSON.stringify(all)) } catch(e){}
+  return all;
+}
+
+/* How long a station lasts. ?seg= shortens it, which exists so the
+   whole five-station run can be walked through in half a minute
+   instead of five — testing a chain by sitting through it is how
+   chains stay untested. */
+function warmSeconds(){
+  var s = 0;
+  try { s = parseInt(new URLSearchParams(location.search).get('seg'), 10) } catch(e){}
+  return (s > 0 && s <= 600) ? s : WARM.SECONDS;
+}
+
+/* And it has to survive the jump to the next station, or only the
+   first one is short and the rest are a minute each — which is the
+   same as not having it. Everything else about the run lives in the
+   session; this is the one thing that travels in the url. */
+function warmQuery(){
+  var s = 0;
+  try { s = parseInt(new URLSearchParams(location.search).get('seg'), 10) } catch(e){}
+  return (s > 0 && s <= 600) ? ('?seg=' + s) : '';
+}
+
+function warmBegin(){
+  WARM.on = true;
+  WARM.banked = 0;
+  WARM.ending = false;
+  document.body.classList.add('warm');
+
+  var me = WARM.LIST[WARM.STATION - 1];
+  $('warmStation').innerHTML = '<b>' + WARM.STATION + '/' + WARM.LIST.length + '</b>' + me.name;
+
+  WARM.until = performance.now() + warmSeconds() * 1000;
+  warmPaint();
+}
+
+function warmLeftMs(){ return Math.max(0, WARM.until - performance.now()) }
+
+function warmPaint(){
+  if (!WARM.on) return;
+  var left = warmLeftMs();
+  var total = warmSeconds() * 1000;
+  var pct = total > 0 ? (left / total) : 0;
+
+  $('warmFill').style.width = (pct * 100) + '%';
+  var secs = Math.ceil(left / 1000);
+  $('warmClock').textContent = Math.floor(secs / 60) + ':' + ('0' + (secs % 60)).slice(-2);
+
+  var fill = $('warmFill'), clock = $('warmClock');
+  fill.className = pct < 0.17 ? 'danger' : (pct < 0.34 ? 'warning' : '');
+  clock.className = pct < 0.17 ? 'danger' : '';
+
+  if (left <= 0){ warmFinishStation(); return }
+  WARM.raf = requestAnimationFrame(warmPaint);
+}
+
+/* A run broke with time still on the clock: bank what it was worth and
+   start another one. The clock is not touched here — that is the whole
+   point of banking rather than ending. */
+function warmAfterMiss(){
+  if (!WARM.on || WARM.ending) return;
+  WARM.banked += WARM.hostScore();
+  WARM.hostRestart();
+}
+
+function warmFinishStation(){
+  if (WARM.ending) return;
+  WARM.ending = true;
+  if (WARM.raf){ cancelAnimationFrame(WARM.raf); WARM.raf = null }
+
+  /* The attempt that was in the air when the buzzer went still counts.
+     It was played inside the minute. */
+  var total = WARM.banked + WARM.hostScore();
+  WARM.hostStop();
+  warmWrite(WARM.STATION, total);
+
+  var last = (WARM.STATION >= WARM.LIST.length);
+  var next = last ? null : WARM.LIST[WARM.STATION];
+
+  $('wnDone').textContent = WARM.LIST[WARM.STATION - 1].name + ' DONE';
+  $('wnScore').textContent = total;
+  $('wnKick').textContent = last ? 'THAT IS THE FIVE MINUTES' : 'UP NEXT';
+  $('wnName').textContent = last ? 'YOUR SCORE' : next.name;
+
+  var dots = $('wnDots');
+  dots.innerHTML = '';
+  WARM.LIST.forEach(function(s){
+    var d = document.createElement('div');
+    d.className = 'wn-dot' + (s.n <= WARM.STATION ? ' done' : '') +
+                  (!last && s.n === WARM.STATION + 1 ? ' now' : '');
+    dots.appendChild(d);
+  });
+
+  $('warmNext').classList.add('show');
+  setTimeout(function(){
+    location.href = (last ? WARM.FINAL : next.file) + warmQuery();
+  }, 2200);
+}
+
+/* Starting the whole thing. Called from the hub, not from here. */
+function warmStartAll(){
+  try {
+    sessionStorage.setItem(WARM.KEY_ON, '1');
+    sessionStorage.removeItem(WARM.KEY_SC);
+  } catch(e){}
+  location.href = WARM.LIST[0].file;
+}
 
 function showCountdown(cb){var count=3;countdownOverlay.classList.add('show');countdownNumber.textContent=count;var ci=setInterval(function(){count--;if(count>0){countdownNumber.textContent=count;countdownNumber.style.animation='none';void countdownNumber.offsetWidth;countdownNumber.style.animation='countdownPop 0.8s ease-out';playCongaHit(2,'good')}else if(count===0){countdownNumber.textContent="GO!";countdownNumber.style.animation='none';void countdownNumber.offsetWidth;countdownNumber.style.animation='countdownPop 0.8s ease-out';playCongaRoll()}else{clearInterval(ci);countdownOverlay.classList.remove('show');if(cb)cb()}},1000)}
 
@@ -682,6 +961,9 @@ tapCongas.forEach(function(c){c.classList.remove('lit')});
 
 var finalLevel=repRound-1;
 var finalTime=(performance.now()-runStartTime)/1000;
+/* In the warm-up a miss is not the end: it is banked and another
+   attempt starts, with the minute still running. */
+if(WARM.on){ setTimeout(warmAfterMiss,900); return; }
 showFinalScore(finalLevel,finalTime);
 }
 
@@ -689,38 +971,31 @@ function showFinalScore(finalLevel,finalTime){
   challengeResult.textContent=finalLevel>=15?'GOLDEN MEMORY! 🧠':finalLevel>=8?'GREAT JOB! 🔥':'GOOD TRY! 💪';
   challengeResult.className='challenge-result '+(finalLevel>=8?'win':'lose');
   challengeStats.textContent='Level Reached: '+finalLevel+' · Time: '+finalTime.toFixed(1)+'s';
-  document.getElementById('endStandingsBtn').style.display='';
-  document.getElementById('handleStandingsStatus').style.display='';
+  /* ── NO NAME, SO NO BOARD ─────────────────────────────────────
+     The score used to be posted to the standings here, labelled with
+     whatever was typed on the WHO'S PLAYING? screen. That screen is
+     gone — entering the gym now takes no code and no name — so the
+     only thing left to label a row with was an empty string.
+
+     A board filling with blank rows is worse than no board: it reads
+     as broken, and every anonymous run makes the real ones harder to
+     find. So nothing is written, and the two things that existed to
+     announce the write —the saving status line and the standings
+     button— stay hidden on this screen.
+
+     NOTHING ELSE WAS REMOVED. recordScoreToStandings(), the standings
+     screen and renderStandings() are all still here and still work;
+     the board is reachable at #standings. When there is a name worth
+     putting on a row again, this block is where it goes back. */
+  document.getElementById('endStandingsBtn').style.display='none';
+  document.getElementById('handleStandingsStatus').style.display='none';
   playCongaRoll();launchConfetti();
   challengeComplete.classList.add('show');
 
-  var statusEl=document.getElementById('handleStandingsStatus');
-  var standingsBtn=document.getElementById('endStandingsBtn');
-  var homeLink=document.getElementById('endHomeLink');
-  standingsBtn.classList.add('nav-locked');
-  homeLink.classList.add('nav-locked');
-  statusEl.textContent='Saving to standings…';
-  statusEl.style.color='rgba(255,255,255,.4)';
-
-  var navUnlocked=false;
-  function unlockNav(){
-    if(navUnlocked)return;
-    navUnlocked=true;
-    standingsBtn.classList.remove('nav-locked');
-    homeLink.classList.remove('nav-locked');
-  }
-  setTimeout(unlockNav,6000);
-
-  recordScoreToStandings(currentPlayerName,finalLevel,finalTime).then(function(ok){
-    if(ok){
-      statusEl.textContent='✓ Saved to standings';
-      statusEl.style.color='#00D9A5';
-    }else{
-      statusEl.textContent='⚠ Couldn\'t save — score still stands above, just not on the board';
-      statusEl.style.color='#FF6B35';
-    }
-    unlockNav();
-  });
+  /* The nav was locked for up to six seconds while the write was in
+     the air, so nobody navigated away mid-save. With no save, there
+     is nothing to wait for. */
+  document.getElementById('endHomeLink').classList.remove('nav-locked');
 }
 
 function repCleanup(){
@@ -971,7 +1246,14 @@ function showFeedback(q){clearTimeout(feedbackTimeout);var t=q==='perfect'?'PERF
 
 tapCongas.forEach(function(c,i){c.addEventListener('touchstart',function(e){e.preventDefault();handleTap(i,c)},{passive:false});c.addEventListener('mousedown',function(e){e.preventDefault();handleTap(i,c)});c.addEventListener('touchend',function(e){e.preventDefault()},{passive:false})});
 
-if(window.location.hash==='#standings'){
+if(warmOn()){
+  /* Last station of the warm-up: no setup screen, no mode to pick, no
+     countdown — the minute is already running when this page loads. */
+  initAudio();
+  showScreen('play');
+  warmBegin();
+  repStart();
+}else if(window.location.hash==='#standings'){
   showScreen('standings');
   renderStandings();
 }else{
