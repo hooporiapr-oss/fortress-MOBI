@@ -27,16 +27,6 @@ if (localStorage.getItem('rct-mobile-pass') !== '1') {
   .hub-title{font-family:'Bebas Neue',sans-serif;font-size:2.2rem;letter-spacing:4px;background:linear-gradient(135deg,var(--gold),var(--orange));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
 
   .handle-label{font-size:.6rem;font-weight:900;letter-spacing:.3em;text-transform:uppercase;color:#8892a0;margin:24px 0 10px;text-align:center}
-  .handle-card{
-    display:block;max-width:440px;margin:0 auto 12px;padding:18px 20px;
-    border-radius:14px;text-decoration:none;color:var(--text);
-    background:linear-gradient(135deg,rgba(255,215,0,.14),rgba(255,107,53,.08));
-    border:1.5px solid rgba(255,215,0,.4);
-  }
-  .handle-card:active{transform:scale(.98)}
-  .handle-card-name{font-family:'Bebas Neue',sans-serif;font-size:1.6rem;letter-spacing:2px;color:#fff}
-  .handle-card-desc{font-size:.72rem;color:var(--muted);margin-top:6px;line-height:1.4}
-
 
   .game-list{display:grid;grid-template-columns:1fr 1fr;gap:10px;max-width:440px;margin:0 auto}
   .quarter-card{display:block;padding:14px 12px;background:var(--card);border:1px solid var(--border);border-radius:14px;text-decoration:none;color:var(--text);transition:all .15s;position:relative;overflow:hidden}
@@ -45,7 +35,6 @@ if (localStorage.getItem('rct-mobile-pass') !== '1') {
   .quarter-num{font-family:'Bebas Neue',sans-serif;font-size:.85rem;color:var(--gold);letter-spacing:1px;margin-bottom:2px}
   .quarter-name{font-family:'Bebas Neue',sans-serif;font-size:1.15rem;letter-spacing:1.5px;color:#fff;line-height:1.1}
   .quarter-desc{font-size:.64rem;color:var(--muted);margin-top:4px;line-height:1.3}
-
 
   /* ── THE WARM-UP CARD ─────────────────────────────────────────────
      The only thing on this page that is a whole session rather than a
@@ -90,11 +79,11 @@ if (localStorage.getItem('rct-mobile-pass') !== '1') {
     <div class="hub-title">COGNITIVO GYM</div>
   </div>
 
-  <a class="handle-card" style="margin-bottom:18px" href="001-fortress.html">
-    <div class="handle-card-name">THE FORTRESS</div>
-    <div class="handle-card-desc">Watch a sequence of balls light up, then repeat it exactly. Every round adds one more — how far can you go?</div>
-  </a>
-
+  <!-- The Fortress used to sit up here on its own as the featured
+       game, which made it look like the product and the other three
+       like extras. They are four stations of one warm-up and they are
+       worth the same, so it joins the list as Q4 — the order the
+       warm-up itself runs them in. -->
   <div class="handle-label">Memory Warmups</div>
   <div class="game-list">
     <a class="quarter-card" href="002-recall.html">
@@ -111,6 +100,11 @@ if (localStorage.getItem('rct-mobile-pass') !== '1') {
       <div class="quarter-num">Q3</div>
       <div class="quarter-name">THE REPLAY</div>
       <div class="quarter-desc">The chain keeps everything you have learned and adds one more cell every round — and each cell has its own note, so it climbs as it grows.</div>
+    </a>
+    <a class="quarter-card" href="001-fortress.html">
+      <div class="quarter-num">Q4</div>
+      <div class="quarter-name">THE FORTRESS</div>
+      <div class="quarter-desc">Watch a sequence of targets light up, then repeat it exactly. Every round adds one more — how far can you go?</div>
     </a>
   </div>
 
