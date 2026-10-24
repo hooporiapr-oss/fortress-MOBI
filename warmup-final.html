@@ -67,7 +67,7 @@ html,body{min-height:100%;font-family:'Outfit',sans-serif;background:var(--dark)
 
 <div id="wrap">
   <div class="kick">Warm-Up Complete</div>
-  <div class="title">THREE MINUTES DONE</div>
+  <div class="title">FOUR MINUTES DONE</div>
 
   <div class="rows" id="rows"></div>
 
@@ -95,23 +95,22 @@ html,body{min-height:100%;font-family:'Outfit',sans-serif;background:var(--dark)
 //  share. If a station is added or reordered there, it is reordered
 //  here too, or the rows will label the wrong scores.
 //
-//  A NOTE ON COMPARING THE NUMBERS. The three games do not score on
-//  the same scale — Recall and Recognition award ten points per cell
-//  in the sequence you just repeated, while Fortress scores a round by
-//  its own length, so round 6 is worth 6. A Fortress station therefore
-//  lands far below the other two for the same effort, and the total is
-//  dominated by whichever game pays more.
+//  THE FOUR SCORE ON ONE SCALE: ten points per cell per round, for
+//  every chain you complete inside your minute. Recall and
+//  Recognition pay it directly; Replay's header already counts in
+//  pointsFor(level), so its station multiplies that by ten to land on
+//  the same rate; Fortress has five targets rather than twenty-five,
+//  so it is scaled by log(5)/log(25) and a round is worth half what a
+//  twenty-five-cell round is worth.
 //
-//  That is left as it is on purpose rather than quietly scaled here:
-//  inventing a conversion would bury the difference instead of showing
-//  it. If the total is meant to be a fair sum, the scoring has to be
-//  reconciled in the games themselves, which is a decision about what
-//  a point means — not a display problem.
+//  So the four rows are comparable, and the total is a fair sum
+//  rather than whichever game happened to pay more.
 // ══════════════════════════════════════════════════════
 var LIST = [
   { n:1, name:'RECALL',      file:'002-recall.html'      },
   { n:2, name:'RECOGNITION', file:'003-recognition.html' },
-  { n:3, name:'FORTRESS',    file:'001-fortress.html'    }
+  { n:3, name:'REPLAY',      file:'004-replay.html'      },
+  { n:4, name:'FORTRESS',    file:'001-fortress.html'    }
 ];
 var KEY_ON = 'cg-warm-active';
 var KEY_SC = 'cg-warm-scores';
