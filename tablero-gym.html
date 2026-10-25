@@ -107,14 +107,34 @@
   .row .lv{font-family:'Bebas Neue',sans-serif;font-size:1.25rem;letter-spacing:1px}
   .row .of{font-size:.56rem;font-weight:900;letter-spacing:.14em;color:#4a5058;text-transform:uppercase}
 
-  /* ── SAVE AND SHARE ────────────────────────────────────────────── */
-  .share-row{display:flex;gap:8px;margin-top:16px}
-  .sh{flex:1;padding:14px 10px;border-radius:13px;border:1px solid rgba(255,215,0,.35);
-    background:rgba(255,215,0,.1);color:var(--gold);font-family:'Bebas Neue',sans-serif;
-    font-size:1.05rem;letter-spacing:1.5px;cursor:pointer}
-  .sh:active{transform:scale(.98)}
-  .sh[disabled]{opacity:.5}
-  .sh-note{font-size:.62rem;color:var(--muted);text-align:center;margin-top:9px;line-height:1.5}
+  /* ── THE TWO TABS ──────────────────────────────────────────────── */
+  .tabs{display:flex;gap:6px;margin-top:20px}
+  .tab{flex:1;padding:11px 8px;border-radius:11px;border:1px solid var(--border);
+    background:transparent;color:var(--muted);font-family:'Bebas Neue',sans-serif;
+    font-size:.92rem;letter-spacing:1.4px;cursor:pointer}
+  .tab.on{background:rgba(255,215,0,.1);border-color:rgba(255,215,0,.4);color:var(--gold)}
+
+  .valor{margin-top:10px;background:var(--card);border:1px solid var(--border);
+    border-radius:14px;padding:16px}
+  .vfila{display:flex;justify-content:space-between;align-items:baseline;gap:10px;
+    padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:.76rem}
+  .vfila:last-of-type{border-bottom:none}
+  .vfila span{color:var(--muted);line-height:1.35}
+  .vfila b{font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:.5px;
+    color:#fff;white-space:nowrap}
+  .vtot{margin-top:12px;padding:14px;border-radius:12px;text-align:center;
+    background:linear-gradient(135deg,rgba(255,215,0,.13),rgba(255,107,53,.08));
+    border:1px solid rgba(255,215,0,.35)}
+  .vtot b{display:block;font-family:'Bebas Neue',sans-serif;font-size:2.2rem;
+    line-height:1;color:var(--gold)}
+  .vtot span{display:block;font-size:.6rem;font-weight:900;letter-spacing:.2em;
+    text-transform:uppercase;color:var(--muted);margin-top:5px}
+  .vhead{font-size:.58rem;font-weight:900;letter-spacing:.24em;text-transform:uppercase;
+    color:var(--muted);margin:16px 0 4px}
+  .vhead:first-child{margin-top:0}
+  .vnota{font-size:.66rem;color:var(--muted);line-height:1.5;margin-top:12px}
+  .vaviso{font-size:.68rem;line-height:1.5;margin-top:12px;padding:11px;border-radius:10px;
+    background:rgba(255,107,53,.1);border:1px solid rgba(255,107,53,.3);color:#ffb499}
 
   .mycode{margin-top:20px;background:var(--card);border:1px dashed rgba(255,215,0,.35);
     border-radius:14px;padding:14px;text-align:center}
@@ -196,14 +216,16 @@
       <div class="leg gym"><i></i>Gym record</div>
     </div>
 
-    <div class="rows" id="rows"></div>
-
-    <div class="share-row">
-      <button class="sh" id="btnShare" style="display:none">SHARE</button>
-      <button class="sh" id="btnSave">SAVE IMAGE</button>
+    <!-- Two ways of reading the same four numbers: what you scored,
+         and what that would be worth to a program. The second is the
+         whole reason the gym and the fundraiser sit next to each
+         other, so it is one tap away and not a separate page. -->
+    <div class="tabs">
+      <button class="tab on" id="tabPts">POINTS</button>
+      <button class="tab" id="tabVal">WHAT IT RAISES</button>
     </div>
-    <div class="sh-note" id="shNote">The image has your levels and your team — never your code
-      and never a name.</div>
+    <div class="rows" id="rows"></div>
+    <div class="valor" id="valor" style="display:none"></div>
 
     <div class="mycode">
       <div class="k">Your code</div>
@@ -428,8 +450,19 @@ function pintar(){
   pintarFilas();
 }
 
-function sumaNiveles(){
-  return (DATOS && DATOS.juegos || []).reduce(function(a, j){ return a + (j.nivelMio || 0) }, 0);
+/* TWO DIFFERENT NUMBERS, and the board uses both on purpose.
+
+   The RING is drawn in levels, because a level is a position you can
+   point at — the ladder goes 1 to 25 and your arc sits on a rung.
+
+   The NUMBERS are points, because that is the score: a chain of L is
+   worth L(L+1)/2, so level 6 pays 21 and level 8 pays 36. Points are
+   what a kid compares and what adds up to something.
+
+   Mixing them would be the mistake. Each is labelled where it is
+   shown, and the ladder keeps the picture honest. */
+function sumaPuntos(){
+  return (DATOS && DATOS.juegos || []).reduce(function(a, j){ return a + (j.mio || 0) }, 0);
 }
 
 function pintarCentro(){
@@ -438,8 +471,8 @@ function pintarCentro(){
     /* With no game chosen, the middle shows the sum of the four
        levels. It is the number for the whole gym, and it is the one
        that moves when any of the four moves. */
-    var suma = sumaNiveles();
-    $('hubKick').textContent = 'YOUR GYM';
+    var suma = sumaPuntos();
+    $('hubKick').textContent = 'YOUR POINTS';
     $('hubNum').textContent = suma;
     $('hubNum').style.color = '#fff';
     $('hubSub').textContent = suma > 0 ? 'four games · tap one' : 'go play one';
@@ -448,15 +481,18 @@ function pintarCentro(){
   var j = JUEGOS.filter(function(x){ return x.id === ELEGIDO })[0];
   var d = datosDe(ELEGIDO);
   $('hubKick').textContent = j.corto;
-  $('hubNum').textContent = d.nivelMio || 0;
+  $('hubNum').textContent = d.mio || 0;
   $('hubNum').style.color = j.color;
+  /* The big number is points; the level is said in words underneath,
+     so the two never get read as the same thing. The record is in
+     points too — it has to match the number above it, or "record 10"
+     next to "36" reads as though somebody did worse. */
   $('hubSub').textContent = d.nivelMio > 0
-    ? ('level of ' + escala + ' · gym record ' + d.nivelGym)
-    : ('played, no score yet · record ' + d.nivelGym);
+    ? ('level ' + d.nivelMio + ' of ' + escala + ' · record ' + d.mejorGym)
+    : ('played, no points yet · record ' + d.mejorGym);
 }
 
 function pintarFilas(){
-  var escala = DATOS.escala || 6;
   var caja = $('rows');
   caja.innerHTML = '';
   JUEGOS.forEach(function(j){
@@ -467,10 +503,13 @@ function pintarFilas(){
     var barra = document.createElement('i'); barra.style.background = j.color;
     var nm = document.createElement('div'); nm.className = 'nm'; nm.textContent = j.nombre;
     var lv = document.createElement('div'); lv.className = 'lv';
-    lv.style.color = d.nivelMio > 0 ? j.color : '#4a5058';
-    lv.textContent = d.nivelMio || '—';
+    lv.style.color = d.mio > 0 ? j.color : '#4a5058';
+    /* Played with nothing scored shows 0, not a dash. He turned up
+       and the station beat him; that is a different thing from never
+       having played it, and the dash is reserved for that. */
+    lv.textContent = d.jugado ? d.mio : '—';
     var of = document.createElement('div'); of.className = 'of';
-    of.textContent = 'of ' + escala;
+    of.textContent = 'pts';
     fila.appendChild(barra); fila.appendChild(nm); fila.appendChild(lv); fila.appendChild(of);
     fila.addEventListener('click', function(){ elegir(j.id) });
     caja.appendChild(fila);
@@ -483,209 +522,82 @@ function pintarFilas(){
 function elegir(id){ ELEGIDO = (ELEGIDO === id) ? null : id; pintar() }
 
 /* ══════════════════════════════════════════════════════════════════
-   THE IMAGE THAT GETS SAVED AND SHARED
+   WHAT IT RAISES
 
-   It is drawn on a canvas by hand and the SVG above is NOT converted.
-   An SVG put inside an <img> to rasterise it loses the fonts — Bebas
-   Neue does not travel inside — and would come out in the system
-   face. Canvas 2D does use the fonts the page already loaded, so
-   what gets saved looks like what is being looked at.
+   The same example demo.html uses, and the numbers have to stay the
+   same as the ones in that file: four padrinos at 25¢ a point, a
+   roster of twelve, and a $5 floor under which a pledge closes out
+   owing nothing. If they ever disagree, the gym and the fundraiser
+   would be quoting two different deals for the same game.
 
-   WHAT DOES NOT GO IN THE IMAGE: the code. It is the player's
-   identity — with it you can post a score in his name — and an image
-   is shared precisely with the people who should not have it. No name
-   goes in either, because there is none to put.
+   WHY 25¢ AND NOT 10¢: the floor. At ten cents a pledge needs 50
+   points to clear $5, and a coach playing one honest minute would be
+   shown zero. At twenty-five it takes 20.
+
+   NOTHING HERE IS A PLEDGE. No money moves, nobody is signed up, and
+   this board is not part of an event — it is what these points would
+   be worth if they were. The panel says so at the bottom, because a
+   number with a dollar sign in front of it will be read as real
+   unless it is told not to be.
    ══════════════════════════════════════════════════════════════════ */
-/* The canvas is taller than it looks like it needs to be, and the
-   numbers below are spaced against each other rather than guessed:
-   the ring's outer edge lands at cy + r1 = 1120, the first row box
-   starts at 1128, and the footer sits clear of the last one. The
-   first version had the kicker inside the title and the last row
-   under the footer — on a phone that is the whole image. */
-var A = 1080, ALTO = 1470;
+var PADRINOS = 4, TARIFA = 0.25, PLANTILLA = 12, PISO = 5;
 
-function texto(ctx, t, x, y, fuente, color, alineado){
-  ctx.font = fuente; ctx.fillStyle = color;
-  ctx.textAlign = alineado || 'center'; ctx.textBaseline = 'alphabetic';
-  ctx.fillText(t, x, y);
-}
-function arcoCanvas(ctx, cx, cy, r, d0, d1, color, grosor, rayas, brillo){
-  ctx.beginPath();
-  ctx.arc(cx, cy, r, d0 * Math.PI / 180, d1 * Math.PI / 180);
-  ctx.strokeStyle = color; ctx.lineWidth = grosor; ctx.lineCap = 'round';
-  ctx.setLineDash(rayas || []);
-  if (brillo){ ctx.shadowColor = color; ctx.shadowBlur = 26 } else { ctx.shadowBlur = 0 }
-  ctx.stroke();
-  ctx.setLineDash([]); ctx.shadowBlur = 0;
+function dinero(n){ return '$' + n.toFixed(2) }
+function centavos(n){ return Math.round(n * 100) + '¢' }
+
+function vfila(texto, valor){
+  return '<div class="vfila"><span>' + texto + '</span><b>' + valor + '</b></div>';
 }
 
-function componerImagen(){
-  var lienzo = document.createElement('canvas');
-  lienzo.width = A; lienzo.height = ALTO;
-  var ctx = lienzo.getContext('2d');
-  var escala = DATOS.escala || 6;
+function pintarValor(){
+  var P = sumaPuntos();
+  var porPunto  = PADRINOS * TARIFA;          // 4 × 0.25 = 1.00
+  var unJugador = P * porPunto;
+  var programa  = unJugador * PLANTILLA;
+  /* A single pledge, not the player's total, is what the floor is
+     measured against — that is how it works in a real event. */
+  var corto = (P * TARIFA) < PISO;
 
-  // Background
-  ctx.fillStyle = '#0a0a0f';
-  ctx.fillRect(0, 0, A, ALTO);
+  var h = '<div class="vhead">One player · you</div>' +
+    vfila('Padrinos one player finds', PADRINOS) +
+    vfila('What each pledges per point', centavos(TARIFA)) +
+    vfila('What one of your points is worth', dinero(porPunto)) +
+    vfila('<b style="color:#fff">Your ' + P + ' points</b>',
+          '<span style="color:' + (P > 0 ? '#FFD700' : '#4a5058') + '">' +
+          dinero(unJugador) + '</span>');
 
-  // Header
-  var deg = ctx.createLinearGradient(A/2 - 230, 0, A/2 + 230, 0);
-  deg.addColorStop(0, '#FFD700'); deg.addColorStop(1, '#FF6B35');
-  /* 66 and 182, not 84 and 166: Bebas at 116px is about 82px of cap
-     height, so a baseline at 166 puts the top of the letters at 84 —
-     exactly where the kicker sits. */
-  texto(ctx, 'CADA PUNTO CUENTA', A/2, 66, '900 26px Outfit, sans-serif', '#FFD700');
-  texto(ctx, 'COGNITIVO GYM', A/2, 182, "116px 'Bebas Neue', sans-serif", deg);
-  texto(ctx, DATOS.equipo ? DATOS.equipo.nombre : 'Gym at large', A/2, 228,
-        '700 28px Outfit, sans-serif', '#8892a0');
-
-  // The ring
-  var cx = A/2, cy = 712, r0 = 168, r1 = 408;
-  arcoCanvas(ctx, cx, cy, r0, 0, 360, 'rgba(255,255,255,.1)', 2);
-  arcoCanvas(ctx, cx, cy, r1, 0, 360, 'rgba(255,255,255,.1)', 2);
-
-  JUEGOS.forEach(function(j, i){
-    var d = datosDe(j.id);
-    if (!d) return;
-    var t = tramo(i), d0 = t[0], d1 = t[1];
-
-    /* The quadrant's tint, the same one the screen has. Without it
-       the saved image is four arcs floating on black and loses the
-       thing that says "these are four separate games". */
-    ctx.beginPath();
-    ctx.arc(cx, cy, r1, d0 * Math.PI / 180, d1 * Math.PI / 180);
-    ctx.arc(cx, cy, r0, d1 * Math.PI / 180, d0 * Math.PI / 180, true);
-    ctx.closePath();
-    ctx.fillStyle = j.color; ctx.globalAlpha = .07; ctx.fill(); ctx.globalAlpha = 1;
-
-    /* The ladder, same as on screen: a rung per level, every fifth
-       one brighter. A saved picture that did not have it would make
-       the arcs unreadable — there would be nothing to count against. */
-    for (var n = 1; n <= escala; n++){
-      var fuerte = (n % 5 === 0);
-      arcoCanvas(ctx, cx, cy, radioDe(n, escala, r0, r1), d0, d1,
-                 'rgba(255,255,255,' + (fuerte ? .17 : .055) + ')', fuerte ? 2.6 : 1.6);
-    }
-
-    if (d.nivelGym > 0){
-      arcoCanvas(ctx, cx, cy, radioDe(d.nivelGym, escala, r0, r1), d0, d1,
-                 'rgba(255,255,255,.45)', 4, [8, 11]);
-    }
-    (d.nivelesEquipo || []).forEach(function(nivel, k){
-      if (nivel <= 0) return;
-      var cuantas = (d.nivelesEquipo || []).length;
-      var ancho = (d1 - d0) / Math.max(cuantas, 1);
-      var centro = d0 + ancho * (k + 0.5);
-      var medio = Math.min(ancho * 0.34, 7);
-      ctx.globalAlpha = .32;
-      arcoCanvas(ctx, cx, cy, radioDe(nivel, escala, r0, r1), centro - medio, centro + medio,
-                 j.color, 11);
-      ctx.globalAlpha = 1;
-    });
-    if (d.nivelMio > 0){
-      arcoCanvas(ctx, cx, cy, radioDe(d.nivelMio, escala, r0, r1), d0, d1, j.color, 19, [], true);
-    }
-    var p = pol(cx, cy, r1 + 46, (d0 + d1) / 2);
-    texto(ctx, j.corto, p[0], p[1] + 10, "30px 'Bebas Neue', sans-serif", '#8892a0');
-  });
-
-  // The ladder's numbers, up the gap at twelve o'clock
-  for (var n = 5; n <= escala; n += 5){
-    texto(ctx, String(n), cx, cy - radioDe(n, escala, r0, r1) + 7,
-          '900 19px Outfit, sans-serif', '#8892a0');
+  if (corto){
+    h += '<div class="vaviso">At 25¢ a point a pledge needs 20 points to clear the $5 ' +
+         'floor — below that it closes out and nothing is owed. Play the four again and ' +
+         'this lands on a real number.</div>';
   }
 
-  // The middle
-  texto(ctx, 'YOUR GYM', cx, cy - 36, '900 22px Outfit, sans-serif', '#8892a0');
-  texto(ctx, String(sumaNiveles()), cx, cy + 60, "128px 'Bebas Neue', sans-serif", '#fff');
-  texto(ctx, 'four games', cx, cy + 96, '700 22px Outfit, sans-serif', '#8892a0');
+  h += '<div class="vhead">The whole roster</div>' +
+    '<div class="vfila"><span>Now the other eleven, each with their own padrinos.</span></div>' +
+    vfila('Players on a roster', PLANTILLA) +
+    vfila('What each one raises', dinero(unJugador)) +
+    '<div class="vtot"><b>' + dinero(programa) + '</b>' +
+      '<span>for the program · from a single event</span></div>' +
+    '<p class="vnota">An example, not a pledge. Nobody has promised anything here and no ' +
+      'money moves through the gym — this is what these points would be worth in a real ' +
+      'event. A program runs five-minute sets with room for far more runs, so this is the ' +
+      'floor and not the ceiling.</p>';
 
-  // The four rows, clear of the ring's outer edge at 1120
-  var y = 1162;
-  JUEGOS.forEach(function(j){
-    var d = datosDe(j.id);
-    if (!d) return;
-    ctx.fillStyle = '#111118';
-    ctx.fillRect(78, y - 34, A - 156, 54);
-    ctx.fillStyle = j.color;
-    ctx.fillRect(78, y - 34, 6, 54);
-    texto(ctx, j.nombre, 112, y + 4, "34px 'Bebas Neue', sans-serif", '#fff', 'left');
-    texto(ctx, (d.nivelMio || 0) + ' / ' + escala, A - 112, y + 4,
-          "36px 'Bebas Neue', sans-serif", d.nivelMio > 0 ? j.color : '#4a5058', 'right');
-    y += 64;
-  });
-
-  texto(ctx, 'COGNITIVO.DIGITAL', A/2, ALTO - 40, '900 24px Outfit, sans-serif', '#4a5058');
-
-  return new Promise(function(res){
-    lienzo.toBlob(function(b){ res(b) }, 'image/png');
-  });
+  $('valor').innerHTML = h;
 }
 
-function nombreArchivo(){
-  var f = new Date();
-  var dos = function(n){ return ('0' + n).slice(-2) };
-  return 'cognitivo-gym-' + f.getFullYear() + dos(f.getMonth() + 1) + dos(f.getDate()) + '.png';
+/* The two tabs show the same four numbers two ways. Nothing is
+   fetched when they switch — it is all in hand already. */
+function verPestana(cual){
+  var puntos = (cual === 'puntos');
+  $('tabPts').className = 'tab' + (puntos ? ' on' : '');
+  $('tabVal').className = 'tab' + (puntos ? '' : ' on');
+  $('rows').style.display  = puntos ? 'grid' : 'none';
+  $('valor').style.display = puntos ? 'none' : 'block';
+  if (!puntos) pintarValor();
 }
-
-function decirNota(t){
-  $('shNote').textContent = t ||
-    'The image has your levels and your team — never your code and never a name.';
-}
-
-/* Saving. Done with a link that taps itself, which is the only thing
-   that behaves the same on both kinds of phone. */
-$('btnSave').onclick = function(){
-  var b = this; b.disabled = true; b.textContent = 'DRAWING…';
-  (document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve())
-    .then(componerImagen)
-    .then(function(blob){
-      var url = URL.createObjectURL(blob);
-      var a = document.createElement('a');
-      a.href = url; a.download = nombreArchivo();
-      document.body.appendChild(a); a.click(); a.remove();
-      setTimeout(function(){ URL.revokeObjectURL(url) }, 4000);
-      b.disabled = false; b.textContent = 'SAVE IMAGE';
-      decirNota('Saved to your photos or downloads.');
-    }, function(){
-      b.disabled = false; b.textContent = 'SAVE IMAGE';
-      decirNota('Could not draw the image. Try again.');
-    });
-};
-
-/* Sharing. The button only appears where the phone knows how to
-   share a file: on a desktop without it, a button that does nothing
-   is worse than no button. */
-$('btnShare').onclick = function(){
-  var b = this; b.disabled = true; b.textContent = 'DRAWING…';
-  (document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve())
-    .then(componerImagen)
-    .then(function(blob){
-      var f = new File([blob], nombreArchivo(), { type:'image/png' });
-      return navigator.share({
-        files:[f],
-        title:'Cognitivo Gym',
-        text:'My four games at the Cognitivo Gym.'
-      });
-    })
-    .then(function(){ decirNota('Shared.') },
-          function(e){
-            /* Cancelling is not a failure: the kid opened the share
-               sheet and changed his mind. Telling him "error" there
-               would be lying to him. */
-            if (!(e && e.name === 'AbortError')) decirNota('Could not share. Try Save image.');
-          })
-    .then(function(){ b.disabled = false; b.textContent = 'SHARE' });
-};
-
-(function(){
-  try {
-    if (navigator.canShare && navigator.canShare({ files:[new File([''], 'x.png', { type:'image/png' })] })){
-      $('btnShare').style.display = 'block';
-    }
-  } catch(e){}
-})();
+$('tabPts').onclick = function(){ verPestana('puntos') };
+$('tabVal').onclick = function(){ verPestana('valor') };
 
 // ── Talking to the server ─────────────────────────────────────────
 function llamar(ruta, cuerpo){
@@ -757,7 +669,9 @@ function mostrarTablero(){
   $('board').style.display = 'block';
   $('myCode').textContent = DATOS.codigo;
   $('teamName').textContent = DATOS.equipo ? DATOS.equipo.nombre : 'Gym at large';
-  decirNota('');
+  /* Always opens on POINTS, whichever tab was last used. Coming back
+     to your board should show you your score, not the arithmetic. */
+  verPestana('puntos');
   pintar();
 }
 
