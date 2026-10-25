@@ -149,10 +149,12 @@
        code in. -->
   <div class="gate" id="gate">
     <h2 id="gateTitle">EARN THE BOARD</h2>
-    <p id="gateText">The board opens when you have played all four games. The warm-up runs
+    <p id="gateText">The board opens when you have played all four games. The Four runs
       them back to back — four minutes, one minute each.</p>
     <div class="dots" id="gateDots"></div>
-    <a class="big-btn" id="gateWarm" href="002-recall.html?warm=1">START THE WARM-UP</a>
+    <!-- ?warm=1 stays: it is the engine's switch, not a word anybody
+         reads. The button says THE FOUR. -->
+    <a class="big-btn" id="gateWarm" href="002-recall.html?warm=1">START THE FOUR</a>
     <div id="gateHave">
       <div class="or">OR, ON A NEW PHONE</div>
       <div class="code-row">
@@ -248,6 +250,23 @@ var SERVIDOR = 'https://cognitivo-gym-server.onrender.com';
 
 var $ = function(id){ return document.getElementById(id) };
 var LLAVE = 'cg-codigo';
+var LLAVE_EQUIPO = 'cg-equipo';
+
+/* ── THE TEAM RIDES IN ON THE LINK, HERE TOO ──────────────────────
+   The four games remember ?e= in their GYM block, and this page has
+   to do the same for one reason: the hub's board button carries it,
+   and somebody who has never played can land here first. If only the
+   games captured it, that button's parameter would be decoration —
+   the team would be forgotten before a code was ever issued.
+
+   It is only remembered, not used: this page issues no codes. It is
+   stored for whichever game ends up asking for one. */
+(function(){
+  try {
+    var m = location.search.match(/[?&]e=([a-z0-9-]{1,40})/i);
+    if (m) localStorage.setItem(LLAVE_EQUIPO, m[1].toLowerCase());
+  } catch(e){}
+})();
 
 var JUEGOS = [
   { id:'recall',      nombre:'THE RECALL',      corto:'RECALL',      color:'#FFD700' },
@@ -675,8 +694,8 @@ function mostrarPuerta(c){
   if (!c){
     $('gateTitle').textContent = 'EARN THE BOARD';
     $('gateText').textContent = 'The board opens when you have played all four games. ' +
-      'The warm-up runs them back to back — four minutes, one minute each.';
-    $('gateWarm').textContent = 'START THE WARM-UP';
+      'The Four runs them back to back — four minutes, one minute each.';
+    $('gateWarm').textContent = 'START THE FOUR';
     $('gateMyCode').style.display = 'none';
     $('gateHave').style.display = 'block';
     return;
@@ -687,7 +706,7 @@ function mostrarPuerta(c){
   $('gateText').textContent = cuantos === 0
     ? 'You have a code, but no games yet. Play all four and the board opens.'
     : ('You have played ' + cuantos + ' of 4. Still to go: ' + faltan.join(', ') + '.');
-  $('gateWarm').textContent = cuantos === 0 ? 'START THE WARM-UP' : 'FINISH THE FOUR';
+  $('gateWarm').textContent = cuantos === 0 ? 'START THE FOUR' : 'FINISH THE FOUR';
   $('gateMyCodeV').textContent = c.codigo;
   $('gateMyCode').style.display = 'block';
   $('gateHave').style.display = 'none';
