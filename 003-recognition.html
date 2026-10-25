@@ -282,6 +282,87 @@ body.warm .play-screen{padding-top:calc(var(--nav-height) + 46px + env(safe-area
 .countdown-number{font-family:'Bebas Neue',sans-serif;font-size:7rem;color:var(--gold);
   text-shadow:0 0 40px var(--gold),0 0 80px var(--orange);animation:countdownPop 0.8s ease-out}
 @keyframes countdownPop{0%{transform:scale(2);opacity:0}50%{transform:scale(1.2);opacity:1}100%{transform:scale(1);opacity:1}}
+
+/* ══════════════════════════════════════════════════════
+   THE END SCREEN
+
+   A run used to finish in place: the board stayed up, the message
+   line turned into GAME OVER and the button at the bottom quietly
+   became PLAY AGAIN. The run was over but the screen still looked
+   like a game in progress, and the score was a number inside a
+   sentence rather than the thing you were being shown.
+
+   It ends on its own screen now, the way Replay does — the number
+   big, what it means underneath it, the two figures worth keeping
+   beside each other, and one button to go again.
+   ══════════════════════════════════════════════════════ */
+#screen-final{position:fixed;inset:0;z-index:300;display:none;
+  flex-direction:column;align-items:center;justify-content:center;
+  background:var(--dark);text-align:center;
+  padding:calc(var(--nav-height) + env(safe-area-inset-top) + 20px) 20px 24px;
+  overflow-y:auto}
+#screen-final.show{display:flex}
+.final-num{font-family:'Bebas Neue',sans-serif;font-size:6rem;line-height:1;
+  color:var(--orange);text-shadow:0 0 60px rgba(255,107,53,.6)}
+.final-label{font-family:'Bebas Neue',sans-serif;font-size:0.8rem;letter-spacing:2px;
+  text-transform:uppercase;color:var(--muted);margin-top:10px}
+.final-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;
+  width:100%;max-width:300px;margin:18px auto}
+.final-stat-cell{border:1px solid var(--border);background:var(--card);
+  border-radius:12px;padding:12px 4px;text-align:center}
+.final-stat-label{font-family:'Outfit',sans-serif;font-size:0.55rem;font-weight:700;
+  letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.final-stat-val{font-family:'Bebas Neue',sans-serif;font-size:1.6rem;color:var(--orange)}
+.final-again{width:100%;max-width:320px;margin:24px auto 0;padding:14px 20px;
+  border:none;border-radius:10px;
+  font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:4px;
+  cursor:pointer;background:linear-gradient(135deg,var(--orange),#E55A2B);
+  color:var(--text);box-shadow:0 4px 20px rgba(255,107,53,0.4)}
+.final-again:active{transform:scale(0.98)}
+.final-back{display:block;width:100%;max-width:320px;margin:12px auto 0;
+  padding:12px 16px;border:1px solid var(--border);border-radius:8px;
+  background:transparent;color:var(--muted);text-decoration:none;
+  font-family:'Outfit',sans-serif;font-size:0.75rem;font-weight:600;text-align:center}
+
+/* ══════════════════════════════════════════════════════
+   THE END SCREEN
+
+   A run used to end in place: the board stayed up, the message line
+   turned into GAME OVER and the button under it changed from LET'S GO
+   to LET'S GO. Nothing moved, so there was no moment that said the
+   run was over — and the score you had just earned was a few words in
+   a message line.
+
+   It ends on its own screen now, the way Replay does: the longest
+   sequence big in the middle, the score beside it, and PLAY AGAIN.
+   ══════════════════════════════════════════════════════ */
+#screen-end{position:fixed;inset:0;display:none;flex-direction:column;
+  align-items:center;justify-content:center;text-align:center;
+  background:var(--dark);z-index:300;
+  overflow-y:auto;overflow-x:hidden;
+  padding:calc(var(--nav-height) + env(safe-area-inset-top) + 20px) 20px 24px}
+#screen-end.show{display:flex}
+.final-num{font-family:'Bebas Neue',sans-serif;font-size:6rem;line-height:1;
+  color:var(--orange);text-shadow:0 0 60px rgba(255,107,53,.6)}
+.final-label{font-family:'Bebas Neue',sans-serif;font-size:0.8rem;letter-spacing:2px;
+  text-transform:uppercase;color:var(--muted);margin-top:10px}
+.final-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;
+  width:100%;max-width:300px;margin:18px auto}
+.final-stat-cell{border:1px solid var(--border);background:var(--card);
+  border-radius:12px;padding:12px 4px;text-align:center}
+.final-stat-label{font-family:'Outfit',sans-serif;font-size:0.55rem;font-weight:700;
+  letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.final-stat-val{font-family:'Bebas Neue',sans-serif;font-size:1.6rem;color:var(--orange)}
+.again-btn{margin:24px auto 0;padding:14px 20px;width:100%;max-width:320px;
+  border:none;border-radius:10px;
+  font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:4px;
+  background:linear-gradient(135deg,var(--orange),#E55A2B);color:var(--text);
+  box-shadow:0 4px 20px rgba(255,107,53,0.4);cursor:pointer;transition:all 0.3s}
+.again-btn:active{transform:scale(0.98)}
+.end-back{display:block;width:100%;max-width:320px;margin:12px auto 0;
+  padding:12px 16px;border:1px solid var(--border);background:transparent;
+  color:var(--muted);border-radius:8px;text-align:center;text-decoration:none;
+  font-family:'Outfit',sans-serif;font-size:0.75rem;font-weight:600}
 </style>
 </head>
 <body>
@@ -431,6 +512,34 @@ body.warm .play-screen{padding-top:calc(var(--nav-height) + 46px + env(safe-area
 </div>
 
 <div class="countdown-overlay" id="countdownOverlay"><div class="countdown-number" id="countdownNumber">3</div></div>
+
+<div id="screen-final">
+  <div class="final-num" id="finalNum">0</div>
+  <div class="final-label" id="finalLabel">Final Score</div>
+  <div class="final-stats">
+    <div class="final-stat-cell">
+      <div class="final-stat-label">Longest</div>
+      <div class="final-stat-val" id="finalBest">0</div>
+    </div>
+    <div class="final-stat-cell">
+      <div class="final-stat-label">Rounds</div>
+      <div class="final-stat-val" id="finalRounds">0</div>
+    </div>
+  </div>
+  <button class="final-again" id="finalAgain">&#9654; PLAY AGAIN</button>
+  <a class="final-back" href="fortress-mobile-hub.html">&larr; Back</a>
+</div>
+
+<div id="screen-end">
+  <div class="final-num" id="endNum">0</div>
+  <div class="final-label" id="endLabel">LONGEST SEQUENCE</div>
+  <div class="final-stats">
+    <div class="final-stat-cell"><div class="final-stat-label">Score</div><div class="final-stat-val" id="endScore">0</div></div>
+    <div class="final-stat-cell"><div class="final-stat-label">Rounds</div><div class="final-stat-val" id="endRounds">0</div></div>
+  </div>
+  <button class="again-btn" id="endAgainBtn">&#9654; PLAY AGAIN</button>
+  <a class="end-back" href="fortress-mobile-hub.html">&larr; Back to the gym</a>
+</div>
 
 <div id="quarterStatsScreen">
   <div class="qs-title" id="qsTitle">4TH QUARTER COMPLETE!</div>
@@ -899,6 +1008,7 @@ function startRun(){
   $('playMessage').className='play-message-text watch';
   showCountdown(function(){ startRound() });
 }
+$('finalAgain').onclick=function(){ hideFinalRun(); restartGame();startRun(); };
 $('letsGoBtn').onclick=function(){ showScreen('play'); initGame(); startRun() };
 var playCourt=$('playCourt'),playCells=[],beatTimers=[],isPlaying=false,phase='idle',canTap=false;
 var originalPattern=[],echoPattern=[],changePos=-1,changedCell=-1,originalCell=-1,beatIndex=0,firstTapDone=false;
@@ -1039,6 +1149,23 @@ function generatePatterns(){
   originalPattern=indices; echoPattern=indices.slice(); changePos=Math.floor(Math.random()*len); originalCell=indices[changePos];
   var newCell; do{newCell=Math.floor(Math.random()*25)}while(indices.indexOf(newCell)!==-1); echoPattern[changePos]=newCell; changedCell=newCell;
 }
+/* ── THE END SCREEN ───────────────────────────────────────────────
+   Shown when a run is over, and only then. A warm-up never reaches
+   it: there a miss is banked and the next attempt starts, with the
+   minute still running, so the run is not over at all.
+
+   PLAY AGAIN resets and starts straight away, count-in and all, so
+   going again takes one press from here just as it does from the
+   mode screen. */
+function showFinalRun(){
+  var el=$('screen-final'); if(!el) return;
+  $('finalNum').textContent = gameState.sc;
+  $('finalBest').textContent = gameState.best || gameState.cellCount;
+  $('finalRounds').textContent = gameState.roundsDone;
+  el.classList.add('show');
+}
+function hideFinalRun(){ var el=$('screen-final'); if(el) el.classList.remove('show') }
+
 function startRound(){
   if(isPlaying)return; getAudioContext(); isPlaying=true; firstTapDone=false; generatePatterns();
   $('playActionBtn').disabled=true; updatePlayUI(); clearAllCells(); hideTimer();
@@ -1152,6 +1279,25 @@ function autoNextRound(){
   $('playActionBtn').disabled=true;
   startRound();
 }
+/* ── THE END SCREEN ───────────────────────────────────────────────
+   Replay's shape: the run leaves the board and lands on a screen of
+   its own, with the longest sequence big, the score beside it and
+   PLAY AGAIN under them. PLAY AGAIN goes back to the mode screen, so
+   the next run can be a different mode without starting over.
+
+   Two runs never see it. A warm-up station banks a miss and deals
+   another chain instead of ending, and a tracked Full Game has its
+   own quarter screen to show — both return before this is reached. */
+function showEndScreen(){
+  var el = $('screen-end');
+  if(!el) return;
+  $('endNum').textContent = gameState.best || 0;
+  $('endScore').textContent = gameState.sc || 0;
+  $('endRounds').textContent = gameState.roundsDone || 0;
+  el.classList.add('show');
+}
+function hideEndScreen(){ var el=$('screen-end'); if(el) el.classList.remove('show') }
+
 function showFinalScore(){
   isPlaying=false;canTap=false;phase='idle';stopFullStrobe();hideTimer();clearAllCells();
   updatePlayUI();
@@ -1161,9 +1307,11 @@ function showFinalScore(){
     $('playMessage').textContent=t('gameOver')+' '+gameState.sc+' (BEST '+gameState.best+')';
   }
   $('playMessage').className='play-message-text miss';
-  $('playActionBtn').textContent=t('letsGo');$('playActionBtn').onclick=restartGame;
+  $('playActionBtn').textContent=t('letsGo');$('playActionBtn').onclick=startRun;
   $('playActionBtn').disabled=false;
-  if(isFullGameActive())showQuarterStats(gameState.sc);
+  /* A tracked Full Game keeps its own ending — the quarter board. */
+  if(isFullGameActive()){ showQuarterStats(gameState.sc); return }
+  beatTimers.push(setTimeout(showEndScreen,700));
 }
 function showTrainingComplete(){
   isPlaying=false;canTap=false;phase='idle';stopFullStrobe();hideTimer();clearAllCells();
@@ -1184,6 +1332,11 @@ function restartGame(){
   $('playActionBtn').disabled=false;
 }
 $('playActionBtn').onclick=startRun;
+$('endAgainBtn').onclick=function(){
+  hideEndScreen();
+  restartGame();
+  showScreen('trophy');
+};
 initDemoCourt(); updateUILanguage();
 if(warmOn()){
   /* Nobody picks a mode in a warm-up: it is the escalating game, it
