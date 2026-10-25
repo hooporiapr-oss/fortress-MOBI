@@ -95,19 +95,20 @@ html,body{min-height:100%;font-family:'Outfit',sans-serif;background:var(--dark)
 //  share. If a station is added or reordered there, it is reordered
 //  here too, or the rows will label the wrong scores.
 //
-//  THE FOUR SCORE ON ONE SCALE: ten points per cell per round, for
-//  every chain you COMPLETE inside your minute. Recall, Recognition
-//  and Replay all pay it directly — a four-cell chain is forty points
-//  in any of the three. Fortress has five targets rather than
-//  twenty-five, so it is scaled by log(5)/log(25) and a round there
-//  is worth half what a twenty-five-cell round is worth.
+//  THE FOUR SCORE THE WAY THE SCRIMMAGE DOES. A chain of L that you
+//  finished is worth L(L+1)/2 — one point for its first cell, two for
+//  its second, three for its third — so each cell added is worth more
+//  than the last. A chain of 6 pays 21; a chain of 3 pays 6.
 //
-//  Completed is the word that matters. A chain you were part way
-//  through when the buzzer went, or when you missed, is worth
-//  nothing — in all four.
+//  AND A STATION KEEPS YOUR BEST ATTEMPT, not the sum of them, just
+//  as a quarter of the scrimmage is scored on its best single run.
+//  Reaching six once is the thing being measured; reaching three
+//  twice is not the same achievement.
 //
-//  So the four rows are comparable, and the total is a fair sum
-//  rather than whichever game happened to pay more.
+//  All four pay the same rate, Fortress included — the scrimmage does
+//  not discount its own Fortress for having five spots instead of
+//  twenty-five, so neither does this. The four rows are comparable
+//  and the total is a fair sum of them.
 // ══════════════════════════════════════════════════════
 var LIST = [
   { n:1, name:'RECALL',      file:'002-recall.html'      },
