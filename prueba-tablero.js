@@ -59,8 +59,10 @@ function respuesta(mios, equipo, gym){
     };
   });
   const faltan = juegos.filter((j) => !j.jugado).map((j) => j.juego);
-  const escala = Math.max(6, ...juegos.map((j) =>
-    Math.max(j.nivelGym, j.nivelMio, ...(j.nivelesEquipo.length ? j.nivelesEquipo : [0]))));
+  /* Fixed at the 5x5 ceiling, the way the server sends it. It used to
+     be the best level around, which made a player's arc move inward
+     whenever somebody else improved. */
+  const escala = 25;
   return {
     ok: true, codigo: 'ACD-EFG',
     equipo: { id: 'eq', nombre: 'Paradiso 6th' },
