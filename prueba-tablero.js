@@ -217,57 +217,72 @@ console.log('\n4 · One more level is drawn further out\n');
 
 console.log('\n5 · Tapping a game drills into it\n');
 {
-  eq(await PAG.locator('#hubKick').textContent(), 'YOUR GYM', 'the middle starts on the whole gym');
-  eq(await PAG.locator('#hubNum').textContent(), '17', 'with the four levels added up: 6+3+0+8');
+  /* POINTS in the numbers, LEVELS in the ring. The middle adds the
+     four scores: 21 + 6 + 0 + 36. */
+  eq(await PAG.locator('#hubKick').textContent(), 'YOUR POINTS', 'the middle starts on the whole gym');
+  eq(await PAG.locator('#hubNum').textContent(), '63', 'with the four scores added up: 21+6+0+36');
 
   await PAG.locator('#rows .row').nth(3).click();      // fortress
   await PAG.waitForTimeout(250);
   eq(await PAG.locator('#hubKick').textContent(), 'FORTRESS', 'tapping a row lights that game');
-  eq(await PAG.locator('#hubNum').textContent(), '8', 'and the middle shows its level');
-  si(/gym record 9/.test(await PAG.locator('#hubSub').textContent()),
-     'and the record to beat');
+  eq(await PAG.locator('#hubNum').textContent(), '36', 'and the middle shows its points');
+  const sub = await PAG.locator('#hubSub').textContent();
+  si(/level 8 of 25/.test(sub), 'with the level said in words, so the two are never confused');
+  si(/record 45/.test(sub), 'and the record to beat, in points like the number above it');
 
   /* Tapping it again has to let go. A board with something stuck lit
      feels broken. */
   await PAG.locator('#rows .row').nth(3).click();
   await PAG.waitForTimeout(250);
-  eq(await PAG.locator('#hubKick').textContent(), 'YOUR GYM', 'tapping it again lets go');
+  eq(await PAG.locator('#hubKick').textContent(), 'YOUR POINTS', 'tapping it again lets go');
 }
 
-console.log('\n6 · The saved image\n');
+console.log('\n6 · The two tabs\n');
 {
-  /* A STATIC CHECK, and on purpose: reading the text out of a PNG is
-     not something this suite can do, but what CAN be guaranteed is
-     that the function that draws it never reads the code. If somebody
-     adds it one day, this fails. */
-  const fuente = fs.readFileSync(path.join(AQUI, 'tablero-gym.html'), 'utf8');
-  const i = fuente.indexOf('function componerImagen()');
-  const j = fuente.indexOf('function nombreArchivo()');
-  const cuerpo = fuente.slice(i, j);
-  si(i > 0 && j > i, 'the drawing function is where it is expected');
-  si(cuerpo.indexOf('codigo') === -1,
-     'and it never reads the code: a shared image cannot hand out an identity');
-  si(cuerpo.indexOf('DATOS.equipo') !== -1, 'it does carry the team name, which is nobody\'s');
+  /* The same four numbers read two ways. POINTS is what you scored;
+     WHAT IT RAISES is what that would be worth to a program — which
+     is the only place the gym and the fundraiser touch. */
+  si(await visible(PAG, '#rows'), 'POINTS is the tab it opens on');
+  si(!(await visible(PAG, '#valor')), 'and the value panel is put away');
 
-  const descarga = PAG.waitForEvent('download', { timeout: 15000 });
-  await PAG.locator('#btnSave').click();
-  const d = await descarga;
-  si(/^cognitivo-gym-\d{8}\.png$/.test(d.suggestedFilename()),
-     'saving gives a dated png: ' + d.suggestedFilename());
-  const destino = path.join(require('os').tmpdir(), 'tablero-prueba.png');
-  await d.saveAs(destino);
-  const tam = fs.statSync(destino).size;
-  si(tam > 8000, 'and it has something drawn in it (' + Math.round(tam / 1024) + ' KB)');
-  /* The PNG signature, so a file that is not an image cannot pass. */
-  const cabecera = fs.readFileSync(destino).slice(0, 8).toString('hex');
-  eq(cabecera, '89504e470d0a1a0a', 'and it really is a png');
-  fs.unlinkSync(destino);
+  await PAG.locator('#tabVal').click();
+  await PAG.waitForTimeout(250);
+  si(await visible(PAG, '#valor'), 'tapping the other tab brings it up');
+  si(!(await visible(PAG, '#rows')), 'and puts the rows away');
 
-  /* The share button hides itself where the browser cannot share a
-     file, which is the case in this one. A button that does nothing
-     is worse than no button. */
-  si(!(await visible(PAG, '#btnShare')),
-     'and where the browser cannot share a file, that button is not shown');
+  const texto = await PAG.locator('#valor').innerText();
+  /* 63 points · 4 padrinos at 25c = a dollar a point · 12 on a roster. */
+  si(texto.indexOf('$63.00') !== -1, "one player's 63 points come to $63.00");
+  si(texto.indexOf('$756.00') !== -1, 'and a roster of twelve raises $756.00');
+  si(texto.indexOf('25') !== -1, 'at the same rate per point the demo quotes');
+
+  /* THE NUMBERS HAVE TO MATCH demo.html. Two pages quoting different
+     deals for the same game is worse than one page quoting none. */
+  const demo = fs.readFileSync(
+    path.join(AQUI, '..', 'final-buzzer-anotado', 'demo.html'), 'utf8');
+  const mio = fs.readFileSync(path.join(AQUI, 'tablero-gym.html'), 'utf8');
+  const saca = (s) => {
+    const m = /var PADRINOS = (\d+), TARIFA = ([\d.]+), PLANTILLA = (\d+), PISO = (\d+)/.exec(s);
+    return m ? m.slice(1).join('/') : null;
+  };
+  if (saca(demo)) eq(saca(mio), saca(demo), 'and the example is the same one demo.html uses');
+  else ok('(demo.html not alongside, example not cross-checked)');
+
+  /* THE LINE THAT HAS TO BE THERE. A number with a dollar sign gets
+     read as real money unless it is told not to be, and nothing here
+     is pledged, owed or collected. */
+  si(/not a pledge/i.test(texto), 'and it says plainly that it is an example, not a pledge');
+  si(/no money moves/i.test(texto), 'and that no money moves through the gym');
+
+  await PAG.locator('#tabPts').click();
+  await PAG.waitForTimeout(250);
+  si(await visible(PAG, '#rows'), 'and it goes back');
+
+  /* The share and save buttons are gone, and so is the code that drew
+     the image. A dead function nobody calls is the kind of thing that
+     comes back to life by accident. */
+  si(mio.indexOf('componerImagen') === -1, 'the image code went with the buttons');
+  si(mio.indexOf('navigator.share') === -1, 'and nothing is left that would share one');
   await CTX.close();
 }
 
