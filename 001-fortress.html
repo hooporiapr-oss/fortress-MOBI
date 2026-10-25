@@ -469,6 +469,68 @@ body.warm .play-screen{padding-top:calc(var(--nav-height) + 46px + env(safe-area
    strip would sit lit on top of the dim. Raised only under .warm, so
    the standalone game keeps the stacking it has always had. */
 body.warm .countdown-overlay{z-index:2400}
+
+/* ══════════════════════════════════════════════════════
+   THE TURN CLOCK — ten beats to repeat the chain
+   The same clock the other three carry: the screen pulses once a beat
+   with a beep, a bar drains above the court, and if it empties before
+   you finish the round it ends on the wrong sound. This game had no
+   turn limit at all, which made it the one station where you could
+   stop and think. Ten beats at 120 BPM is five seconds.
+   ══════════════════════════════════════════════════════ */
+#fsStrobe{position:fixed;inset:0;z-index:9998;pointer-events:none;background:var(--gold);opacity:0}
+.timer-wrap{width:100%;max-width:420px;margin:0 auto 6px;height:6px;
+  background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden;
+  opacity:0;transition:opacity 0.2s}
+.timer-wrap.active{opacity:1}
+.timer-bar{height:100%;width:100%;background:var(--gold);border-radius:3px;transition:none}
+.timer-bar.warning{background:var(--orange)}
+.timer-bar.danger{background:#FF1493}
+
+/* NO BUTTON ON THE BOARD, like the other three. STOP sat under the
+   thumb you tap with for a whole run; Back in the header leaves, and
+   a miss ends the run by itself. */
+.stop-btn{display:none!important}
+
+/* ══════════════════════════════════════════════════════
+   THE MODE SCREEN — Game or Training, same as the other three
+   Training fixes where the chain STARTS: level 3 opens on a
+   three-ball chain and grows from there, the way Replay's does.
+   ══════════════════════════════════════════════════════ */
+#screen-mode{position:fixed;inset:0;display:none;flex-direction:column;align-items:center;
+  background:var(--dark);z-index:110;overflow-y:auto;overflow-x:hidden;
+  padding:calc(50px + env(safe-area-inset-top) + 10px) 15px 40px}
+#screen-mode.show{display:flex}
+.trophy-container{width:100%;max-width:420px;margin:0 auto;padding:15px 0 40px}
+.trophy-header{text-align:center;margin-bottom:20px}
+.trophy-icon{font-size:2.5rem;margin-bottom:5px}
+.trophy-title{font-family:'Bebas Neue',sans-serif;font-size:1.8rem;letter-spacing:3px;color:var(--gold);margin-bottom:4px}
+.trophy-subtitle{font-size:0.75rem;color:var(--muted)}
+.bpm-section{margin-bottom:20px}
+.bpm-section-title{font-family:'Bebas Neue',sans-serif;font-size:0.85rem;letter-spacing:2px;color:var(--text);margin-bottom:10px;text-align:center}
+.bpm-tier{background:var(--card);border:2px solid var(--border);border-radius:14px;padding:15px;cursor:pointer;transition:all 0.3s}
+.bpm-tier.active{border-color:var(--gold);background:rgba(255,215,0,0.08)}
+.bpm-tier-left{display:flex;align-items:center;gap:10px}
+.bpm-tier-icon{font-size:1.3rem}
+.bpm-tier-name{font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:1px;color:var(--text)}
+.bpm-tier-bpm{font-size:0.6rem;color:var(--muted)}
+.mode-row{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.level-section{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:15px;margin-bottom:20px}
+.level-section.hidden{display:none}
+.level-section-title{font-size:0.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;text-align:center;margin-bottom:10px}
+.level-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.level-btn{aspect-ratio:1;border:2px solid var(--border);background:transparent;border-radius:8px;
+  font-family:'Bebas Neue',sans-serif;font-size:1rem;color:var(--muted);cursor:pointer;
+  transition:all 0.2s;display:flex;align-items:center;justify-content:center}
+.level-btn.active{border-color:var(--gold);color:var(--gold);background:rgba(255,215,0,0.1)}
+.level-info{display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding-top:12px;border-top:1px solid var(--border)}
+.level-info-label{font-size:0.65rem;color:var(--muted)}
+.level-info-value{font-family:'Bebas Neue',sans-serif;font-size:0.9rem;color:var(--gold)}
+.letsgo-btn{width:100%;padding:16px 24px;border:none;border-radius:12px;
+  font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:4px;cursor:pointer;
+  background:linear-gradient(135deg,var(--gold),var(--orange));color:#1a0f0f;
+  box-shadow:0 4px 20px rgba(255,215,0,0.3);transition:all 0.3s}
+.letsgo-btn:active{transform:scale(0.98)}
 </style>
 </head>
 <body>
@@ -511,6 +573,53 @@ body.warm .countdown-overlay{z-index:2400}
   <div class="wn-dots" id="wnDots"></div>
 </div>
 
+<div id="screen-mode">
+  <div class="intro-nav-row">
+    <a href="#" class="back-btn" id="modeBack">&larr; Back</a>
+    <div class="intro-nav-title">THE FORTRESS</div>
+    <div style="width:68px"></div>
+  </div>
+  <div class="trophy-container">
+    <div class="trophy-header">
+      <div class="trophy-icon">&#127942;</div>
+      <h1 class="trophy-title">YOUR TROPHY ROOM</h1>
+      <p class="trophy-subtitle">THE FORTRESS Progress</p>
+    </div>
+    <div class="bpm-section">
+      <div class="bpm-section-title">SELECT MODE</div>
+      <div class="mode-row">
+        <div class="bpm-tier active" id="modeGame">
+          <div class="bpm-tier-left"><span class="bpm-tier-icon">&#127918;</span>
+            <div><div class="bpm-tier-name">GAME</div><div class="bpm-tier-bpm">Escalating</div></div>
+          </div>
+        </div>
+        <div class="bpm-tier" id="modeTraining">
+          <div class="bpm-tier-left"><span class="bpm-tier-icon">&#127947;</span>
+            <div><div class="bpm-tier-name">TRAINING</div><div class="bpm-tier-bpm">Fixed Start</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="level-section hidden" id="levelSection">
+      <div class="level-section-title">SELECT LEVEL</div>
+      <div class="level-grid" id="levelGrid">
+        <button class="level-btn active" data-level="1">1</button>
+        <button class="level-btn" data-level="2">2</button>
+        <button class="level-btn" data-level="3">3</button>
+        <button class="level-btn" data-level="4">4</button>
+        <button class="level-btn" data-level="5">5</button>
+      </div>
+      <div class="level-info">
+        <span class="level-info-label">Chain starts at:</span>
+        <span class="level-info-value" id="cellsDisplay">1</span>
+      </div>
+    </div>
+    <button class="letsgo-btn" id="letsGoBtn">LET'S GO!</button>
+  </div>
+</div>
+
+<div id="fsStrobe"></div>
+
 <div class="play-screen hidden" id="playScreen">
 <div class="play-header">
 <a href="fortress-mobile-hub.html" class="play-back-btn" id="playBackBtn" title="Home">⌂</a>
@@ -519,6 +628,7 @@ body.warm .countdown-overlay{z-index:2400}
 </div>
 
 <div class="game-area">
+<div class="timer-wrap" id="timerWrap"><div class="timer-bar" id="timerBar"></div></div>
 <div class="court-slot" id="courtSlot"><div class="court5x5" id="congaRow"></div></div>
 
 <div class="info-strip">
@@ -903,7 +1013,8 @@ function warmStartAll(){
 function showCountdown(cb){var count=3;countdownOverlay.classList.add('show');countdownNumber.textContent=count;var ci=setInterval(function(){count--;if(count>0){countdownNumber.textContent=count;countdownNumber.style.animation='none';void countdownNumber.offsetWidth;countdownNumber.style.animation='countdownPop 0.8s ease-out';playCongaHit(2,'good')}else if(count===0){countdownNumber.textContent="GO!";countdownNumber.style.animation='none';void countdownNumber.offsetWidth;countdownNumber.style.animation='countdownPop 0.8s ease-out';playCongaRoll()}else{clearInterval(ci);countdownOverlay.classList.remove('show');if(cb)cb()}},1000)}
 
 retryBtn.onclick=function(){
-  showScreen('play');showCountdown(function(){repStart();});
+  challengeComplete.classList.remove('show');
+  showModeScreen();
 };
 
 function initAudio(){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();if(audioCtx.state==='suspended')audioCtx.resume()}
@@ -972,7 +1083,7 @@ function beatPulse(){gameArea.classList.remove('beat-pulse');void gameArea.offse
 
 function startGame(){initAudio();repStart()}
 
-function stopGame(){isPlaying=false;clearInterval(beatInterval);beatInterval=null;repCleanup();
+function stopGame(){isPlaying=false;stopTurn();clearInterval(beatInterval);beatInterval=null;repCleanup();
 tapCongas.forEach(function(c){c.classList.remove('lit')});setOnFire(false);lastMilestone=0;
 stopBombaLoop()}
 
@@ -986,9 +1097,115 @@ var repPlaybackTimeout=null;
 var repShotLog=[];
 var runStartTime=0;
 
+/* ── THE TURN CLOCK ───────────────────────────────────────────────
+   Ported from Recall: a pulse and a beep every beat while it is your
+   turn, a bar draining over ten of them, and the wrong sound if it
+   empties. The clock belongs to the TURN — it opens when the chain
+   has finished playing and closes the moment you finish it, miss, or
+   run out. */
+var fortStrobe=null, fortRAF=null, fortTurn=null;
+function fortBeatMs(){ return 60000 / bpm }
+function fortTurnMs(){ return Math.round(fortBeatMs() * 10) }
+
+function startFullStrobe(){
+  stopFullStrobe();
+  var el=document.getElementById('fsStrobe'), ms=fortBeatMs();
+  fortStrobe=setInterval(function(){
+    el.style.transition='none'; el.style.opacity='.30';
+    try{ playCongaHit(2,'soft') }catch(e){}
+    setTimeout(function(){ el.style.transition='opacity .15s'; el.style.opacity='0' },
+               Math.min(120, ms*0.3));
+  }, ms);
+}
+function stopFullStrobe(){
+  if(fortStrobe){ clearInterval(fortStrobe); fortStrobe=null }
+  var el=document.getElementById('fsStrobe');
+  if(el){ el.style.transition='none'; el.style.opacity='0' }
+}
+function startTimerBar(duration){
+  var started=performance.now(), wrap=document.getElementById('timerWrap'), bar=document.getElementById('timerBar');
+  wrap.classList.add('active'); bar.className='timer-bar'; bar.style.width='100%';
+  (function tick(){
+    var pct=Math.max(0,1-(performance.now()-started)/duration);
+    bar.style.width=(pct*100)+'%';
+    if(pct<0.3) bar.className='timer-bar danger';
+    else if(pct<0.5) bar.className='timer-bar warning';
+    if(pct>0 && repIsListening) fortRAF=requestAnimationFrame(tick);
+  })();
+}
+function hideTimer(){
+  if(fortRAF){ cancelAnimationFrame(fortRAF); fortRAF=null }
+  var w=document.getElementById('timerWrap'); if(w) w.classList.remove('active');
+}
+function startTurn(){
+  stopTurn();
+  startFullStrobe();
+  startTimerBar(fortTurnMs());
+  fortTurn=setTimeout(function(){
+    if(!repIsListening) return;
+    stopTurn();
+    repIsListening=false;
+    repShotLog.push({hit:false,round:repRound,pts:0});
+    playWrongSound(); vibrate(80);
+    repiteloIndicator.textContent='OUT OF TIME!';
+    repiteloIndicator.className='repitelo-indicator watching';
+    setTimeout(repEndGame,900);
+  }, fortTurnMs());
+}
+function stopTurn(){
+  if(fortTurn){ clearTimeout(fortTurn); fortTurn=null }
+  stopFullStrobe(); hideTimer();
+}
+
+/* ── THE MODE SCREEN ──────────────────────────────────────────────
+   Game runs as it always has. Training opens the chain at the level
+   you pick rather than always at one. A warm-up station and an
+   official run both skip it. */
+var fortMode='game', fortLevel=1;
+function fortStartRound(){ return fortMode==='training' ? fortLevel : 1 }
+
+function showModeScreen(){
+  setupScreen.style.display='none';
+  playScreen.classList.add('hidden');
+  challengeComplete.classList.remove('show');
+  document.getElementById('screen-mode').classList.add('show');
+}
+function hideModeScreen(){ document.getElementById('screen-mode').classList.remove('show') }
+function paintMode(){
+  document.getElementById('modeGame').classList.toggle('active', fortMode==='game');
+  document.getElementById('modeTraining').classList.toggle('active', fortMode==='training');
+  document.getElementById('levelSection').classList.toggle('hidden', fortMode!=='training');
+  var btns=document.getElementById('levelGrid').querySelectorAll('.level-btn');
+  for(var i=0;i<btns.length;i++){
+    btns[i].classList.toggle('active', parseInt(btns[i].getAttribute('data-level'),10)===fortLevel);
+  }
+  document.getElementById('cellsDisplay').textContent=fortStartRound();
+}
+function wireModeScreen(){
+  if(!document.getElementById('screen-mode')) return;
+  document.getElementById('modeGame').onclick=function(){ fortMode='game'; paintMode() };
+  document.getElementById('modeTraining').onclick=function(){ fortMode='training'; paintMode() };
+  var btns=document.getElementById('levelGrid').querySelectorAll('.level-btn');
+  for(var i=0;i<btns.length;i++){
+    (function(btn){ btn.onclick=function(){
+      fortLevel=parseInt(btn.getAttribute('data-level'),10)||1;
+      fortMode='training'; paintMode();
+    } })(btns[i]);
+  }
+  document.getElementById('modeBack').onclick=function(e){
+    e.preventDefault(); hideModeScreen(); showScreen('setup');
+  };
+  document.getElementById('letsGoBtn').onclick=function(){
+    hideModeScreen(); initAudio(); showScreen('play');
+    showCountdown(function(){ repStart() });
+  };
+  paintMode();
+}
+
 function repStart(){
 pintarCancha();
-repSequence=[];repRound=0;repPlayerIndex=0;repIsPlaying=false;repIsListening=false;repShotLog=[];
+stopTurn();
+repSequence=[];repRound=fortStartRound()-1;repPlayerIndex=0;repIsPlaying=false;repIsListening=false;repShotLog=[];
 isPlaying=true;
 runStartTime=performance.now();
 score=0;scoreEl.textContent=0;
@@ -1010,7 +1227,15 @@ repIsListening=false;
 repIsPlaying=true;
 streakEl.textContent=repRound;
 var maxDrum=drumCount===3?3:5;
-repSequence.push(Math.floor(Math.random()*maxDrum));
+/* The first round of a Training run deals the whole starting chain
+   at once. Bumping the round counter alone left you on round 3 with
+   one ball to repeat — the label moved and the difficulty did not. */
+if(repSequence.length===0){
+  var abrir=fortStartRound();
+  for(var z=0;z<abrir;z++) repSequence.push(Math.floor(Math.random()*maxDrum));
+}else{
+  repSequence.push(Math.floor(Math.random()*maxDrum));
+}
 repRenderDots();
 repiteloIndicator.textContent='🧠 ROUND '+repRound+' · WATCH...';
 repiteloIndicator.className='repitelo-indicator watching';
@@ -1040,6 +1265,7 @@ repIsListening=true;
 repPlayerIndex=0;
 pintarCancha();
 repiteloIndicator.textContent='🏀 YOUR TURN! ('+repSequence.length+' taps)';
+startTurn();
 repiteloIndicator.className='repitelo-indicator listening';
 var fd=document.getElementById('repDot0');
 if(fd)fd.classList.add('current');
@@ -1106,6 +1332,7 @@ if(nd)nd.classList.add('current');
 }
 if(repPlayerIndex>=repSequence.length){
 repIsListening=false;
+stopTurn();
 score=repRound;scoreEl.textContent=score;
 repShotLog.push({hit:true,round:repRound,pts:repRound});
 repiteloIndicator.textContent='NICE! 🔥 Round '+repRound+' complete';
@@ -1123,6 +1350,7 @@ return true;
 } else {
 if(dot){dot.classList.remove('current');dot.classList.add('wrong');}
 repIsListening=false;
+stopTurn();
 repShotLog.push({hit:false,round:repRound,pts:0});
 playWrongSound();vibrate(80);
 repiteloIndicator.textContent='SO CLOSE! It was ball '+(expected+1);
@@ -1138,6 +1366,7 @@ return true;
 }
 
 function repEndGame(){
+stopTurn();
 repIsPlaying=false;repIsListening=false;
 isPlaying=false;
 repiteloIndicator.className='repitelo-indicator';
@@ -1410,8 +1639,7 @@ document.getElementById('standingsRefreshBtn').addEventListener('click',function
    typed: show the court and run the countdown. */
 document.getElementById('startFullGameBtn').onclick=function(){
   initAudio();
-  showScreen('play');
-  showCountdown(function(){repStart()});
+  showModeScreen();
 };
 
 stopBtn.onclick=function(){
@@ -1430,6 +1658,8 @@ el.classList.add('tapped');createColorBurst(el,ci);createSparks(el,ci);showCallo
 function showFeedback(q){clearTimeout(feedbackTimeout);var t=q==='perfect'?'PERFECT!':q==='good'?'GOOD!':q==='early'?'EARLY':q==='late'?'LATE':q==='wrong'?'WRONG!':q==='miss'?'MISS!':q==='start'?'TAP TO START! ↓':'';feedback.textContent=t;feedback.className='feedback-text show '+q;feedbackTimeout=setTimeout(function(){feedback.classList.remove('show')},400)}
 
 tapCongas.forEach(function(c,i){c.addEventListener('touchstart',function(e){e.preventDefault();handleTap(i,c)},{passive:false});c.addEventListener('mousedown',function(e){e.preventDefault();handleTap(i,c)});c.addEventListener('touchend',function(e){e.preventDefault()},{passive:false})});
+
+wireModeScreen();
 
 if(warmOn()){
   /* Last station of the warm-up: no setup screen and no mode to pick,
