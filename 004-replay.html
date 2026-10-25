@@ -1515,12 +1515,21 @@ function warmPaint(){
   WARM.raf = requestAnimationFrame(warmPaint);
 }
 
-/* A run broke with time still on the clock: bank what it was worth and
+/* A run broke with time still on the clock: keep what it was worth and
    start another one. The clock is not touched here — that is the whole
-   point of banking rather than ending. */
+   point of keeping rather than ending.
+
+   THE STATION KEEPS YOUR BEST ATTEMPT, NOT THE SUM OF THEM, because
+   that is how the four-quarter scrimmage scores a quarter. Reaching a
+   chain of six once is the thing being measured; getting to three
+   twice is not the same achievement and no longer pays as if it were.
+
+   Starting again quickly still matters — it is how you get more
+   attempts at a long chain inside the minute — but a short, panicked
+   restart can no longer pad a score. */
 function warmAfterMiss(){
   if (!WARM.on || WARM.ending) return;
-  WARM.banked += WARM.hostScore();
+  WARM.banked = Math.max(WARM.banked, WARM.hostScore());
   WARM.hostRestart();
 }
 
@@ -1530,8 +1539,9 @@ function warmFinishStation(){
   if (WARM.raf){ cancelAnimationFrame(WARM.raf); WARM.raf = null }
 
   /* The attempt that was in the air when the buzzer went still counts.
-     It was played inside the minute. */
-  var total = WARM.banked + WARM.hostScore();
+     It was played inside the minute — and if it was the best of them,
+     it is the one that stands. */
+  var total = Math.max(WARM.banked, WARM.hostScore());
   WARM.hostStop();
   warmWrite(WARM.STATION, total);
 
@@ -1775,9 +1785,10 @@ function handleTap(idx){
 
     if(playerIdx>=sequence.length){
       stopTurn();
-      /* A chain finished: bank its length, at ten a cell. */
+      /* A chain finished: it is the level reached, and the score is
+         what that level is worth. */
       repChains = Math.max(repChains, sequence.length);
-      repScore += sequence.length * 10;
+      repScore = pointsFor(repChains);
       $('hPoints').textContent = repScore;
       paintPlayInfo();
       msg(T('nice'),'go');
