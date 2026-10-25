@@ -896,6 +896,25 @@ var GAME = 'replay';
 
 function pointsFor(level){ return level > 0 ? (level * (level + 1)) / 2 : 0; }
 
+/* WHAT THE RUN HAS ACTUALLY FINISHED.
+
+   The score used to be read off `level`, which is the chain being
+   ATTEMPTED — it is incremented when a chain is dealt, not when one
+   is completed. So timing out on the very first chain, having tapped
+   nothing, reported a level of 1 and a point for it. Nothing had been
+   finished and the run scored.
+
+   These two count completions and nothing else, so both are zero
+   until a chain is repeated in full:
+
+     repChains  the longest chain repeated, for the big number
+     repScore   the running score, on the gym's scale
+
+   THE SCALE IS THE GYM'S: ten points per cell per completed round,
+   the same rate Recall and Recognition pay. A four-ball chain is
+   forty points in all three. */
+var repChains = 0, repScore = 0;
+
 // ---- language ----
 var STR = {
   en:{
@@ -1356,16 +1375,11 @@ var WARM = {
    Written as functions on WARM rather than called directly, so the
    engine never has to know a single variable name from the game. */
 WARM.hostScore = function(){
-  /* The header already shows pointsFor(level) for every chain fully
-     recalled, so the game's own displayed truth is the score — no
-     second tally here to drift out of step with it.
-
-     Times ten to land on the gym's scale: ten points per cell per
-     round, the same rate Recall and Recognition pay, so a station of
-     Replay is worth what a station of either of those is worth. */
-  var mostrado = 0;
-  try { mostrado = parseInt($('hPoints').textContent, 10) || 0 } catch(e){}
-  return mostrado * 10;
+  /* repScore is already on the gym's scale — ten points per cell per
+     completed round, the same rate Recall and Recognition pay — so a
+     station of Replay is worth what a station of either of those is,
+     with no conversion here to drift out of step. */
+  return (typeof repScore === 'number') ? repScore : 0;
 };
 WARM.hostRestart = function(){
   /* Straight into another chain, with no count-in: the count-in
@@ -1604,6 +1618,7 @@ function beginRun(){
   sequence=[];
   level=startLength()-1;
   runStartTime=performance.now();
+  repChains=0; repScore=0;
   $('hLevel').textContent='0';$('hPoints').textContent='0';$('hTime').textContent='0.0';
   paintPlayInfo();
   msg(T('getReady'),'go');
@@ -1760,7 +1775,10 @@ function handleTap(idx){
 
     if(playerIdx>=sequence.length){
       stopTurn();
-      $('hPoints').textContent=pointsFor(level);
+      /* A chain finished: bank its length, at ten a cell. */
+      repChains = Math.max(repChains, sequence.length);
+      repScore += sequence.length * 10;
+      $('hPoints').textContent = repScore;
       paintPlayInfo();
       msg(T('nice'),'go');
       timers.push(setTimeout(nextLevel,BETWEEN_MS));
@@ -1784,9 +1802,9 @@ function endRun(){
   if(phase==='done')return;
   phase='done';clrT();stopTurn();
 
-  // The level being attempted was not completed, so the score is the
-  // last sequence fully recalled.
-  var finalLevel=Math.max(0, level-1);
+  /* The chain being attempted was not completed, so what counts is
+     what was: the longest chain actually repeated. */
+  var finalLevel=repChains;
   var finalTime=(performance.now()-runStartTime)/1000;
 
   msg(T('wrong'),'miss');
@@ -1797,7 +1815,7 @@ function endRun(){
 }
 
 function showFinal(finalLevel,finalTime){
-  var points=pointsFor(finalLevel);
+  var points=repScore;
 
   if(finalLevel>best){best=finalLevel;saveBest()}
 
