@@ -96,12 +96,15 @@ html,body{min-height:100%;font-family:'Outfit',sans-serif;background:var(--dark)
 //  here too, or the rows will label the wrong scores.
 //
 //  THE FOUR SCORE ON ONE SCALE: ten points per cell per round, for
-//  every chain you complete inside your minute. Recall and
-//  Recognition pay it directly; Replay's header already counts in
-//  pointsFor(level), so its station multiplies that by ten to land on
-//  the same rate; Fortress has five targets rather than twenty-five,
-//  so it is scaled by log(5)/log(25) and a round is worth half what a
-//  twenty-five-cell round is worth.
+//  every chain you COMPLETE inside your minute. Recall, Recognition
+//  and Replay all pay it directly — a four-cell chain is forty points
+//  in any of the three. Fortress has five targets rather than
+//  twenty-five, so it is scaled by log(5)/log(25) and a round there
+//  is worth half what a twenty-five-cell round is worth.
+//
+//  Completed is the word that matters. A chain you were part way
+//  through when the buzzer went, or when you missed, is worth
+//  nothing — in all four.
 //
 //  So the four rows are comparable, and the total is a fair sum
 //  rather than whichever game happened to pay more.
