@@ -12,7 +12,10 @@ if (localStorage.getItem('rct-mobile-pass') !== '1') {
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@400;600;700;900&display=swap" rel="stylesheet">
 <style>
-  :root{--gold:#FFD700;--orange:#FF6B35;--dark:#0a0a0f;--card:#111118;--text:#fff;--muted:#8892a0;--border:rgba(255,255,255,0.1)}
+  /* --teal is the same #00D9A5 warmup-final.html uses for its board
+     button. The two pages are the only ways to reach the board, so it
+     is worth them looking like the same door. */
+  :root{--gold:#FFD700;--orange:#FF6B35;--teal:#00D9A5;--dark:#0a0a0f;--card:#111118;--text:#fff;--muted:#8892a0;--border:rgba(255,255,255,0.1)}
   *{margin:0;padding:0;box-sizing:border-box}
   html,body{height:100%;font-family:'Outfit',sans-serif;background:var(--dark);color:var(--text);touch-action:manipulation;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;overflow-x:hidden}
   #strobe{position:fixed;inset:0;z-index:1;pointer-events:none;background:var(--gold);opacity:0;transition:opacity .07s ease-out}
@@ -63,6 +66,28 @@ if (localStorage.getItem('rct-mobile-pass') !== '1') {
   .warm-chips{display:flex;gap:6px;margin-top:13px;flex-wrap:wrap}
   .warm-chip{font-family:'Bebas Neue',sans-serif;font-size:.72rem;letter-spacing:1.5px;
     background:rgba(26,15,15,.17);color:#1a0f0f;padding:4px 11px;border-radius:999px}
+  /* ── THE BOARD ────────────────────────────────────────────────────
+     Outlined and not filled, on purpose. The warm-up card above is the
+     one thing on this page that should say "start here" from across a
+     room, and a second solid card would argue with it. This one is
+     also the only card here you cannot use yet on your first visit —
+     the board opens on having played all four — so it sits quieter
+     than the thing that gets you there.
+
+     THE TEAM RIDES IN ON THE HREF. ?e=demo is captured the moment the
+     page it lands on loads, so a kid who taps this before he has ever
+     played is on the team by the time his code is issued. That is the
+     whole reason the parameter is here and not just on the link the
+     coach shares: the hub is where people actually arrive. */
+  .board-card{
+    display:block;max-width:440px;margin:10px auto 0;padding:15px 18px;
+    border-radius:16px;text-decoration:none;text-align:center;
+    color:var(--teal);border:1.5px solid rgba(0,217,165,.42);
+    background:rgba(0,217,165,.07);
+  }
+  .board-card:active{transform:scale(.98)}
+  .board-name{font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:2.5px;line-height:1}
+  .board-desc{font-size:.68rem;font-weight:600;color:var(--muted);margin-top:5px;line-height:1.4}
   .hub-foot{text-align:center;margin-top:28px;font-size:.6rem;font-weight:900;letter-spacing:.24em;text-transform:uppercase;color:#4a5058}
   .hub-foot b{color:var(--muted);font-style:italic}
   #site-footer{text-align:center;margin-top:14px;padding-bottom:8px}
@@ -124,6 +149,12 @@ if (localStorage.getItem('rct-mobile-pass') !== '1') {
     </div>
   </a>
 
+  <a class="board-card" href="tablero-gym.html?e=demo">
+    <div class="board-name">◴ YOUR BOARD</div>
+    <div class="board-desc">Where you stand in all four, against the gym. Opens once you have
+      played every one of them.</div>
+  </a>
+
   <div class="hub-foot">Powered by <b>Gostar Digital</b></div>
   <div id="site-footer">
     <div class="footer-copy">© Copyright Gostar Digital LLC. All Rights Reserved.</div>
@@ -131,6 +162,38 @@ if (localStorage.getItem('rct-mobile-pass') !== '1') {
 </div>
 
 <script>
+/* ── THE TEAM, DECIDED HERE AND ONCE ──────────────────────────────
+   A player's team is fixed when his code is issued and never changes
+   after, so arriving at the gym with no team means playing alone
+   forever — with nothing on any screen to explain why. That makes the
+   front door the right place to settle it.
+
+   Two steps, in this order and it matters:
+
+     1. a ?e= on the address wins. A coach's link carries his own team
+        and must never be overridden by the default below.
+     2. nothing stored and nothing on the address → the open team.
+        That is what a bookmark, a typed address or a plain shared
+        hub link all land on.
+
+   DONE HERE RATHER THAN ON THE SIX LINKS BELOW. Hanging ?e=demo off
+   every card would work today and rot tomorrow: the next card anybody
+   adds forgets it, and the failure it causes is invisible. One
+   decision at the door covers every way out of it, including the ways
+   that do not exist yet.
+
+   The games do their own ?e= capture in their GYM block, so a coach
+   linking straight to a game still works without coming through
+   here. */
+var EQUIPO_ABIERTO = 'demo';
+(function(){
+  try {
+    var m = location.search.match(/[?&]e=([a-z0-9-]{1,40})/i);
+    if (m) { localStorage.setItem('cg-equipo', m[1].toLowerCase()); return }
+    if (!localStorage.getItem('cg-equipo')) localStorage.setItem('cg-equipo', EQUIPO_ABIERTO);
+  } catch(e){}
+})();
+
 var $=function(id){return document.getElementById(id)};
 var BPM=120, beatMs=60000/BPM;
 var audioCtx=null, audioReady=false, soundOn=true;
