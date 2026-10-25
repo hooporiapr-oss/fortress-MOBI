@@ -531,6 +531,25 @@ body.warm .countdown-overlay{z-index:2400}
   background:linear-gradient(135deg,var(--gold),var(--orange));color:#1a0f0f;
   box-shadow:0 4px 20px rgba(255,215,0,0.3);transition:all 0.3s}
 .letsgo-btn:active{transform:scale(0.98)}
+
+/* ── EL CENTRO LATE HASTA QUE LO TOCAS ────────────────────────────
+   Late con el oro de «encendida», que es el color que ya significa
+   que el juego está vivo. Es lo que dice «yo soy el botón» sin
+   escribirlo en ningún sitio — la misma señal que lleva el tablero
+   del scrimmage. */
+@keyframes latirCentro{
+  0%,100%{transform:scale(1);filter:brightness(1);
+          box-shadow:0 0 10px var(--conga-glow)}
+  50%    {transform:scale(1.12);filter:brightness(1.45);
+          box-shadow:0 0 34px var(--conga-color),0 0 60px var(--conga-glow)}
+}
+.tap-conga.latiendo{animation:latirCentro 900ms ease-in-out infinite}
+/* A quien le molesta el movimiento se le deja la bola marcada y
+   quieta: la señal sigue ahí, sin latido. */
+@media (prefers-reduced-motion:reduce){
+  .tap-conga.latiendo{animation:none;filter:brightness(1.35);
+    box-shadow:0 0 26px var(--conga-color)}
+}
 </style>
 </head>
 <body>
@@ -1092,7 +1111,7 @@ function beatPulse(){gameArea.classList.remove('beat-pulse');void gameArea.offse
 
 function startGame(){initAudio();repStart()}
 
-function stopGame(){isPlaying=false;stopTurn();clearInterval(beatInterval);beatInterval=null;repCleanup();
+function stopGame(){isPlaying=false;stopTurn();pararCentro();clearInterval(beatInterval);beatInterval=null;repCleanup();
 tapCongas.forEach(function(c){c.classList.remove('lit')});setOnFire(false);lastMilestone=0;
 stopBombaLoop()}
 
@@ -1206,7 +1225,9 @@ function wireModeScreen(){
   };
   document.getElementById('letsGoBtn').onclick=function(){
     hideModeScreen(); initAudio(); showScreen('play');
-    showCountdown(function(){ repStart() });
+    showCountdown(function(){
+      pedirCentro(function(){ repStart() });
+    });
   };
   paintMode();
 }
@@ -1222,6 +1243,39 @@ function wireModeScreen(){
    A LEVEL IS A CHAIN YOU FINISHED. Nothing is scored for a chain you
    were part way through when you missed or when time ran out. */
 function pointsFor(level){ return level > 0 ? (level * (level + 1)) / 2 : 0; }
+
+/* ── ARRANCAR TOCANDO EL CENTRO ───────────────────────────────────
+   Después de la cuenta no sale la cadena sola: late la bola del
+   centro y la primera cadena empieza cuando la tocas. Son dos cosas
+   a la vez — te dice dónde está el juego, y te deja decidir cuándo
+   empieza, que es justo lo que falta cuando el teléfono todavía está
+   cambiando de mano.
+
+   EN UN SET CON RELOJ NO SE ESPERA A NADIE. El calentamiento y el
+   scrimmage arrancan su reloj en GO!, así que un centro latiendo
+   sería tiempo del nene gastado mirando un punto. Ahí la cadena sale
+   sola, como hasta ahora. */
+var esperandoCentro=false;
+function pedirCentro(alTocar){
+  esperandoCentro=true;
+  var centro=tapCongas[0];           // conga0 es el centro de la cancha
+  if(!centro){ esperandoCentro=false; alTocar(); return }
+  centro.classList.add('latiendo');
+  repiteloIndicator.textContent='TAP THE CENTER TO START';
+  repiteloIndicator.className='repitelo-indicator listening';
+  CENTRO_LISTO=function(){
+    if(!esperandoCentro) return false;
+    esperandoCentro=false;
+    centro.classList.remove('latiendo');
+    alTocar();
+    return true;
+  };
+}
+var CENTRO_LISTO=null;
+function pararCentro(){
+  esperandoCentro=false; CENTRO_LISTO=null;
+  tapCongas.forEach(function(c){ if(c) c.classList.remove('latiendo') });
+}
 
 function repStart(){
 pintarCancha();
@@ -1251,11 +1305,27 @@ var maxDrum=drumCount===3?3:5;
 /* The first round of a Training run deals the whole starting chain
    at once. Bumping the round counter alone left you on round 3 with
    one ball to repeat — the label moved and the difficulty did not. */
+/* NUNCA LA MISMA BOLA DOS VECES SEGUIDAS.
+   Con cinco bolas y un sorteo limpio, una de cada cinco rondas
+   repetía la bola anterior — y una repetición no se ve: la bola ya
+   está encendida, se apaga un instante y vuelve. Lo que el nene
+   recuerda es «esa otra vez», sin saber cuántas. Es la única cadena
+   que falla por un motivo que no es la memoria.
+
+   Se sortea entre las demás, así que sigue siendo azar: lo único que
+   desaparece es el caso que no se puede leer. */
+function otraBola(maxDrum, anterior){
+  if(maxDrum<=1) return 0;
+  var b=Math.floor(Math.random()*(maxDrum-1));
+  return (typeof anterior==='number' && b>=anterior) ? b+1 : b;
+}
 if(repSequence.length===0){
   var abrir=fortStartRound();
-  for(var z=0;z<abrir;z++) repSequence.push(Math.floor(Math.random()*maxDrum));
+  for(var z=0;z<abrir;z++){
+    repSequence.push(otraBola(maxDrum, z>0 ? repSequence[z-1] : null));
+  }
 }else{
-  repSequence.push(Math.floor(Math.random()*maxDrum));
+  repSequence.push(otraBola(maxDrum, repSequence[repSequence.length-1]));
 }
 repRenderDots();
 repiteloIndicator.textContent='🧠 ROUND '+repRound+' · WATCH...';
@@ -1313,11 +1383,17 @@ if(dot)dot.classList.add('played');
    would be faster and wrong, because the ear hears it fighting the
    beat. Half a beat is the fastest step that is still in time. */
 pintarCancha(ci);
+/* TRES CUARTOS DE TIEMPO POR BOLA, no medio.
+   Medio tiempo —250ms— resultó demasiado rápido para leer la cadena:
+   la bola se encendía y se apagaba antes de que el ojo terminara de
+   llegar. Un tiempo entero (400ms) ya se había probado y arrastraba.
+   Tres cuartos son 375ms, siguen cayendo sobre el pulso de 120 y dan
+   el cuarto de segundo que faltaba para ver cada bola de verdad. */
 var speed=60000/bpm;
 setTimeout(function(){
 el.classList.remove('lit');
-setTimeout(function(){repPlaySequence(idx+1)},speed*0.2);
-},speed*0.3);
+setTimeout(function(){repPlaySequence(idx+1)},speed*0.25);
+},speed*0.5);
 }
 
 /* THE COURT TAKES THE COLOUR OF THE LIVE TARGET.
@@ -1388,6 +1464,7 @@ return true;
 
 function repEndGame(){
 stopTurn();
+pararCentro();
 repIsPlaying=false;repIsListening=false;
 isPlaying=false;
 repiteloIndicator.className='repitelo-indicator';
@@ -1671,7 +1748,14 @@ document.getElementById('endBackBtn').addEventListener('click',function(){
 repCleanup();stopGame();showScreen('setup');
 });
 
-function handleTap(ci,el){initAudio();playCongaHit(ci,'good');createTapParticles(el);createGlowTrail(el,ci);vibrate(15);
+function handleTap(ci,el){initAudio();
+/* El centro latiendo se come el primer toque: ese toque no es una
+   respuesta, es el arranque. */
+if(esperandoCentro){
+  if(ci===0 && CENTRO_LISTO){ playCongaHit(ci,'good'); createTapParticles(el); vibrate(15); CENTRO_LISTO(); }
+  return;
+}
+playCongaHit(ci,'good');createTapParticles(el);createGlowTrail(el,ci);vibrate(15);
 el.classList.add('hit-correct');setTimeout(function(){el.classList.remove('hit-correct')},200);
 if(isPlaying){if(repIsListening)repHandleTap(ci);return;}
 el.classList.add('tapped');createColorBurst(el,ci);createSparks(el,ci);showCallout(el);setTimeout(function(){el.classList.remove('tapped')},150);showFeedback('start');}
