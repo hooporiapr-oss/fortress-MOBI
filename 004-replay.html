@@ -1400,6 +1400,110 @@ WARM.hostCountdown = function(cb){
   if (typeof countdownThen === 'function') countdownThen(cb); else cb();
 };
 
+// ══════════════════════════════════════════════════════
+//  THE GYM BLOCK — byte-identical in all four games
+//
+//  Hands a finished score to the gym server, so the board can show
+//  it, and gets the player a code the first time he scores.
+//
+//  THE CODE IS ISSUED HERE, not on the board page. The board is
+//  earned by playing all four, so by the time anybody reaches it he
+//  has already scored four times — the code has to exist well before
+//  then, and the first score is the first moment it can.
+//
+//  NOTHING HERE CAN STOP A GAME. Every call is fire-and-forget and
+//  every failure is swallowed. A kid in the middle of his minute does
+//  not care that a server is down, and a game that freezes because a
+//  score would not save is a worse game than one that quietly loses
+//  the score.
+//
+//  THE GAME'S NAME COMES OUT OF WARM.STATION, which is the one line
+//  that already differs between these four files. That keeps this
+//  block identical in all of them and leaves no second place to get
+//  the station number wrong.
+// ══════════════════════════════════════════════════════
+var GYM = {
+  /* If the Render service is named differently, it changes here in
+     all four games AND in tablero-gym.html. The server only accepts
+     calls from hooporia.mobi, cognitivo.digital and cognitivogym.com:
+     from anywhere else the browser blocks the reply on its own, with
+     nothing shown on screen. */
+  SERVIDOR: 'https://cognitivo-gym-server.onrender.com',
+  LLAVE: 'cg-codigo',
+  LLAVE_EQUIPO: 'cg-equipo',
+  NOMBRES: ['recall', 'recognition', 'replay', 'fortress'],
+  pidiendo: null
+};
+
+function gymJuego(){
+  var n = (typeof WARM === 'object' && WARM && WARM.STATION) ? WARM.STATION : 1;
+  return GYM.NOMBRES[n - 1] || null;
+}
+function gymGuardado(k){ try { return localStorage.getItem(k) } catch(e){ return null } }
+function gymGuardar(k, v){ try { localStorage.setItem(k, v) } catch(e){} }
+
+/* THE TEAM TRAVELS IN THE LINK the coach hands out — ?e=paradiso-6 —
+   and it is remembered the moment it is seen, on whatever page it
+   lands on. It has to be: the link might drop a kid straight into a
+   game, and by the time his code gets issued the query string could
+   be three pages behind him. */
+function gymEquipo(){
+  try {
+    var m = location.search.match(/[?&]e=([a-z0-9-]{1,40})/i);
+    if (m) gymGuardar(GYM.LLAVE_EQUIPO, m[1].toLowerCase());
+  } catch(e){}
+  return gymGuardado(GYM.LLAVE_EQUIPO);
+}
+gymEquipo();
+
+function gymLlamar(ruta, cuerpo){
+  return fetch(GYM.SERVIDOR + ruta, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(cuerpo || {})
+  }).then(function(r){
+    return r.json().then(function(j){ return { http: r.status, datos: j } },
+                         function(){ return { http: r.status, datos: null } });
+  });
+}
+
+/* One code, and only one. Two stations finishing close together could
+   each find no code and each ask for one, and the kid would end up
+   with two — with two halves of his four games, and a board that
+   never opens. GYM.pidiendo holds the promise so the second caller
+   waits on the first one's answer instead of starting its own. */
+function gymCodigo(){
+  var ya = gymGuardado(GYM.LLAVE);
+  if (ya) return Promise.resolve(ya);
+  if (GYM.pidiendo) return GYM.pidiendo;
+
+  GYM.pidiendo = gymLlamar('/jugador', { equipo: gymEquipo() }).then(function(r){
+    GYM.pidiendo = null;
+    if (r.http === 200 && r.datos && r.datos.ok && r.datos.codigo){
+      gymGuardar(GYM.LLAVE, r.datos.codigo);
+      return r.datos.codigo;
+    }
+    return null;
+  }, function(){ GYM.pidiendo = null; return null });
+
+  return GYM.pidiendo;
+}
+
+/* The one call the games make. Everything it can do wrong, it does
+   quietly. */
+function gymAnotar(puntos){
+  try {
+    var juego = gymJuego();
+    var p = parseInt(puntos, 10);
+    if (!juego || !isFinite(p) || p < 0) return;
+    gymCodigo().then(function(codigo){
+      if (!codigo) return;
+      gymLlamar('/anotar', { codigo: codigo, juego: juego, puntos: p })
+        .then(function(){}, function(){});
+    }, function(){});
+  } catch(e){}
+}
+
 /* ?warm=1 starts a warm-up from a cold link, without the hub.
 
    The hub is what normally switches it on, and until that exists this
@@ -1544,6 +1648,11 @@ function warmFinishStation(){
   var total = Math.max(WARM.banked, WARM.hostScore());
   WARM.hostStop();
   warmWrite(WARM.STATION, total);
+
+  /* And to the gym, so the board can show it. Fire and forget: the
+     station is about to navigate to the next one and does not wait
+     for anybody. */
+  gymAnotar(total);
 
   var last = (WARM.STATION >= WARM.LIST.length);
   var next = last ? null : WARM.LIST[WARM.STATION];
@@ -1827,6 +1936,15 @@ function endRun(){
 
 function showFinal(finalLevel,finalTime){
   var points=repScore;
+
+  /* AND TO THE GYM, which is what the board reads. Only outside a
+     warm-up run: inside one the station posts its own score when the
+     minute ends, and posting here too would send the same run twice.
+
+     WARM.hostScore() and not a variable of this game's: that hook is
+     the one contract every one of the four already implements, so
+     this line is the same line in all four files. */
+  if (typeof WARM === 'object' && WARM && !WARM.on) gymAnotar(WARM.hostScore());
 
   if(finalLevel>best){best=finalLevel;saveBest()}
 
