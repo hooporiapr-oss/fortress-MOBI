@@ -574,13 +574,30 @@ body.warm .play-container{min-height:0}
    Ten beats at 100 BPM is six seconds, the same window the other two
    give, and the same bar in the same place above the board. */
 #fsStrobe{position:fixed;inset:0;z-index:9998;pointer-events:none;background:var(--orange);opacity:0}
-.timer-wrap{width:100%;max-width:340px;margin:0 auto 6px;height:6px;
+/* Edge to edge, like Recall's. Capped at the board's width it read
+   as part of the board; spanning the screen it reads as the clock on
+   the whole turn, which is what it is. */
+.timer-wrap{width:100%;margin:0 0 6px;height:6px;
   background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden;
   opacity:0;transition:opacity 0.2s}
 .timer-wrap.active{opacity:1}
 .timer-bar{height:100%;width:100%;background:var(--orange);border-radius:3px;transition:none}
 .timer-bar.warning{background:var(--gold)}
 .timer-bar.danger{background:#FF1493}
+
+/* The line under the board that Recall carries: which mode you are
+   in, how long the chain is now, and what the run is worth. The board
+   on its own does not say any of those, and in Recall they sit right
+   under it rather than back up in the stat row. */
+.play-info{display:flex;justify-content:space-between;align-items:center;
+  width:100%;max-width:340px;margin:10px auto 8px;padding:0 4px}
+.play-info-badge{font-family:'Bebas Neue',sans-serif;font-size:0.8rem;color:var(--orange);letter-spacing:1px}
+.play-info-cells{font-family:'Bebas Neue',sans-serif;font-size:0.75rem;color:var(--muted);letter-spacing:1px}
+.play-info-score{font-family:'Bebas Neue',sans-serif;font-size:0.8rem;color:var(--gold)}
+/* Back is in the bar at the top, so the floating Home button under
+   the board is a second way to do the same thing sitting exactly
+   where a thumb rests during a turn. */
+#controls{display:none}
 </style>
 </style>
 </head>
@@ -730,6 +747,11 @@ body.warm .play-container{min-height:0}
   <div id="msg" class="watch"></div>
   <div class="timer-wrap" id="timerWrap"><div class="timer-bar" id="timerBar"></div></div>
   <div class="court-area"><div class="court" id="court"></div></div>
+  <div class="play-info">
+    <div class="play-info-badge" id="playBadge">GAME</div>
+    <div class="play-info-cells" id="playChain">CHAIN: 2</div>
+    <div class="play-info-score" id="playTotal">0</div>
+  </div>
   <div id="controls">
     <a class="ctrl-btn" href="fortress-mobile-hub.html" id="homeBtn">← Home</a>
   </div>
@@ -1582,6 +1604,7 @@ function beginRun(){
   level=startLength()-1;
   runStartTime=performance.now();
   $('hLevel').textContent='0';$('hPoints').textContent='0';$('hTime').textContent='0.0';
+  paintPlayInfo();
   msg(T('getReady'),'go');
   timers.push(setTimeout(nextLevel,900));
   requestAnimationFrame(tickTimer);
@@ -1643,6 +1666,7 @@ function flashFrom(i){
   // the whole chain has been shown
   clearCells();
   msg(T('yourTurn'),'go');
+  paintPlayInfo();
   startTurn();
 }
 
@@ -1709,6 +1733,20 @@ function stopTurn(){
   hideTimer();
 }
 
+/* Keeps the line under the board honest. Called wherever the chain,
+   the mode or the score can have changed. */
+function paintPlayInfo(){
+  var badge = $('playBadge'), chain = $('playChain'), total = $('playTotal');
+  if(!badge) return;
+  badge.textContent = (replayMode === 'training')
+    ? ('L' + replayLevel + ' TRAINING') : 'GAME';
+  chain.textContent = 'CHAIN: ' + (sequence.length || startLength());
+  /* The same number the header shows — what the run has BANKED, not
+     what this chain would be worth if you finish it. Two different
+     numbers for "score" on one screen is a bug, not a detail. */
+  total.textContent = $('hPoints').textContent || '0';
+}
+
 function handleTap(idx){
   if(phase!=='running')return;
   if($('msg').textContent!==T('yourTurn'))return;   // still memorizing
@@ -1722,6 +1760,7 @@ function handleTap(idx){
     if(playerIdx>=sequence.length){
       stopTurn();
       $('hPoints').textContent=pointsFor(level);
+      paintPlayInfo();
       msg(T('nice'),'go');
       timers.push(setTimeout(nextLevel,BETWEEN_MS));
     }
