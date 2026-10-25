@@ -353,6 +353,14 @@ body.warm .play-container{min-height:0}
   padding:12px 16px;border:1px solid var(--border);background:transparent;
   color:var(--muted);border-radius:8px;text-align:center;text-decoration:none;
   font-family:'Outfit',sans-serif;font-size:0.75rem;font-weight:600}
+
+/* NO BUTTON ON THE BOARD, like Replay.
+   It had exactly two jobs and neither is left: starting a run, which
+   LET'S GO on the mode screen does, and starting the next one after a
+   game over, which PLAY AGAIN on the end screen does. All it did
+   during a turn was sit at the bottom of the screen, disabled, under
+   the thumb you are tapping with. */
+.play-action-btn{display:none!important}
 </style>
 </head>
 <body>
@@ -1433,8 +1441,11 @@ if(warmOn()){
   $('playMessage').className = 'play-message-text watch';
   warmBegin(function(){ startRound() });
 }else if(isFullGameActive()){
+  /* A quarter of a tracked Full Game starts itself now. It used to
+     wait on the button, and the button is gone. */
   showScreen('play');
   initGame();
+  startRun();
 }else{
   startDemo();
 }
