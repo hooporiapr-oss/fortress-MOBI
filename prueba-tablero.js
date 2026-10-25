@@ -322,7 +322,65 @@ console.log('\n8 · Coming back, and coming back on a new phone\n');
   await ctx.close();
 }
 
-console.log('\n9 · The final scoreboard leads here\n');
+console.log('\n9 · The board remembers a team it is handed\n');
+{
+  /* The hub's board button carries ?e=, and somebody who has never
+     played can arrive here first. If this page forgot it, that
+     parameter would be decoration: the team would be gone before any
+     game asked for a code. */
+  guion = { ok: false, error: 'codigo-no-existe', __http: 404 };
+  const { ctx, pag } = await abrir();
+  await pag.goto(BASE + '?e=demo');
+  await pag.waitForTimeout(400);
+  eq(await pag.evaluate(() => localStorage.getItem('cg-equipo')), 'demo',
+     'arriving with ?e=demo, the team is remembered');
+  si(await visible(pag, '#gate'), 'and a first-timer still lands at the door');
+  eq(await pag.evaluate(() => localStorage.getItem('cg-codigo')), null,
+     'this page issues no code of its own — a game does that');
+  await ctx.close();
+}
+
+console.log('\n10 · The hub and the final scoreboard both lead here\n');
+{
+  const hub = fs.readFileSync(path.join(AQUI, 'fortress-mobile-hub.html'), 'utf8');
+  si(/href="tablero-gym\.html\?e=demo"/.test(hub),
+     'the hub has a board button, and it carries the team');
+  si(/--teal:#00D9A5/.test(hub), 'in the same colour as the other door to the board');
+}
+
+console.log('\n10b · The hub settles the team for every way out of it\n');
+{
+  /* A player's team is fixed when his code is issued, so arriving
+     with none means playing alone forever. The hub decides it at the
+     door rather than leaning on a tail hung off each card. */
+  const ctx = await navegador.newContext({ viewport: { width: 390, height: 844 } });
+  await ctx.addInitScript(() => {
+    try { localStorage.setItem('rct-mobile-pass', '1') } catch(e){}
+  });
+  const pag = await ctx.newPage();
+  pag.on('pageerror', (e) => mal('the hub threw: ' + e.message));
+
+  await pag.goto('http://localhost:' + PUERTO + '/fortress-mobile-hub.html');
+  await pag.waitForTimeout(400);
+  eq(await pag.evaluate(() => localStorage.getItem('cg-equipo')), 'demo',
+     'arriving with no tail at all still joins the open team');
+
+  /* AND A COACH'S TEAM WINS. If the default could override this, every
+     kid on a real team would silently land in the open one. */
+  await pag.goto('http://localhost:' + PUERTO + '/fortress-mobile-hub.html?e=paradiso-6');
+  await pag.waitForTimeout(400);
+  eq(await pag.evaluate(() => localStorage.getItem('cg-equipo')), 'paradiso-6',
+     'and a team on the address beats both the default and what was stored');
+
+  /* Coming back plainly must not drag him back to the open team. */
+  await pag.goto('http://localhost:' + PUERTO + '/fortress-mobile-hub.html');
+  await pag.waitForTimeout(400);
+  eq(await pag.evaluate(() => localStorage.getItem('cg-equipo')), 'paradiso-6',
+     'and returning without the tail leaves him on his own team');
+  await ctx.close();
+}
+
+console.log('\n11 · The final scoreboard leads here\n');
 {
   const fuente = fs.readFileSync(path.join(AQUI, 'warmup-final.html'), 'utf8');
   si(/href="tablero-gym\.html"/.test(fuente), 'warmup-final.html has the button to the board');
