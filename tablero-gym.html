@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Cognitivo Gym · Your Board</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@400;600;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --gold:#FFD700;--orange:#FF6B35;--dark:#0a0a0f;--card:#111118;
+    --text:#fff;--muted:#8892a0;--border:rgba(255,255,255,0.1);
+    /* ONE COLOUR PER GAME, and the pink #FF1493 is NOT among them:
+       that one is the miss signal inside the four games, and a pink
+       quadrant here would be saying "you got it wrong" to somebody
+       who came to look at how well he is doing. */
+    --c-recall:#FFD700;--c-recognition:#00D9D9;--c-replay:#9B59B6;--c-fortress:#FF6B35;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{min-height:100%;font-family:'Outfit',sans-serif;background:var(--dark);
+    color:var(--text);touch-action:manipulation;-webkit-tap-highlight-color:transparent;
+    -webkit-user-select:none;user-select:none;overflow-x:hidden}
+  .wrap{max-width:460px;margin:0 auto;
+    padding:calc(22px + env(safe-area-inset-top)) 16px calc(26px + env(safe-area-inset-bottom))}
+
+  .head{text-align:center;margin-bottom:18px}
+  .kick{font-size:.6rem;font-weight:900;letter-spacing:.38em;text-transform:uppercase;
+    color:var(--gold);margin-bottom:8px;text-shadow:0 0 18px rgba(255,215,0,.7)}
+  .title{font-family:'Bebas Neue',sans-serif;font-size:1.9rem;letter-spacing:3px;
+    background:linear-gradient(135deg,var(--gold),var(--orange));
+    -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+  .team{font-size:.68rem;font-weight:700;color:var(--muted);margin-top:4px;letter-spacing:.06em}
+
+  /* ── THE DOOR ──────────────────────────────────────────────────── */
+  .gate{background:var(--card);border:1px solid var(--border);border-radius:18px;
+    padding:22px 18px;text-align:center}
+  .gate h2{font-family:'Bebas Neue',sans-serif;font-size:1.5rem;letter-spacing:2px;margin-bottom:8px}
+  .gate p{font-size:.78rem;color:var(--muted);line-height:1.55;margin-bottom:16px}
+  .big-btn{display:block;width:100%;padding:16px;border:none;border-radius:14px;
+    font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:2px;color:#1a0f0f;
+    background:linear-gradient(135deg,var(--gold),var(--orange));cursor:pointer;
+    text-decoration:none;text-align:center}
+  .big-btn:active{transform:scale(.98)}
+  .big-btn[disabled]{opacity:.5}
+
+  /* The door's four pips: which ones you have and which are left. A
+     door that only says no is a wall; this says how much is left. */
+  .dots{display:flex;justify-content:center;gap:7px;margin:0 0 16px}
+  .dot{display:flex;flex-direction:column;align-items:center;gap:5px;width:70px}
+  .dot b{display:block;width:100%;height:5px;border-radius:3px;background:rgba(255,255,255,.12)}
+  .dot.done b{background:var(--gold)}
+  .dot span{font-family:'Bebas Neue',sans-serif;font-size:.6rem;letter-spacing:.5px;
+    color:#4a5058;line-height:1.1}
+  .dot.done span{color:var(--muted)}
+
+  .or{font-size:.6rem;font-weight:900;letter-spacing:.26em;color:#4a5058;margin:18px 0 10px}
+  .code-row{display:flex;gap:8px}
+  .code-in{flex:1;padding:13px;border-radius:12px;border:1px solid var(--border);
+    background:rgba(255,255,255,.05);color:#fff;font-family:'Bebas Neue',sans-serif;
+    font-size:1.2rem;letter-spacing:4px;text-align:center;text-transform:uppercase}
+  .code-in:focus{outline:none;border-color:var(--gold)}
+  .code-go{padding:13px 18px;border-radius:12px;border:1px solid rgba(255,215,0,.4);
+    background:rgba(255,215,0,.12);color:var(--gold);font-family:'Bebas Neue',sans-serif;
+    font-size:1.1rem;letter-spacing:1px;cursor:pointer}
+  .aviso{font-size:.72rem;font-weight:700;color:#FF8080;margin-top:12px;min-height:1em}
+
+  /* ── THE DRAWING ───────────────────────────────────────────────── */
+  #board{display:none}
+  .donut-wrap{position:relative;max-width:360px;margin:0 auto}
+  svg{display:block;width:100%;height:auto;overflow:visible}
+  .ring-bg{fill:none;stroke:rgba(255,255,255,.055);stroke-width:1}
+  .sector{cursor:pointer}
+  .sector-bg{opacity:.07;transition:opacity .18s}
+  .sector.on .sector-bg{opacity:.2}
+  .tick-team{stroke-linecap:round;opacity:.3}
+  .mark-gym{fill:none;stroke:rgba(255,255,255,.5);stroke-width:1.6;stroke-dasharray:3 4}
+  .mark-mine{fill:none;stroke-linecap:round;stroke-width:7}
+  .lbl{font-family:'Bebas Neue',sans-serif;font-size:10px;letter-spacing:1.2px;
+    fill:var(--muted);text-anchor:middle}
+  .lbl.on{fill:#fff}
+
+  /* The middle of the drawing is HTML sitting on top of the SVG: it
+     is text that changes, and SVG text does not wrap onto a second
+     line by itself. */
+  .hub{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+    width:44%;text-align:center;pointer-events:none}
+  .hub-kick{font-size:.5rem;font-weight:900;letter-spacing:.2em;text-transform:uppercase;
+    color:var(--muted);line-height:1.3}
+  .hub-num{font-family:'Bebas Neue',sans-serif;font-size:2.7rem;line-height:.95;margin:2px 0}
+  .hub-sub{font-size:.54rem;font-weight:700;color:var(--muted);line-height:1.35}
+
+  .legend{display:flex;justify-content:center;gap:14px;margin-top:14px;flex-wrap:wrap}
+  .leg{display:flex;align-items:center;gap:5px;font-size:.56rem;font-weight:900;
+    letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+  .leg i{display:block;width:16px;height:3px;border-radius:2px;background:var(--muted)}
+  .leg.mine i{background:var(--gold);height:5px}
+  .leg.gym i{background:transparent;border-top:2px dashed rgba(255,255,255,.55);height:0}
+
+  .rows{margin-top:18px;display:grid;gap:7px}
+  .row{display:flex;align-items:center;gap:10px;padding:11px 13px;background:var(--card);
+    border:1px solid var(--border);border-radius:12px;cursor:pointer;transition:border-color .15s}
+  .row.on{border-color:rgba(255,255,255,.3)}
+  .row i{display:block;width:4px;height:26px;border-radius:2px;flex:0 0 auto}
+  .row .nm{font-family:'Bebas Neue',sans-serif;font-size:.95rem;letter-spacing:1.2px;flex:1}
+  .row .lv{font-family:'Bebas Neue',sans-serif;font-size:1.25rem;letter-spacing:1px}
+  .row .of{font-size:.56rem;font-weight:900;letter-spacing:.14em;color:#4a5058;text-transform:uppercase}
+
+  /* ── SAVE AND SHARE ────────────────────────────────────────────── */
+  .share-row{display:flex;gap:8px;margin-top:16px}
+  .sh{flex:1;padding:14px 10px;border-radius:13px;border:1px solid rgba(255,215,0,.35);
+    background:rgba(255,215,0,.1);color:var(--gold);font-family:'Bebas Neue',sans-serif;
+    font-size:1.05rem;letter-spacing:1.5px;cursor:pointer}
+  .sh:active{transform:scale(.98)}
+  .sh[disabled]{opacity:.5}
+  .sh-note{font-size:.62rem;color:var(--muted);text-align:center;margin-top:9px;line-height:1.5}
+
+  .mycode{margin-top:20px;background:var(--card);border:1px dashed rgba(255,215,0,.35);
+    border-radius:14px;padding:14px;text-align:center}
+  .mycode .k{font-size:.56rem;font-weight:900;letter-spacing:.24em;text-transform:uppercase;
+    color:var(--muted);margin-bottom:6px}
+  .mycode .v{font-family:'Bebas Neue',sans-serif;font-size:1.7rem;letter-spacing:6px;color:var(--gold)}
+  .mycode .n{font-size:.66rem;color:var(--muted);margin-top:7px;line-height:1.45}
+
+  .back{display:block;margin-top:16px;padding:14px;text-align:center;border-radius:14px;
+    background:rgba(255,255,255,.05);border:1px solid var(--border);color:#fff;
+    text-decoration:none;font-family:'Bebas Neue',sans-serif;font-size:1.05rem;letter-spacing:2px}
+  .foot{text-align:center;margin-top:20px;font-size:.56rem;font-weight:900;
+    letter-spacing:.22em;text-transform:uppercase;color:#4a5058}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="head">
+    <div class="kick">🧠 Cada Punto Cuenta</div>
+    <div class="title">YOUR BOARD</div>
+    <div class="team" id="teamName"></div>
+  </div>
+
+  <!-- ── THE DOOR ──────────────────────────────────────────────────
+       The board is earned by playing all four, so this door has two
+       faces and neither of them hands out codes: the code is issued
+       by the game on the first play, not by this page.
+
+         no code   — nothing played yet: go play
+         a code    — some played: it says which are left
+
+       And whoever already played the four on another phone types his
+       code in. -->
+  <div class="gate" id="gate">
+    <h2 id="gateTitle">EARN THE BOARD</h2>
+    <p id="gateText">The board opens when you have played all four games. The warm-up runs
+      them back to back — four minutes, one minute each.</p>
+    <div class="dots" id="gateDots"></div>
+    <a class="big-btn" id="gateWarm" href="002-recall.html?warm=1">START THE WARM-UP</a>
+    <div id="gateHave">
+      <div class="or">OR, ON A NEW PHONE</div>
+      <div class="code-row">
+        <input class="code-in" id="gateCode" maxlength="7" placeholder="ABC-DEF"
+               autocomplete="off" autocapitalize="characters" spellcheck="false" inputmode="text">
+        <button class="code-go" id="gateGo">GO</button>
+      </div>
+    </div>
+    <div class="mycode" id="gateMyCode" style="display:none">
+      <div class="k">Your code</div>
+      <div class="v" id="gateMyCodeV">—</div>
+      <div class="n">Keep it. It is what brings your games with you.</div>
+    </div>
+    <div class="aviso" id="gateAviso"></div>
+  </div>
+
+  <!-- ── THE BOARD ───────────────────────────────────────────────── -->
+  <div id="board">
+    <div class="donut-wrap">
+      <svg id="svg" viewBox="0 0 320 320" role="img" aria-labelledby="svgTitle">
+        <title id="svgTitle">Your level in each of the four games</title>
+        <g id="gRings"></g>
+        <g id="gSectors"></g>
+        <g id="gMarks"></g>
+        <g id="gLabels"></g>
+      </svg>
+      <div class="hub">
+        <div class="hub-kick" id="hubKick">YOUR GYM</div>
+        <div class="hub-num" id="hubNum">0</div>
+        <div class="hub-sub" id="hubSub">tap a game</div>
+      </div>
+    </div>
+
+    <div class="legend">
+      <div class="leg mine"><i></i>You</div>
+      <div class="leg"><i></i>Your team</div>
+      <div class="leg gym"><i></i>Gym record</div>
+    </div>
+
+    <div class="rows" id="rows"></div>
+
+    <div class="share-row">
+      <button class="sh" id="btnShare" style="display:none">SHARE</button>
+      <button class="sh" id="btnSave">SAVE IMAGE</button>
+    </div>
+    <div class="sh-note" id="shNote">The image has your levels and your team — never your code
+      and never a name.</div>
+
+    <div class="mycode">
+      <div class="k">Your code</div>
+      <div class="v" id="myCode">—</div>
+      <div class="n">Keep it. Typing it on another phone brings this board with it.
+        Nobody sees your name here — the board has scores and nothing else.</div>
+    </div>
+
+    <a class="back" href="fortress-mobile-hub.html">← BACK TO THE GYM</a>
+    <div class="foot">Powered by Gostar Digital</div>
+  </div>
+
+</div>
+
+<script>
+/* ══════════════════════════════════════════════════════════════════
+   THE GYM BOARD
+
+   Four quadrants, one per game. What rises is not the angle: it is
+   the RADIUS. One more level and the mark moves outward, which is why
+   the drawing reads at a glance without reading a number.
+
+   The scale is the same across all four and the server sets it. If
+   each quadrant stretched to its own range, a level 4 would look
+   higher than a 7 beside it — the opposite of what a board is for.
+
+   NO NAMES, and not out of discretion at drawing time: the server
+   does not send any. The team's marks arrive as loose, shuffled
+   numbers. There is nothing to hide here because nothing arrives.
+
+   AND THE BOARD IS EARNED. It opens with all four games played, and
+   the server decides that — c.completo — not this page: a flag in
+   localStorage is changed from the same phone in ten seconds.
+   ══════════════════════════════════════════════════════════════════ */
+
+/* ── THE ONE LINE TO CHECK WHEN DEPLOYING ─────────────────────────
+   The address of the gym's Render service. If the service is named
+   differently, it changes HERE and in the four games, which carry it
+   in their GYM block.
+
+   And if it changes, check the server's domain list: it accepts
+   hooporia.mobi, cognitivo.digital and cognitivogym.com. A page
+   served from anywhere else gets a CORS block, which shows no error
+   on screen — it just goes quiet. */
+var SERVIDOR = 'https://cognitivo-gym-server.onrender.com';
+
+var $ = function(id){ return document.getElementById(id) };
+var LLAVE = 'cg-codigo';
+
+var JUEGOS = [
+  { id:'recall',      nombre:'THE RECALL',      corto:'RECALL',      color:'#FFD700' },
+  { id:'recognition', nombre:'THE RECOGNITION', corto:'RECOGNITION', color:'#00D9D9' },
+  { id:'replay',      nombre:'THE REPLAY',      corto:'REPLAY',      color:'#9B59B6' },
+  { id:'fortress',    nombre:'THE FORTRESS',    corto:'FORTRESS',    color:'#FF6B35' }
+];
+
+var DATOS = null;      // the last thing the server answered
+var ELEGIDO = null;    // the game that is lit, or null
+
+// ── Geometry ──────────────────────────────────────────────────────
+var CX = 160, CY = 160, R0 = 62, R1 = 148, HUECO = 3;
+
+function pol(cx, cy, r, grados){
+  var a = grados * Math.PI / 180;
+  return [cx + r * Math.cos(a), cy + r * Math.sin(a)];
+}
+function arco(r, d0, d1){
+  var a = pol(CX, CY, r, d0), b = pol(CX, CY, r, d1);
+  var grande = (d1 - d0) > 180 ? 1 : 0;
+  return 'M' + a[0].toFixed(2) + ' ' + a[1].toFixed(2) +
+         ' A' + r + ' ' + r + ' 0 ' + grande + ' 1 ' + b[0].toFixed(2) + ' ' + b[1].toFixed(2);
+}
+function sector(d0, d1){
+  var a = pol(CX, CY, R1, d0), b = pol(CX, CY, R1, d1);
+  var c = pol(CX, CY, R0, d1), d = pol(CX, CY, R0, d0);
+  return 'M' + a[0].toFixed(2) + ' ' + a[1].toFixed(2) +
+         ' A' + R1 + ' ' + R1 + ' 0 0 1 ' + b[0].toFixed(2) + ' ' + b[1].toFixed(2) +
+         ' L' + c[0].toFixed(2) + ' ' + c[1].toFixed(2) +
+         ' A' + R0 + ' ' + R0 + ' 0 0 0 ' + d[0].toFixed(2) + ' ' + d[1].toFixed(2) + ' Z';
+}
+/* Quadrant i starts at the top and goes clockwise, in the hub's
+   order: Q1 top right, Q2 bottom right, Q3 bottom left, Q4 top
+   left. */
+function tramo(i){ return [-90 + i*90 + HUECO, -90 + (i+1)*90 - HUECO] }
+
+/* Level to radius. Zero stays ON the inner edge: whoever has not
+   scored has no mark, rather than a mark on the floor. */
+function radioDe(nivel, escala, r0, r1){
+  var t = escala > 0 ? Math.min(1, nivel / escala) : 0;
+  return r0 + t * (r1 - r0);
+}
+function radio(nivel, escala){ return radioDe(nivel, escala, R0, R1) }
+
+function el(tipo, atrs){
+  var e = document.createElementNS('http://www.w3.org/2000/svg', tipo);
+  for (var k in atrs) if (atrs.hasOwnProperty(k)) e.setAttribute(k, atrs[k]);
+  return e;
+}
+function datosDe(id){
+  return (DATOS && DATOS.juegos || []).filter(function(x){ return x.juego === id })[0];
+}
+
+// ── Drawing ───────────────────────────────────────────────────────
+function pintar(){
+  if (!DATOS) return;
+  var escala = DATOS.escala || 6;
+  ['gRings','gSectors','gMarks','gLabels'].forEach(function(g){ $(g).innerHTML = '' });
+
+  /* The background rings are the levels. On a short scale one ring
+     per level; on a long one every five, because twenty-five circles
+     at this size are a smudge. */
+  var paso = escala <= 12 ? 1 : 5;
+  for (var n = paso; n <= escala; n += paso){
+    $('gRings').appendChild(el('circle', { cx:CX, cy:CY, r:radio(n, escala).toFixed(2), 'class':'ring-bg' }));
+  }
+  $('gRings').appendChild(el('circle', { cx:CX, cy:CY, r:R0, 'class':'ring-bg' }));
+  $('gRings').appendChild(el('circle', { cx:CX, cy:CY, r:R1, 'class':'ring-bg' }));
+
+  JUEGOS.forEach(function(j, i){
+    var d = datosDe(j.id);
+    if (!d) return;
+    var t = tramo(i), d0 = t[0], d1 = t[1];
+    var encendido = (ELEGIDO === j.id);
+
+    // The quadrant, which is also the button.
+    var g = el('g', { 'class':'sector' + (encendido ? ' on' : '') });
+    g.appendChild(el('path', { d:sector(d0, d1), fill:j.color, 'class':'sector-bg' }));
+    g.addEventListener('click', function(){ elegir(j.id) });
+    $('gSectors').appendChild(g);
+
+    /* THE GYM RECORD, dashed and across the whole quadrant. It
+       belongs to everybody, so it is not a mark: it is a line to
+       reach. */
+    if (d.nivelGym > 0){
+      $('gMarks').appendChild(el('path', {
+        d:arco(radio(d.nivelGym, escala), d0, d1), 'class':'mark-gym'
+      }));
+    }
+
+    /* THE TEAM'S, with no name and no order: short ticks spread
+       across the quadrant. Dim on purpose — they are there to give
+       the measure of where the team is, not for anybody to sit and
+       count them. */
+    var suyas = d.nivelesEquipo || [];
+    var cuantas = suyas.length;
+    suyas.forEach(function(nivel, k){
+      if (nivel <= 0) return;
+      var ancho = (d1 - d0) / Math.max(cuantas, 1);
+      var centro = d0 + ancho * (k + 0.5);
+      var medio = Math.min(ancho * 0.34, 7);
+      $('gMarks').appendChild(el('path', {
+        d:arco(radio(nivel, escala), centro - medio, centro + medio),
+        'class':'tick-team', stroke:j.color, 'stroke-width':4, fill:'none'
+      }));
+    });
+
+    /* MINE, lit and across the full width. It is the only thing with
+       a glow, and the only thing on the drawing the kid came to
+       see. */
+    if (d.nivelMio > 0){
+      $('gMarks').appendChild(el('path', {
+        d:arco(radio(d.nivelMio, escala), d0, d1), 'class':'mark-mine', stroke:j.color,
+        style:'filter:drop-shadow(0 0 7px ' + j.color + ')'
+      }));
+    }
+
+    // The game's name, outside the ring.
+    var p = pol(CX, CY, R1 + 15, (d0 + d1) / 2);
+    var lbl = el('text', {
+      x:p[0].toFixed(1), y:(p[1] + 3).toFixed(1),
+      'class':'lbl' + (encendido ? ' on' : '')
+    });
+    lbl.textContent = j.corto;
+    $('gLabels').appendChild(lbl);
+  });
+
+  pintarCentro();
+  pintarFilas();
+}
+
+function sumaNiveles(){
+  return (DATOS && DATOS.juegos || []).reduce(function(a, j){ return a + (j.nivelMio || 0) }, 0);
+}
+
+function pintarCentro(){
+  var escala = DATOS.escala || 6;
+  if (!ELEGIDO){
+    /* With no game chosen, the middle shows the sum of the four
+       levels. It is the number for the whole gym, and it is the one
+       that moves when any of the four moves. */
+    var suma = sumaNiveles();
+    $('hubKick').textContent = 'YOUR GYM';
+    $('hubNum').textContent = suma;
+    $('hubNum').style.color = '#fff';
+    $('hubSub').textContent = suma > 0 ? 'four games · tap one' : 'go play one';
+    return;
+  }
+  var j = JUEGOS.filter(function(x){ return x.id === ELEGIDO })[0];
+  var d = datosDe(ELEGIDO);
+  $('hubKick').textContent = j.corto;
+  $('hubNum').textContent = d.nivelMio || 0;
+  $('hubNum').style.color = j.color;
+  $('hubSub').textContent = d.nivelMio > 0
+    ? ('level of ' + escala + ' · gym record ' + d.nivelGym)
+    : ('played, no score yet · record ' + d.nivelGym);
+}
+
+function pintarFilas(){
+  var escala = DATOS.escala || 6;
+  var caja = $('rows');
+  caja.innerHTML = '';
+  JUEGOS.forEach(function(j){
+    var d = datosDe(j.id);
+    if (!d) return;
+    var fila = document.createElement('div');
+    fila.className = 'row' + (ELEGIDO === j.id ? ' on' : '');
+    var barra = document.createElement('i'); barra.style.background = j.color;
+    var nm = document.createElement('div'); nm.className = 'nm'; nm.textContent = j.nombre;
+    var lv = document.createElement('div'); lv.className = 'lv';
+    lv.style.color = d.nivelMio > 0 ? j.color : '#4a5058';
+    lv.textContent = d.nivelMio || '—';
+    var of = document.createElement('div'); of.className = 'of';
+    of.textContent = 'of ' + escala;
+    fila.appendChild(barra); fila.appendChild(nm); fila.appendChild(lv); fila.appendChild(of);
+    fila.addEventListener('click', function(){ elegir(j.id) });
+    caja.appendChild(fila);
+  });
+}
+
+/* Tapping the same one again turns it off and goes back to the
+   summary. A board where something stays lit with no way to unlight
+   it feels broken. */
+function elegir(id){ ELEGIDO = (ELEGIDO === id) ? null : id; pintar() }
+
+/* ══════════════════════════════════════════════════════════════════
+   THE IMAGE THAT GETS SAVED AND SHARED
+
+   It is drawn on a canvas by hand and the SVG above is NOT converted.
+   An SVG put inside an <img> to rasterise it loses the fonts — Bebas
+   Neue does not travel inside — and would come out in the system
+   face. Canvas 2D does use the fonts the page already loaded, so
+   what gets saved looks like what is being looked at.
+
+   WHAT DOES NOT GO IN THE IMAGE: the code. It is the player's
+   identity — with it you can post a score in his name — and an image
+   is shared precisely with the people who should not have it. No name
+   goes in either, because there is none to put.
+   ══════════════════════════════════════════════════════════════════ */
+/* The canvas is taller than it looks like it needs to be, and the
+   numbers below are spaced against each other rather than guessed:
+   the ring's outer edge lands at cy + r1 = 1120, the first row box
+   starts at 1128, and the footer sits clear of the last one. The
+   first version had the kicker inside the title and the last row
+   under the footer — on a phone that is the whole image. */
+var A = 1080, ALTO = 1470;
+
+function texto(ctx, t, x, y, fuente, color, alineado){
+  ctx.font = fuente; ctx.fillStyle = color;
+  ctx.textAlign = alineado || 'center'; ctx.textBaseline = 'alphabetic';
+  ctx.fillText(t, x, y);
+}
+function arcoCanvas(ctx, cx, cy, r, d0, d1, color, grosor, rayas, brillo){
+  ctx.beginPath();
+  ctx.arc(cx, cy, r, d0 * Math.PI / 180, d1 * Math.PI / 180);
+  ctx.strokeStyle = color; ctx.lineWidth = grosor; ctx.lineCap = 'round';
+  ctx.setLineDash(rayas || []);
+  if (brillo){ ctx.shadowColor = color; ctx.shadowBlur = 26 } else { ctx.shadowBlur = 0 }
+  ctx.stroke();
+  ctx.setLineDash([]); ctx.shadowBlur = 0;
+}
+
+function componerImagen(){
+  var lienzo = document.createElement('canvas');
+  lienzo.width = A; lienzo.height = ALTO;
+  var ctx = lienzo.getContext('2d');
+  var escala = DATOS.escala || 6;
+
+  // Background
+  ctx.fillStyle = '#0a0a0f';
+  ctx.fillRect(0, 0, A, ALTO);
+
+  // Header
+  var deg = ctx.createLinearGradient(A/2 - 230, 0, A/2 + 230, 0);
+  deg.addColorStop(0, '#FFD700'); deg.addColorStop(1, '#FF6B35');
+  /* 66 and 182, not 84 and 166: Bebas at 116px is about 82px of cap
+     height, so a baseline at 166 puts the top of the letters at 84 —
+     exactly where the kicker sits. */
+  texto(ctx, 'CADA PUNTO CUENTA', A/2, 66, '900 26px Outfit, sans-serif', '#FFD700');
+  texto(ctx, 'COGNITIVO GYM', A/2, 182, "116px 'Bebas Neue', sans-serif", deg);
+  texto(ctx, DATOS.equipo ? DATOS.equipo.nombre : 'Gym at large', A/2, 228,
+        '700 28px Outfit, sans-serif', '#8892a0');
+
+  // The ring
+  var cx = A/2, cy = 712, r0 = 168, r1 = 408;
+  var paso = escala <= 12 ? 1 : 5;
+  for (var n = paso; n <= escala; n += paso){
+    arcoCanvas(ctx, cx, cy, radioDe(n, escala, r0, r1), 0, 360, 'rgba(255,255,255,.06)', 2);
+  }
+  arcoCanvas(ctx, cx, cy, r0, 0, 360, 'rgba(255,255,255,.1)', 2);
+  arcoCanvas(ctx, cx, cy, r1, 0, 360, 'rgba(255,255,255,.1)', 2);
+
+  JUEGOS.forEach(function(j, i){
+    var d = datosDe(j.id);
+    if (!d) return;
+    var t = tramo(i), d0 = t[0], d1 = t[1];
+
+    /* The quadrant's tint, the same one the screen has. Without it
+       the saved image is four arcs floating on black and loses the
+       thing that says "these are four separate games". */
+    ctx.beginPath();
+    ctx.arc(cx, cy, r1, d0 * Math.PI / 180, d1 * Math.PI / 180);
+    ctx.arc(cx, cy, r0, d1 * Math.PI / 180, d0 * Math.PI / 180, true);
+    ctx.closePath();
+    ctx.fillStyle = j.color; ctx.globalAlpha = .07; ctx.fill(); ctx.globalAlpha = 1;
+
+    if (d.nivelGym > 0){
+      arcoCanvas(ctx, cx, cy, radioDe(d.nivelGym, escala, r0, r1), d0, d1,
+                 'rgba(255,255,255,.45)', 4, [8, 11]);
+    }
+    (d.nivelesEquipo || []).forEach(function(nivel, k){
+      if (nivel <= 0) return;
+      var cuantas = (d.nivelesEquipo || []).length;
+      var ancho = (d1 - d0) / Math.max(cuantas, 1);
+      var centro = d0 + ancho * (k + 0.5);
+      var medio = Math.min(ancho * 0.34, 7);
+      ctx.globalAlpha = .32;
+      arcoCanvas(ctx, cx, cy, radioDe(nivel, escala, r0, r1), centro - medio, centro + medio,
+                 j.color, 11);
+      ctx.globalAlpha = 1;
+    });
+    if (d.nivelMio > 0){
+      arcoCanvas(ctx, cx, cy, radioDe(d.nivelMio, escala, r0, r1), d0, d1, j.color, 19, [], true);
+    }
+    var p = pol(cx, cy, r1 + 46, (d0 + d1) / 2);
+    texto(ctx, j.corto, p[0], p[1] + 10, "30px 'Bebas Neue', sans-serif", '#8892a0');
+  });
+
+  // The middle
+  texto(ctx, 'YOUR GYM', cx, cy - 36, '900 22px Outfit, sans-serif', '#8892a0');
+  texto(ctx, String(sumaNiveles()), cx, cy + 60, "128px 'Bebas Neue', sans-serif", '#fff');
+  texto(ctx, 'four games', cx, cy + 96, '700 22px Outfit, sans-serif', '#8892a0');
+
+  // The four rows, clear of the ring's outer edge at 1120
+  var y = 1162;
+  JUEGOS.forEach(function(j){
+    var d = datosDe(j.id);
+    if (!d) return;
+    ctx.fillStyle = '#111118';
+    ctx.fillRect(78, y - 34, A - 156, 54);
+    ctx.fillStyle = j.color;
+    ctx.fillRect(78, y - 34, 6, 54);
+    texto(ctx, j.nombre, 112, y + 4, "34px 'Bebas Neue', sans-serif", '#fff', 'left');
+    texto(ctx, (d.nivelMio || 0) + ' / ' + escala, A - 112, y + 4,
+          "36px 'Bebas Neue', sans-serif", d.nivelMio > 0 ? j.color : '#4a5058', 'right');
+    y += 64;
+  });
+
+  texto(ctx, 'COGNITIVO.DIGITAL', A/2, ALTO - 40, '900 24px Outfit, sans-serif', '#4a5058');
+
+  return new Promise(function(res){
+    lienzo.toBlob(function(b){ res(b) }, 'image/png');
+  });
+}
+
+function nombreArchivo(){
+  var f = new Date();
+  var dos = function(n){ return ('0' + n).slice(-2) };
+  return 'cognitivo-gym-' + f.getFullYear() + dos(f.getMonth() + 1) + dos(f.getDate()) + '.png';
+}
+
+function decirNota(t){
+  $('shNote').textContent = t ||
+    'The image has your levels and your team — never your code and never a name.';
+}
+
+/* Saving. Done with a link that taps itself, which is the only thing
+   that behaves the same on both kinds of phone. */
+$('btnSave').onclick = function(){
+  var b = this; b.disabled = true; b.textContent = 'DRAWING…';
+  (document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve())
+    .then(componerImagen)
+    .then(function(blob){
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url; a.download = nombreArchivo();
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(function(){ URL.revokeObjectURL(url) }, 4000);
+      b.disabled = false; b.textContent = 'SAVE IMAGE';
+      decirNota('Saved to your photos or downloads.');
+    }, function(){
+      b.disabled = false; b.textContent = 'SAVE IMAGE';
+      decirNota('Could not draw the image. Try again.');
+    });
+};
+
+/* Sharing. The button only appears where the phone knows how to
+   share a file: on a desktop without it, a button that does nothing
+   is worse than no button. */
+$('btnShare').onclick = function(){
+  var b = this; b.disabled = true; b.textContent = 'DRAWING…';
+  (document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve())
+    .then(componerImagen)
+    .then(function(blob){
+      var f = new File([blob], nombreArchivo(), { type:'image/png' });
+      return navigator.share({
+        files:[f],
+        title:'Cognitivo Gym',
+        text:'My four games at the Cognitivo Gym.'
+      });
+    })
+    .then(function(){ decirNota('Shared.') },
+          function(e){
+            /* Cancelling is not a failure: the kid opened the share
+               sheet and changed his mind. Telling him "error" there
+               would be lying to him. */
+            if (!(e && e.name === 'AbortError')) decirNota('Could not share. Try Save image.');
+          })
+    .then(function(){ b.disabled = false; b.textContent = 'SHARE' });
+};
+
+(function(){
+  try {
+    if (navigator.canShare && navigator.canShare({ files:[new File([''], 'x.png', { type:'image/png' })] })){
+      $('btnShare').style.display = 'block';
+    }
+  } catch(e){}
+})();
+
+// ── Talking to the server ─────────────────────────────────────────
+function llamar(ruta, cuerpo){
+  return fetch(SERVIDOR + ruta, {
+    method:'POST',
+    headers:{ 'Content-Type':'application/json' },
+    body:JSON.stringify(cuerpo || {})
+  }).then(function(r){
+    return r.json().then(function(j){ return { http:r.status, datos:j } },
+                         function(){ return { http:r.status, datos:null } });
+  });
+}
+
+function decirAviso(t){ $('gateAviso').textContent = t || '' }
+
+function nombreCorto(id){
+  var j = JUEGOS.filter(function(x){ return x.id === id })[0];
+  return j ? j.corto : id;
+}
+
+/* ── THE DOOR, WITH ITS FOUR PIPS ─────────────────────────────────
+   It is drawn the same with no code as with a half-finished one:
+   four little bars, lit for the ones he has. What differs is the
+   text, and that with a code he is shown his own so he does not lose
+   it. */
+function mostrarPuerta(c){
+  $('board').style.display = 'none';
+  $('gate').style.display = 'block';
+  $('teamName').textContent = (c && c.equipo) ? c.equipo.nombre : '';
+
+  var hechos = {};
+  if (c) (c.juegos || []).forEach(function(j){ if (j.jugado) hechos[j.juego] = true });
+  var cuantos = Object.keys(hechos).length;
+
+  var dots = $('gateDots');
+  dots.innerHTML = '';
+  JUEGOS.forEach(function(j){
+    var d = document.createElement('div');
+    d.className = 'dot' + (hechos[j.id] ? ' done' : '');
+    var b = document.createElement('b');
+    var s = document.createElement('span'); s.textContent = j.corto;
+    d.appendChild(b); d.appendChild(s);
+    dots.appendChild(d);
+  });
+
+  if (!c){
+    $('gateTitle').textContent = 'EARN THE BOARD';
+    $('gateText').textContent = 'The board opens when you have played all four games. ' +
+      'The warm-up runs them back to back — four minutes, one minute each.';
+    $('gateWarm').textContent = 'START THE WARM-UP';
+    $('gateMyCode').style.display = 'none';
+    $('gateHave').style.display = 'block';
+    return;
+  }
+
+  var faltan = (c.faltan || []).map(nombreCorto);
+  $('gateTitle').textContent = cuantos === 0 ? 'EARN THE BOARD' : 'ALMOST';
+  $('gateText').textContent = cuantos === 0
+    ? 'You have a code, but no games yet. Play all four and the board opens.'
+    : ('You have played ' + cuantos + ' of 4. Still to go: ' + faltan.join(', ') + '.');
+  $('gateWarm').textContent = cuantos === 0 ? 'START THE WARM-UP' : 'FINISH THE FOUR';
+  $('gateMyCodeV').textContent = c.codigo;
+  $('gateMyCode').style.display = 'block';
+  $('gateHave').style.display = 'none';
+}
+
+function mostrarTablero(){
+  $('gate').style.display = 'none';
+  $('board').style.display = 'block';
+  $('myCode').textContent = DATOS.codigo;
+  $('teamName').textContent = DATOS.equipo ? DATOS.equipo.nombre : 'Gym at large';
+  decirNota('');
+  pintar();
+}
+
+function cargar(codigo){
+  decirAviso('');
+  return llamar('/tablero', { codigo:codigo }).then(function(r){
+    if (r.http === 200 && r.datos && r.datos.ok){
+      try { localStorage.setItem(LLAVE, r.datos.codigo) } catch(e){}
+      /* THE LOCK. The server says so and this page obeys without
+         arguing: with all four, the board; with fewer, the door and
+         what is missing. */
+      if (!r.datos.completo){ DATOS = null; mostrarPuerta(r.datos); return false }
+      DATOS = r.datos;
+      mostrarTablero();
+      return true;
+    }
+    /* A CODE THAT DOES NOT EXIST IS FORGOTTEN. Otherwise whoever
+       mistyped it gets stuck at the door every time he opens the
+       page, with an error he does not understand. */
+    if (r.http === 404){
+      try { localStorage.removeItem(LLAVE) } catch(e){}
+      mostrarPuerta(null);
+      decirAviso('That code is not in the gym. Check it, or go play the four.');
+    } else if (r.http === 0 || !r.datos){
+      decirAviso('Cannot reach the gym right now. Try again in a moment.');
+    } else {
+      decirAviso('Something went wrong. Try again.');
+    }
+    return false;
+  }, function(){
+    decirAviso('Cannot reach the gym right now. Try again in a moment.');
+    return false;
+  });
+}
+
+$('gateGo').onclick = function(){
+  var v = ($('gateCode').value || '').trim();
+  if (!v){ decirAviso('Type your code first.'); return }
+  cargar(v);
+};
+$('gateCode').addEventListener('keydown', function(e){
+  if (e.key === 'Enter') $('gateGo').click();
+});
+
+/* On open: if a code is already saved, ask about it. The door is for
+   whoever has not played the four and for a new phone, not for every
+   day. */
+(function(){
+  var guardado = null;
+  try { guardado = localStorage.getItem(LLAVE) } catch(e){}
+  if (guardado) cargar(guardado); else mostrarPuerta(null);
+})();
+</script>
+</body>
+</html>
