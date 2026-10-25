@@ -78,6 +78,8 @@
   .lbl{font-family:'Bebas Neue',sans-serif;font-size:10px;letter-spacing:1.2px;
     fill:var(--muted);text-anchor:middle}
   .lbl.on{fill:#fff}
+  .rung{font-family:'Outfit',sans-serif;font-size:6.8px;font-weight:900;
+    fill:var(--muted);text-anchor:middle;letter-spacing:.3px}
 
   /* The middle of the drawing is HTML sitting on top of the SVG: it
      is text that changes, and SVG text does not wrap onto a second
@@ -327,15 +329,42 @@ function pintar(){
   var escala = DATOS.escala || 6;
   ['gRings','gSectors','gMarks','gLabels'].forEach(function(g){ $(g).innerHTML = '' });
 
-  /* The background rings are the levels. On a short scale one ring
-     per level; on a long one every five, because twenty-five circles
-     at this size are a smudge. */
-  var paso = escala <= 12 ? 1 : 5;
-  for (var n = paso; n <= escala; n += paso){
-    $('gRings').appendChild(el('circle', { cx:CX, cy:CY, r:radio(n, escala).toFixed(2), 'class':'ring-bg' }));
-  }
+  /* ── THE LADDER ─────────────────────────────────────────────────
+     One rung per level, in every quadrant, so a player can count
+     where he is instead of guessing from how far out his arc sits.
+     Every fifth rung is brighter, which is what makes 25 of them
+     readable rather than a smudge — the eye counts in fives.
+
+     Drawn per quadrant and not as full circles so each game has its
+     own ladder, and so the rungs stop at the gaps instead of running
+     through them. The numbers below go up the gap at the top, once:
+     the scale is the same in all four, and printing 5/10/15/20/25
+     four times over would cost more legibility than it buys. */
+  JUEGOS.forEach(function(j, i){
+    var t = tramo(i), d0 = t[0], d1 = t[1];
+    for (var n = 1; n <= escala; n++){
+      var fuerte = (n % 5 === 0);
+      $('gRings').appendChild(el('path', {
+        d:arco(radio(n, escala), d0, d1), fill:'none',
+        stroke:'rgba(255,255,255,' + (fuerte ? .17 : .055) + ')',
+        'stroke-width':fuerte ? 1.1 : .7
+      }));
+    }
+  });
   $('gRings').appendChild(el('circle', { cx:CX, cy:CY, r:R0, 'class':'ring-bg' }));
   $('gRings').appendChild(el('circle', { cx:CX, cy:CY, r:R1, 'class':'ring-bg' }));
+
+  /* The numbers, straight up the gap between Fortress and Recall —
+     which is exactly 12 o'clock, so they read as an axis rather than
+     as something belonging to either game. */
+  for (var n = 5; n <= escala; n += 5){
+    /* No backing plate behind them. The gap is already bare — the
+       rungs stop at its edges — so a dark rect per number only
+       stacked up into a slot cut through the ring. */
+    var num = el('text', { x:CX, y:(CY - radio(n, escala) + 2.4).toFixed(1), 'class':'rung' });
+    num.textContent = n;
+    $('gRings').appendChild(num);
+  }
 
   JUEGOS.forEach(function(j, i){
     var d = datosDe(j.id);
@@ -513,10 +542,6 @@ function componerImagen(){
 
   // The ring
   var cx = A/2, cy = 712, r0 = 168, r1 = 408;
-  var paso = escala <= 12 ? 1 : 5;
-  for (var n = paso; n <= escala; n += paso){
-    arcoCanvas(ctx, cx, cy, radioDe(n, escala, r0, r1), 0, 360, 'rgba(255,255,255,.06)', 2);
-  }
   arcoCanvas(ctx, cx, cy, r0, 0, 360, 'rgba(255,255,255,.1)', 2);
   arcoCanvas(ctx, cx, cy, r1, 0, 360, 'rgba(255,255,255,.1)', 2);
 
@@ -533,6 +558,15 @@ function componerImagen(){
     ctx.arc(cx, cy, r0, d1 * Math.PI / 180, d0 * Math.PI / 180, true);
     ctx.closePath();
     ctx.fillStyle = j.color; ctx.globalAlpha = .07; ctx.fill(); ctx.globalAlpha = 1;
+
+    /* The ladder, same as on screen: a rung per level, every fifth
+       one brighter. A saved picture that did not have it would make
+       the arcs unreadable — there would be nothing to count against. */
+    for (var n = 1; n <= escala; n++){
+      var fuerte = (n % 5 === 0);
+      arcoCanvas(ctx, cx, cy, radioDe(n, escala, r0, r1), d0, d1,
+                 'rgba(255,255,255,' + (fuerte ? .17 : .055) + ')', fuerte ? 2.6 : 1.6);
+    }
 
     if (d.nivelGym > 0){
       arcoCanvas(ctx, cx, cy, radioDe(d.nivelGym, escala, r0, r1), d0, d1,
@@ -555,6 +589,12 @@ function componerImagen(){
     var p = pol(cx, cy, r1 + 46, (d0 + d1) / 2);
     texto(ctx, j.corto, p[0], p[1] + 10, "30px 'Bebas Neue', sans-serif", '#8892a0');
   });
+
+  // The ladder's numbers, up the gap at twelve o'clock
+  for (var n = 5; n <= escala; n += 5){
+    texto(ctx, String(n), cx, cy - radioDe(n, escala, r0, r1) + 7,
+          '900 19px Outfit, sans-serif', '#8892a0');
+  }
 
   // The middle
   texto(ctx, 'YOUR GYM', cx, cy - 36, '900 22px Outfit, sans-serif', '#8892a0');
