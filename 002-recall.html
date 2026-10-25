@@ -831,6 +831,9 @@ var WARM = {
    Written as functions on WARM rather than called directly, so the
    engine never has to know a single variable name from the game. */
 WARM.hostScore = function(){
+  /* pointsFor the best chain this attempt finished. The engine
+     keeps the best across attempts, so this only has to speak for
+     the attempt in hand. */
   return (typeof gameState === 'object' && gameState) ? (gameState.sc || 0) : 0;
 };
 WARM.hostRestart = function(){
@@ -967,12 +970,21 @@ function warmPaint(){
   WARM.raf = requestAnimationFrame(warmPaint);
 }
 
-/* A run broke with time still on the clock: bank what it was worth and
+/* A run broke with time still on the clock: keep what it was worth and
    start another one. The clock is not touched here — that is the whole
-   point of banking rather than ending. */
+   point of keeping rather than ending.
+
+   THE STATION KEEPS YOUR BEST ATTEMPT, NOT THE SUM OF THEM, because
+   that is how the four-quarter scrimmage scores a quarter. Reaching a
+   chain of six once is the thing being measured; getting to three
+   twice is not the same achievement and no longer pays as if it were.
+
+   Starting again quickly still matters — it is how you get more
+   attempts at a long chain inside the minute — but a short, panicked
+   restart can no longer pad a score. */
 function warmAfterMiss(){
   if (!WARM.on || WARM.ending) return;
-  WARM.banked += WARM.hostScore();
+  WARM.banked = Math.max(WARM.banked, WARM.hostScore());
   WARM.hostRestart();
 }
 
@@ -982,8 +994,9 @@ function warmFinishStation(){
   if (WARM.raf){ cancelAnimationFrame(WARM.raf); WARM.raf = null }
 
   /* The attempt that was in the air when the buzzer went still counts.
-     It was played inside the minute. */
-  var total = WARM.banked + WARM.hostScore();
+     It was played inside the minute — and if it was the best of them,
+     it is the one that stands. */
+  var total = Math.max(WARM.banked, WARM.hostScore());
   WARM.hostStop();
   warmWrite(WARM.STATION, total);
 
@@ -1299,10 +1312,26 @@ function handleTap(idx){
         setPlayTimeout(function(){roundComplete(false)},2000);
     }
 }
+/* THE SCRIMMAGE'S SCORING, in the gym.
+
+   One point for the first cell of a chain, two for the second, three
+   for the third — so a chain of L is worth L(L+1)/2. The same curve
+   the four-quarter scrimmage runs on, and for the same reason: each
+   cell you add is worth more than the last, because holding a chain
+   of six is far more than twice as hard as holding a chain of three.
+
+   A LEVEL IS A CHAIN YOU FINISHED. Nothing is scored for a chain you
+   were part way through when you missed or when time ran out. */
+function pointsFor(level){ return level > 0 ? (level * (level + 1)) / 2 : 0; }
+
 function roundComplete(success){
     isPlaying=false;canTap=false;
     if(success){
-        gameState.sc+=gameState.cellCount*10;
+        /* The chain just finished is the level reached. The score is
+           what that level is worth, not a running tally — so a longer
+           chain replaces a shorter one rather than adding to it. */
+        if(gameState.cellCount>gameState.best)gameState.best=gameState.cellCount;
+        gameState.sc=pointsFor(gameState.best);
         gameState.streak++;
         var intensity=gameState.streak>=5?'party':gameState.streak>=3?'big':'medium';
         var msgs=gameState.streak>=5?['🏆 LEGEND!','🏆 WOW!']:gameState.streak>=3?['🔥 FIRE!','🤣 AMAZING!']:['😄 NICE!','😊 GREAT!'];
