@@ -815,21 +815,20 @@ var WARM = {
    watching kids play both and comparing what they actually score.
    This gets the station scores into the same order of magnitude so
    the breakdown means something; it does not make them interchangeable. */
-WARM.PER_ITEM_25 = 10;
 WARM.hostScore = function(){
-  /* repShotLog holds every round of this attempt with its own points,
-     which for Fortress is the round's sequence length. */
-  var largo = 0;
-  try { repShotLog.forEach(function(r){ largo += (r.pts || 0) }) } catch(e){}
+  /* The highest round FINISHED in this attempt is the level reached,
+     and the level is worth what the scrimmage says it is worth.
 
-  /* The alphabet this run is actually using — the three-drum variant
-     is worth less per item than the five, and reading drumCount keeps
-     that honest instead of assuming five. */
-  var opciones = 5;
-  try { if (typeof drumCount === 'number' && drumCount > 1) opciones = drumCount } catch(e){}
-  var escala = Math.log(opciones) / Math.log(25);
-
-  return Math.round(largo * WARM.PER_ITEM_25 * escala);
+     The old log(5)/log(25) scaling is gone with it. That existed to
+     put a five-target game on the same per-cell footing as a
+     twenty-five-cell one; the scrimmage does not scale — its own
+     Fortress has five live spots and pays pointsFor straight — so
+     neither does this. All four stations now read the same. */
+  var alto = 0;
+  try {
+    repShotLog.forEach(function(r){ if(r.hit && r.round > alto) alto = r.round });
+  } catch(e){}
+  return pointsFor(alto);
 };
 WARM.hostRestart = function(){
   /* Straight back in, with no three-second countdown: the countdown
@@ -958,12 +957,21 @@ function warmPaint(){
   WARM.raf = requestAnimationFrame(warmPaint);
 }
 
-/* A run broke with time still on the clock: bank what it was worth and
+/* A run broke with time still on the clock: keep what it was worth and
    start another one. The clock is not touched here — that is the whole
-   point of banking rather than ending. */
+   point of keeping rather than ending.
+
+   THE STATION KEEPS YOUR BEST ATTEMPT, NOT THE SUM OF THEM, because
+   that is how the four-quarter scrimmage scores a quarter. Reaching a
+   chain of six once is the thing being measured; getting to three
+   twice is not the same achievement and no longer pays as if it were.
+
+   Starting again quickly still matters — it is how you get more
+   attempts at a long chain inside the minute — but a short, panicked
+   restart can no longer pad a score. */
 function warmAfterMiss(){
   if (!WARM.on || WARM.ending) return;
-  WARM.banked += WARM.hostScore();
+  WARM.banked = Math.max(WARM.banked, WARM.hostScore());
   WARM.hostRestart();
 }
 
@@ -973,8 +981,9 @@ function warmFinishStation(){
   if (WARM.raf){ cancelAnimationFrame(WARM.raf); WARM.raf = null }
 
   /* The attempt that was in the air when the buzzer went still counts.
-     It was played inside the minute. */
-  var total = WARM.banked + WARM.hostScore();
+     It was played inside the minute — and if it was the best of them,
+     it is the one that stands. */
+  var total = Math.max(WARM.banked, WARM.hostScore());
   WARM.hostStop();
   warmWrite(WARM.STATION, total);
 
@@ -1201,6 +1210,18 @@ function wireModeScreen(){
   };
   paintMode();
 }
+
+/* THE SCRIMMAGE'S SCORING, in the gym.
+
+   One point for the first cell of a chain, two for the second, three
+   for the third — so a chain of L is worth L(L+1)/2. The same curve
+   the four-quarter scrimmage runs on, and for the same reason: each
+   cell you add is worth more than the last, because holding a chain
+   of six is far more than twice as hard as holding a chain of three.
+
+   A LEVEL IS A CHAIN YOU FINISHED. Nothing is scored for a chain you
+   were part way through when you missed or when time ran out. */
+function pointsFor(level){ return level > 0 ? (level * (level + 1)) / 2 : 0; }
 
 function repStart(){
 pintarCancha();
