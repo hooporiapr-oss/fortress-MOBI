@@ -39,7 +39,15 @@ if (localStorage.getItem('rct-mobile-pass') !== '1') {
   .quarter-name{font-family:'Bebas Neue',sans-serif;font-size:1.15rem;letter-spacing:1.5px;color:#fff;line-height:1.1}
   .quarter-desc{font-size:.64rem;color:var(--muted);margin-top:4px;line-height:1.3}
 
-  /* ── THE WARM-UP CARD ─────────────────────────────────────────────
+  /* ── THE CARD FOR THE FOUR ────────────────────────────────────────
+     Called THE WARM-UP until the board arrived, and the name stopped
+     being true the moment playing all four became the thing that
+     opens it. A warm-up is what you do before the real thing; this is
+     the real thing. The engine underneath is still called WARM in all
+     four games and the filename is still warmup-final.html — those are
+     internal names nobody reads, and renaming them would be a
+     four-file refactor that changes nothing on screen.
+
      The only thing on this page that is a whole session rather than a
      single game, so it is the only one painted solid: everything above
      is a dark card with a tinted edge, and this one is filled. It does
@@ -109,7 +117,7 @@ if (localStorage.getItem('rct-mobile-pass') !== '1') {
        like extras. They are four stations of one warm-up and they are
        worth the same, so it joins the list as Q4 — the order the
        warm-up itself runs them in. -->
-  <div class="handle-label">Memory Warmups</div>
+  <div class="handle-label">The Games</div>
   <div class="game-list">
     <a class="quarter-card" href="002-recall.html">
       <div class="quarter-num">Q1</div>
@@ -139,8 +147,8 @@ if (localStorage.getItem('rct-mobile-pass') !== '1') {
        has not played yet. The run writes its own way there. -->
   <a class="warm-card" href="002-recall.html?warm=1">
     <div class="warm-kick">⏱ 4 Minutes · Runs Itself</div>
-    <div class="warm-name">THE WARM-UP</div>
-    <div class="warm-desc">All four, one minute each, start to finish without touching anything. Miss and it starts you again — your minute keeps running.</div>
+    <div class="warm-name">THE FOUR</div>
+    <div class="warm-desc">All four, one minute each, start to finish without touching anything. Miss and it starts you again — your minute keeps running. Play all four and your board opens.</div>
     <div class="warm-chips">
       <span class="warm-chip">1 · RECALL</span>
       <span class="warm-chip">2 · RECOGNITION</span>
