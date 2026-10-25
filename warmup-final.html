@@ -50,8 +50,19 @@ html,body{min-height:100%;font-family:'Outfit',sans-serif;background:var(--dark)
   color:var(--muted);margin-bottom:4px}
 .total .val{font-family:'Bebas Neue',sans-serif;font-size:3rem;line-height:1;color:var(--gold)}
 
-.again{width:100%;max-width:380px;padding:16px;border:none;border-radius:14px;
-  background:linear-gradient(135deg,var(--gold),var(--orange));color:#1a0f0f;
+/* The board link leads, so it gets the filled treatment and "Go
+   Again" steps back to an outline. Two solid buttons side by side
+   would be two things shouting, and the one worth tapping first is
+   the one he just earned. */
+.board{width:100%;max-width:380px;padding:16px;border-radius:14px;display:block;
+  background:linear-gradient(135deg,var(--teal),#00B894);color:#04201a;
+  font-family:'Bebas Neue',sans-serif;font-size:1.2rem;letter-spacing:3px;
+  text-transform:uppercase;text-decoration:none;text-align:center;margin-bottom:10px;
+  box-shadow:0 0 28px rgba(0,217,165,.28)}
+.board:active{transform:scale(.98)}
+.again{width:100%;max-width:380px;padding:16px;border:1.5px solid rgba(255,215,0,.45);
+  border-radius:14px;
+  background:rgba(255,215,0,.08);color:var(--gold);
   font-family:'Bebas Neue',sans-serif;font-size:1.2rem;letter-spacing:3px;text-transform:uppercase;
   cursor:pointer;margin-bottom:10px}
 .again:active{transform:scale(.98)}
@@ -76,6 +87,18 @@ html,body{min-height:100%;font-family:'Outfit',sans-serif;background:var(--dark)
     <div class="val" id="total">0</div>
   </div>
 
+  <!-- THE BOARD IS WHAT THIS SCREEN LEADS TO NOW. Four minutes just
+       went by, the four scores are on screen, and this is the moment
+       the board means something — it is also the moment the player
+       has just earned it, because the board opens on having played
+       all four and he has.
+
+       It is a plain link and not a button that checks anything: the
+       board asks the server whether the four are done, and the
+       server's answer is the only one that counts. If this screen
+       tried to decide it too, there would be two locks disagreeing
+       sooner or later. -->
+  <a class="board" href="tablero-gym.html">◴ See Your Board</a>
   <button class="again" id="again">▶ Go Again</button>
   <a class="home" href="fortress-mobile-hub.html">← Back to the gym</a>
 
