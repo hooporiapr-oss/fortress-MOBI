@@ -574,10 +574,11 @@ body.warm .play-container{min-height:0}
    Ten beats at 100 BPM is six seconds, the same window the other two
    give, and the same bar in the same place above the board. */
 #fsStrobe{position:fixed;inset:0;z-index:9998;pointer-events:none;background:var(--orange);opacity:0}
-/* Edge to edge, like Recall's. Capped at the board's width it read
-   as part of the board; spanning the screen it reads as the clock on
-   the whole turn, which is what it is. */
-.timer-wrap{width:100%;margin:0 0 6px;height:6px;
+/* The same column the rest of the screen lives in, 420px, which is
+   what Recall does. Left to run full width it spanned the whole
+   window on a desktop while everything under it stayed in its
+   column — the bar was the only thing touching both edges. */
+.timer-wrap{width:100%;max-width:420px;margin:0 auto 6px;height:6px;
   background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden;
   opacity:0;transition:opacity 0.2s}
 .timer-wrap.active{opacity:1}
