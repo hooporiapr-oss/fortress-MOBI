@@ -145,25 +145,25 @@ if (localStorage.getItem('rct-mobile-pass') !== '1') {
        like extras. They are four stations of one warm-up and they are
        worth the same, so it joins the list as Q4 — the order the
        warm-up itself runs them in. -->
-  <div class="handle-label">The Games</div>
+  <div class="handle-label">The Stations</div>
   <div class="game-list">
     <a class="quarter-card" href="002-recall.html">
-      <div class="quarter-num">Q1</div>
+      <div class="quarter-num">STATION 1</div>
       <div class="quarter-name">THE RECALL</div>
       <div class="quarter-desc">Watch a pattern flash all at once, then repeat it back in order.</div>
     </a>
     <a class="quarter-card" href="003-recognition.html">
-      <div class="quarter-num">Q2</div>
+      <div class="quarter-num">STATION 2</div>
       <div class="quarter-name">THE RECOGNITION</div>
       <div class="quarter-desc">Watch the original, then spot what changed in the echo that follows.</div>
     </a>
     <a class="quarter-card" href="004-replay.html">
-      <div class="quarter-num">Q3</div>
+      <div class="quarter-num">STATION 3</div>
       <div class="quarter-name">THE REPLAY</div>
       <div class="quarter-desc">The chain keeps everything you have learned and adds one more cell every round — and each cell has its own note, so it climbs as it grows.</div>
     </a>
     <a class="quarter-card" href="001-fortress.html">
-      <div class="quarter-num">Q4</div>
+      <div class="quarter-num">STATION 4</div>
       <div class="quarter-name">THE FORTRESS</div>
       <div class="quarter-desc">Watch a sequence of targets light up, then repeat it exactly. Every round adds one more — how far can you go?</div>
     </a>
@@ -174,9 +174,17 @@ if (localStorage.getItem('rct-mobile-pass') !== '1') {
        opened cold from here it would show four zeros to somebody who
        has not played yet. The run writes its own way there. -->
   <a class="warm-card" href="002-recall.html?warm=1">
-    <div class="warm-kick">⏱ 4 Minutes · Runs Itself</div>
+    <!-- IT NO LONGER RUNS ITSELF, and this copy had to stop saying so.
+         The kicker said "Runs Itself" and the line said "start to
+         finish without touching anything"; both were true while a
+         station navigated to the next on a 2.2 second timer. Since
+         each station now ends on a START button, the run waits
+         between stations and the player decides when the next minute
+         begins. Four minutes of play is still four minutes of play —
+         what changed is who starts the clock. -->
+    <div class="warm-kick">⏱ 4 Minutes · Four Stations</div>
     <div class="warm-name">THE FOUR</div>
-    <div class="warm-desc">All four, one minute each, start to finish without touching anything. Miss and it starts you again — your minute keeps running. Play all four and your board opens.</div>
+    <div class="warm-desc">All four, one minute each. Miss and it starts you again — your minute keeps running. You start each station when you are ready. Play all four and your board opens.</div>
     <div class="warm-chips">
       <span class="warm-chip">1 · RECALL</span>
       <span class="warm-chip">2 · RECOGNITION</span>
