@@ -216,16 +216,24 @@
       <div class="leg gym"><i></i>Gym record</div>
     </div>
 
-    <!-- Two ways of reading the same four numbers: what you scored,
-         and what that would be worth to a program. The second is the
-         whole reason the gym and the fundraiser sit next to each
-         other, so it is one tap away and not a separate page. -->
-    <div class="tabs">
-      <button class="tab on" id="tabPts">POINTS</button>
-      <button class="tab" id="tabVal">WHAT IT RAISES</button>
-    </div>
+    <!-- WHAT IT RAISES SE FUE DE AQUI el 26 de octubre de 2026.
+         Esta pestana enseñaba lo que valdrian estos puntos para un
+         programa: cuatro padrinos a 25 centavos, una plantilla de
+         doce, y el total.
+
+         El gimnasio es gratis y se licencia aparte; el que recauda
+         es Cada Punto. Tener la cuenta del dinero dentro del
+         producto gratis mezclaba los dos, y ademas la contaba como
+         una corrida de un jugador, que no es como se recauda desde
+         que las promesas van por juego.
+
+         Vive ahora en la portada de cadapunto.com, en la seccion
+         «Lo que da un juego», contada como un juego de baloncesto.
+
+         Con ella se fueron las dos pestanas: con una sola vista no
+         hay entre que escoger, y una fila de pestanas con un solo
+         boton es un mando que no manda nada. -->
     <div class="rows" id="rows"></div>
-    <div class="valor" id="valor" style="display:none"></div>
 
     <div class="mycode">
       <div class="k">Your code</div>
@@ -521,83 +529,6 @@ function pintarFilas(){
    it feels broken. */
 function elegir(id){ ELEGIDO = (ELEGIDO === id) ? null : id; pintar() }
 
-/* ══════════════════════════════════════════════════════════════════
-   WHAT IT RAISES
-
-   The same example demo.html uses, and the numbers have to stay the
-   same as the ones in that file: four padrinos at 25¢ a point, a
-   roster of twelve, and a $5 floor under which a pledge closes out
-   owing nothing. If they ever disagree, the gym and the fundraiser
-   would be quoting two different deals for the same game.
-
-   WHY 25¢ AND NOT 10¢: the floor. At ten cents a pledge needs 50
-   points to clear $5, and a coach playing one honest minute would be
-   shown zero. At twenty-five it takes 20.
-
-   NOTHING HERE IS A PLEDGE. No money moves, nobody is signed up, and
-   this board is not part of an event — it is what these points would
-   be worth if they were. The panel says so at the bottom, because a
-   number with a dollar sign in front of it will be read as real
-   unless it is told not to be.
-   ══════════════════════════════════════════════════════════════════ */
-var PADRINOS = 4, TARIFA = 0.25, PLANTILLA = 12, PISO = 5;
-
-function dinero(n){ return '$' + n.toFixed(2) }
-function centavos(n){ return Math.round(n * 100) + '¢' }
-
-function vfila(texto, valor){
-  return '<div class="vfila"><span>' + texto + '</span><b>' + valor + '</b></div>';
-}
-
-function pintarValor(){
-  var P = sumaPuntos();
-  var porPunto  = PADRINOS * TARIFA;          // 4 × 0.25 = 1.00
-  var unJugador = P * porPunto;
-  var programa  = unJugador * PLANTILLA;
-  /* A single pledge, not the player's total, is what the floor is
-     measured against — that is how it works in a real event. */
-  var corto = (P * TARIFA) < PISO;
-
-  var h = '<div class="vhead">One player · you</div>' +
-    vfila('Padrinos one player finds', PADRINOS) +
-    vfila('What each pledges per point', centavos(TARIFA)) +
-    vfila('What one of your points is worth', dinero(porPunto)) +
-    vfila('<b style="color:#fff">Your ' + P + ' points</b>',
-          '<span style="color:' + (P > 0 ? '#FFD700' : '#4a5058') + '">' +
-          dinero(unJugador) + '</span>');
-
-  if (corto){
-    h += '<div class="vaviso">At 25¢ a point a pledge needs 20 points to clear the $5 ' +
-         'floor — below that it closes out and nothing is owed. Play the four again and ' +
-         'this lands on a real number.</div>';
-  }
-
-  h += '<div class="vhead">The whole roster</div>' +
-    '<div class="vfila"><span>Now the other eleven, each with their own padrinos.</span></div>' +
-    vfila('Players on a roster', PLANTILLA) +
-    vfila('What each one raises', dinero(unJugador)) +
-    '<div class="vtot"><b>' + dinero(programa) + '</b>' +
-      '<span>for the program · from a single event</span></div>' +
-    '<p class="vnota">An example, not a pledge. Nobody has promised anything here and no ' +
-      'money moves through the gym — this is what these points would be worth in a real ' +
-      'event. A program runs five-minute sets with room for far more runs, so this is the ' +
-      'floor and not the ceiling.</p>';
-
-  $('valor').innerHTML = h;
-}
-
-/* The two tabs show the same four numbers two ways. Nothing is
-   fetched when they switch — it is all in hand already. */
-function verPestana(cual){
-  var puntos = (cual === 'puntos');
-  $('tabPts').className = 'tab' + (puntos ? ' on' : '');
-  $('tabVal').className = 'tab' + (puntos ? '' : ' on');
-  $('rows').style.display  = puntos ? 'grid' : 'none';
-  $('valor').style.display = puntos ? 'none' : 'block';
-  if (!puntos) pintarValor();
-}
-$('tabPts').onclick = function(){ verPestana('puntos') };
-$('tabVal').onclick = function(){ verPestana('valor') };
 
 // ── Talking to the server ─────────────────────────────────────────
 function llamar(ruta, cuerpo){
@@ -671,7 +602,6 @@ function mostrarTablero(){
   $('teamName').textContent = DATOS.equipo ? DATOS.equipo.nombre : 'Gym at large';
   /* Always opens on POINTS, whichever tab was last used. Coming back
      to your board should show you your score, not the arithmetic. */
-  verPestana('puntos');
   pintar();
 }
 
