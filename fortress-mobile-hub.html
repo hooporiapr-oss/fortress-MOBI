@@ -17,7 +17,15 @@ if (localStorage.getItem('rct-mobile-pass') !== '1') {
      is worth them looking like the same door. */
   :root{--gold:#FFD700;--orange:#FF6B35;--teal:#00D9A5;--dark:#0a0a0f;--card:#111118;--text:#fff;--muted:#8892a0;--border:rgba(255,255,255,0.1)}
   *{margin:0;padding:0;box-sizing:border-box}
-  html,body{height:100%;font-family:'Outfit',sans-serif;background:var(--dark);color:var(--text);touch-action:manipulation;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;overflow-x:hidden}
+  /* min-height Y NO height. With height:100% the document is exactly
+     as tall as the window, whatever is inside it — so the page did
+     not scroll, and everything past the fold was simply unreachable.
+     On a 390x844 phone that was the fundraiser card and the footer,
+     sitting at 875px with no way to get to them.
+
+     #hub already carries min-height:100dvh, so the dark background
+     still fills a short page. */
+  html,body{min-height:100%;font-family:'Outfit',sans-serif;background:var(--dark);color:var(--text);touch-action:manipulation;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;overflow-x:hidden}
   #strobe{position:fixed;inset:0;z-index:1;pointer-events:none;background:var(--gold);opacity:0;transition:opacity .07s ease-out}
   #dots{position:fixed;inset:0;z-index:2;pointer-events:none;overflow:hidden}
   .beat-dot{position:absolute;width:46px;height:46px;border-radius:50%;background:radial-gradient(circle at 40% 35%,#ffe066,var(--gold));box-shadow:0 0 28px rgba(255,215,0,.9);opacity:0}
@@ -96,6 +104,26 @@ if (localStorage.getItem('rct-mobile-pass') !== '1') {
   .board-card:active{transform:scale(.98)}
   .board-name{font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:2.5px;line-height:1}
   .board-desc{font-size:.68rem;font-weight:600;color:var(--muted);margin-top:5px;line-height:1.4}
+  /* ── THE FUNDRAISER ───────────────────────────────────────────────
+     The other product of the same house, and the only thing on this
+     page that leaves the gym. It goes last and stays quiet on
+     purpose: somebody who came here to play should find the four
+     games, the board and the way back before they find this.
+
+     A plain dark card, not a filled one. THE FOUR is filled because
+     it is what to do here; this is somewhere else entirely, and a
+     second bright card would argue with the first for a tap it does
+     not deserve on this page. */
+  .cpc-card{max-width:440px;margin:22px auto 0;padding:20px 18px;border-radius:16px;
+    text-align:center;background:var(--card);border:1px solid var(--border)}
+  .cpc-line{font-family:'Bebas Neue',sans-serif;font-size:1.45rem;letter-spacing:1.5px;
+    line-height:1.1;color:#fff}
+  .cpc-line em{font-style:normal;color:var(--orange)}
+  .cpc-sub{font-size:.68rem;color:var(--muted);margin-top:8px;line-height:1.45}
+  .cpc-btn{display:inline-block;margin-top:15px;padding:12px 24px;border-radius:12px;
+    background:var(--orange);color:#1a0f0f;font-family:'Bebas Neue',sans-serif;
+    font-size:1.05rem;letter-spacing:2px;text-decoration:none}
+  .cpc-btn:active{transform:scale(.98)}
   .hub-foot{text-align:center;margin-top:28px;font-size:.6rem;font-weight:900;letter-spacing:.24em;text-transform:uppercase;color:#4a5058}
   .hub-foot b{color:var(--muted);font-style:italic}
   #site-footer{text-align:center;margin-top:14px;padding-bottom:8px}
@@ -162,6 +190,15 @@ if (localStorage.getItem('rct-mobile-pass') !== '1') {
     <div class="board-desc">Where you stand in all four, against the gym. Opens once you have
       played every one of them.</div>
   </a>
+
+  <!-- Last on the page, and off the gym. No ?e= on this one: it goes
+       to the fundraiser's own site, which has nothing to do with gym
+       teams or codes. -->
+  <div class="cpc-card">
+    <div class="cpc-line">Play. Score. <em>Raise Money.</em></div>
+    <div class="cpc-sub">The same four games, run as a pledge fundraiser for a program.</div>
+    <a class="cpc-btn" href="https://cadapunto.com">CADA PUNTO CUENTA</a>
+  </div>
 
   <div class="hub-foot">Powered by <b>Gostar Digital</b></div>
   <div id="site-footer">
