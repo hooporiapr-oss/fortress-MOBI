@@ -237,46 +237,52 @@ console.log('\n5 · Tapping a game drills into it\n');
   eq(await PAG.locator('#hubKick').textContent(), 'YOUR POINTS', 'tapping it again lets go');
 }
 
-console.log('\n6 · The two tabs\n');
+console.log('\n6 · The board carries no money\n');
 {
-  /* The same four numbers read two ways. POINTS is what you scored;
-     WHAT IT RAISES is what that would be worth to a program — which
-     is the only place the gym and the fundraiser touch. */
-  si(await visible(PAG, '#rows'), 'POINTS is the tab it opens on');
-  si(!(await visible(PAG, '#valor')), 'and the value panel is put away');
+  /* THIS SECTION USED TO TEST THE OPPOSITE.
 
-  await PAG.locator('#tabVal').click();
-  await PAG.waitForTimeout(250);
-  si(await visible(PAG, '#valor'), 'tapping the other tab brings it up');
-  si(!(await visible(PAG, '#rows')), 'and puts the rows away');
+     The board had two tabs: POINTS, and WHAT IT RAISES — the same
+     four numbers read as what they would be worth to a program,
+     four padrinos at 25c across a roster of twelve. This checked
+     that the tab worked, that its figures matched demo.html, and
+     that it said plainly it was an example and not a pledge.
 
-  const texto = await PAG.locator('#valor').innerText();
-  /* 63 points · 4 padrinos at 25c = a dollar a point · 12 on a roster. */
-  si(texto.indexOf('$63.00') !== -1, "one player's 63 points come to $63.00");
-  si(texto.indexOf('$756.00') !== -1, 'and a roster of twelve raises $756.00');
-  si(texto.indexOf('25') !== -1, 'at the same rate per point the demo quotes');
+     It came out on 26 October 2026. The gym is free and licensed on
+     its own; Cada Punto is what raises money. Putting the money
+     count inside the free product mixed the two, and it told the
+     story as one player's run — which is not how raising works since
+     pledges went per game.
 
-  /* THE NUMBERS HAVE TO MATCH demo.html. Two pages quoting different
-     deals for the same game is worse than one page quoting none. */
-  const demo = fs.readFileSync(
-    path.join(AQUI, '..', 'final-buzzer-anotado', 'demo.html'), 'utf8');
-  const mio = fs.readFileSync(path.join(AQUI, 'tablero-gym.html'), 'utf8');
-  const saca = (s) => {
-    const m = /var PADRINOS = (\d+), TARIFA = ([\d.]+), PLANTILLA = (\d+), PISO = (\d+)/.exec(s);
-    return m ? m.slice(1).join('/') : null;
-  };
-  if (saca(demo)) eq(saca(mio), saca(demo), 'and the example is the same one demo.html uses');
-  else ok('(demo.html not alongside, example not cross-checked)');
+     It lives on the front page of cadapunto.com now, in «Lo que da
+     un juego», told as a basketball game.
 
-  /* THE LINE THAT HAS TO BE THERE. A number with a dollar sign gets
-     read as real money unless it is told not to be, and nothing here
-     is pledged, owed or collected. */
-  si(/not a pledge/i.test(texto), 'and it says plainly that it is an example, not a pledge');
-  si(/no money moves/i.test(texto), 'and that no money moves through the gym');
+     So what is checked here is the reverse: that no dollar figure is
+     left anywhere on the board, and that nothing of the panel
+     survives half-wired. */
+  si(await visible(PAG, '#rows'), 'the rows are there');
 
-  await PAG.locator('#tabPts').click();
-  await PAG.waitForTimeout(250);
-  si(await visible(PAG, '#rows'), 'and it goes back');
+  const cuerpo = await PAG.locator('body').innerText();
+  si(!/\$\s?\d/.test(cuerpo), 'and not one dollar figure anywhere on it');
+
+  /* Sin comentarios: el fichero EXPLICA que la pestaña se fue, y esa
+     explicación nombra lo que se fue. Buscar sobre el texto crudo
+     hacía fallar la comprobación por decir bien lo que tiene que
+     decir — el mismo error que se arregló hoy en prueba-precio.js. */
+  const mio = fs.readFileSync(path.join(AQUI, 'tablero-gym.html'), 'utf8')
+    .replace(/<!--[\s\S]*?-->/g, '')
+    .replace(/\/\*[\s\S]*?\*\//g, '');
+  for (const [frag, t] of [
+    ['tabVal',        'the tab is gone'],
+    ['pintarValor',   'and the panel that drew it'],
+    ['verPestana',    'and the switch between them'],
+    ['PADRINOS',      'and the padrinos of the example'],
+    ['TARIFA',        'and its rate'],
+    ['WHAT IT RAISES','and its heading']
+  ]) si(mio.indexOf(frag) === -1, t);
+
+  /* A lone tab is a control that controls nothing: the row went with
+     the second one. */
+  si(mio.indexOf('class="tabs"') === -1, 'and the tab row itself, which had nothing left to switch');
 
   /* The share and save buttons are gone, and so is the code that drew
      the image. A dead function nobody calls is the kind of thing that
