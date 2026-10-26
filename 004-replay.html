@@ -220,8 +220,14 @@ body.warm .play-screen{padding-top:calc(var(--nav-height) + 46px + env(safe-area
 
 /* The hand-off. Two and a bit seconds of black with the next station's
    name on it — long enough to read, short enough that nobody reaches
-   for the screen. Nothing here is tappable on purpose: the warm-up
-   runs itself from the first station to the last. */
+   for the screen.
+
+   IT USED TO RUN ITSELF from here, on a 2.2 second timer, and this
+   comment used to say nothing was tappable on purpose. A station now
+   ends on a button: the run stops between stations and the next one
+   starts when the player says so. Those seconds are his — he has
+   just played a minute flat out and the next minute starts the
+   moment he taps. */
 #warmNext{
   position:fixed;inset:0;z-index:2500;display:none;
   flex-direction:column;align-items:center;justify-content:center;
@@ -241,6 +247,15 @@ body.warm .play-screen{padding-top:calc(var(--nav-height) + 46px + env(safe-area
 .wn-dot.done{background:#00D9A5}
 .wn-dot.now{background:var(--orange);transform:scale(1.35);
   box-shadow:0 0 10px var(--orange)}
+.wn-go{margin-top:28px;padding:16px 36px;border:none;border-radius:14px;
+  background:linear-gradient(135deg,var(--gold),var(--orange));color:#1a0f0f;
+  font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:3px;
+  text-transform:uppercase;cursor:pointer}
+.wn-go:active{transform:scale(.98)}
+/* BORN SEALED. The tap that was chasing a cell a second ago must not
+   land on this button and start the next station before the player
+   has read his own score. */
+.wn-go[disabled]{opacity:.45}
 
 /* 3 · 2 · 1 — the lead-in to a station.
    Ported from The Fortress, which already had it: the same 7rem gold
@@ -615,6 +630,7 @@ body.warm .play-container{min-height:0}
   <div class="wn-kick" id="wnKick">UP NEXT</div>
   <div class="wn-name" id="wnName"></div>
   <div class="wn-dots" id="wnDots"></div>
+  <button class="wn-go" id="wnGo">START</button>
 </div>
 
 <div id="screen-intro">
@@ -1657,9 +1673,10 @@ function warmFinishStation(){
   var last = (WARM.STATION >= WARM.LIST.length);
   var next = last ? null : WARM.LIST[WARM.STATION];
 
-  $('wnDone').textContent = WARM.LIST[WARM.STATION - 1].name + ' DONE';
+  var mio = WARM.LIST[WARM.STATION - 1];
+  $('wnDone').textContent = 'STATION ' + mio.n + ' · ' + mio.name + ' COMPLETE';
   $('wnScore').textContent = total;
-  $('wnKick').textContent = last ? 'THAT IS THE FIVE MINUTES' : 'UP NEXT';
+  $('wnKick').textContent = last ? 'THAT IS ALL FOUR' : ('NEXT · STATION ' + next.n);
   $('wnName').textContent = last ? 'YOUR SCORE' : next.name;
 
   var dots = $('wnDots');
@@ -1671,10 +1688,25 @@ function warmFinishStation(){
     dots.appendChild(d);
   });
 
-  $('warmNext').classList.add('show');
-  setTimeout(function(){
+  /* THE RUN STOPS HERE AND WAITS. It used to navigate on a 2.2
+     second timer, which meant the next station started while the
+     player was still reading what he had just scored — and if he
+     wanted a breath between stations, there was no way to take one.
+
+     The button is sealed for a second first, for the same reason the
+     scrimmage seals its own: the tap that was chasing a cell a
+     moment ago is still in the air, and it must not spend itself on
+     starting the next station. */
+  var ir = $('wnGo');
+  ir.textContent = last ? 'SEE YOUR SCORE' : ('START STATION ' + next.n);
+  ir.disabled = true;
+  ir.onclick = function(){
+    if (ir.disabled) return;
     location.href = (last ? WARM.FINAL : next.file) + warmQuery();
-  }, 2200);
+  };
+
+  $('warmNext').classList.add('show');
+  setTimeout(function(){ ir.disabled = false }, 1000);
 }
 
 /* Starting the whole thing. Called from the hub, not from here. */
