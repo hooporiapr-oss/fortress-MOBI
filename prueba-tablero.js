@@ -363,6 +363,42 @@ console.log('\n10 · The hub and the final scoreboard both lead here\n');
   si(/href="tablero-gym\.html\?e=demo"/.test(hub),
      'the hub has a board button, and it carries the team');
   si(/--teal:#00D9A5/.test(hub), 'in the same colour as the other door to the board');
+
+  /* And the way out to the fundraiser, which is the only link on the
+     hub that leaves the gym. No ?e= on it: that site has nothing to
+     do with gym teams or codes, and a stray team id on a fundraiser
+     URL is the kind of thing somebody later tries to make mean
+     something. */
+  si(/href="https:\/\/cadapunto\.com"/.test(hub),
+     'and the fundraiser card points at cadapunto.com');
+  si(!/cadapunto\.com\?e=|cadapunto\.com\/\?e=/.test(hub),
+     'without a team tail, which would mean nothing over there');
+
+  /* AND THE PAGE HAS TO SCROLL. html,body carried height:100%, which
+     makes the document exactly as tall as the window however much is
+     inside it — so nothing past the fold could be reached at all. On
+     a 390x844 phone that was this card and the footer.
+
+     It is checked in a real browser and not by reading the CSS,
+     because what matters is the scrollHeight the phone ends up with,
+     not which property produced it. */
+  const ctxH = await navegador.newContext({ viewport: { width: 390, height: 844 } });
+  await ctxH.addInitScript(() => {
+    try { localStorage.setItem('rct-mobile-pass', '1') } catch(e){}
+  });
+  const pagH = await ctxH.newPage();
+  await pagH.goto('http://localhost:' + PUERTO + '/fortress-mobile-hub.html');
+  await pagH.waitForTimeout(400);
+  const alto = await pagH.evaluate(() => document.documentElement.scrollHeight);
+  si(alto > 844, 'the hub scrolls past one screen (' + alto + 'px of 844)');
+  await pagH.evaluate(() => window.scrollTo(0, 99999));
+  await pagH.waitForTimeout(300);
+  const abajo = await pagH.evaluate(() => {
+    const b = document.querySelector('.cpc-btn').getBoundingClientRect();
+    return b.top >= 0 && b.bottom <= window.innerHeight;
+  });
+  si(abajo, 'and scrolling to the end actually reaches the bottom card');
+  await ctxH.close();
 }
 
 console.log('\n10b · The hub settles the team for every way out of it\n');
