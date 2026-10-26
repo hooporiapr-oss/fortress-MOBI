@@ -1058,6 +1058,33 @@ function warmQuery(){
    The game itself is handed over as a callback rather than started
    here, so the engine still knows nothing about the game under it —
    and nothing is playable until GO!. */
+/* LO QUE SE ENSEÑA ES LO QUE SE APUNTA.
+
+   La estación guarda Math.max(banked, hostScore()) — el mejor
+   intento del minuto, no la suma de ellos. Eso es deliberado y está
+   escrito en warmup-final.html: llegar a seis una vez es el logro;
+   llegar a tres dos veces no es lo mismo.
+
+   Pero la pantalla no enseñaba eso, y cada juego se equivocaba a su
+   manera. Recall y Recognition enseñaban banked + el intento actual,
+   que es una SUMA: con 10 guardados y 8 en el intento, el nene veía
+   18 y se apuntaban 10. Fortress y Replay enseñaban sólo el intento,
+   que al fallar vuelve a cero: con 10 guardados el nene veía 0 y se
+   apuntaban 10.
+
+   En los dos casos el número de la pantalla y el del tablero no eran
+   el mismo, que es justo lo que se reportó el 26 de octubre de 2026:
+   «acabo de terminar las cuatro y el marcador final no es el que
+   enseña el tablero».
+
+   Esto lo arregla en un solo sitio. El máximo nunca baja —con 10
+   guardados y un intento recién empezado enseña 10, no 0— así que el
+   número sigue sin ir hacia atrás, que era lo que se quería evitar.
+   Y es exactamente el que se va a guardar. */
+WARM.shown = function(){
+  return WARM.on ? Math.max(WARM.banked, WARM.hostScore()) : WARM.hostScore();
+};
+
 function warmBegin(onGo){
   WARM.on = true;
   WARM.banked = 0;
@@ -1430,7 +1457,7 @@ stopTurn();
 repSequence=[];repRound=fortStartRound()-1;repPlayerIndex=0;repIsPlaying=false;repIsListening=false;repShotLog=[];
 isPlaying=true;
 runStartTime=performance.now();
-score=0;scoreEl.textContent=0;
+score=0;scoreEl.textContent=WARM.shown();
 streakEl.textContent=0;
 document.getElementById('liveTime').textContent='0.0';
 repNextRound();
@@ -1577,7 +1604,7 @@ if(nd)nd.classList.add('current');
 if(repPlayerIndex>=repSequence.length){
 repIsListening=false;
 stopTurn();
-score=repRound;scoreEl.textContent=score;
+score=repRound;scoreEl.textContent=WARM.shown();
 repShotLog.push({hit:true,round:repRound,pts:repRound});
 repiteloIndicator.textContent='NICE! 🔥 Round '+repRound+' complete';
 repiteloIndicator.className='repitelo-indicator listening';
