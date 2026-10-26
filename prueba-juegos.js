@@ -207,6 +207,26 @@ console.log('\n6 · Posted from both ends, and never twice from one\n');
        fichero + ': and the game name comes out of WARM.STATION, not a second constant');
   }
 
+  /* A STATION ENDS ON A BUTTON, not on a timer. It used to navigate
+     2.2 seconds after the buzzer, which started the next minute
+     while the player was still reading what he had just scored.
+
+     Checked in all four because the between-station screen lives in
+     the WARM block, which is copied rather than shared: a timer left
+     behind in one file would auto-advance one station out of four
+     and look like a glitch rather than a leftover. */
+  for (const [fichero] of JUEGOS){
+    const s = sacarBloque(fichero).fuente;
+    si(s.indexOf("ir.textContent = last ? 'SEE YOUR SCORE'") !== -1,
+       fichero + ': the station ends on a button');
+    si(!/location\.href = \(last \? WARM\.FINAL : next\.file\) \+ warmQuery\(\);\s*\}, \d+\)/.test(s),
+       fichero + ': and no timer is left navigating on its own');
+    si(s.indexOf('setTimeout(function(){ ir.disabled = false }, 1000)') !== -1,
+       fichero + ': with the button sealed for a second first');
+    si(s.indexOf("'STATION ' + mio.n + ' · ' + mio.name + ' COMPLETE'") !== -1,
+       fichero + ': and the screen names the station it just finished');
+  }
+
   /* BYTE FOR BYTE. The block is copied, not shared, exactly like the
      WARM engine above it — so the only thing holding the four copies
      together is a check that says so out loud. */
