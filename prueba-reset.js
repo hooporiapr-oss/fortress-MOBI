@@ -36,7 +36,13 @@ const sitio=http.createServer((q,r)=>{const f=path.join(__dirname,decodeURICompo
       si(await p.isVisible('#s-moment'),'and stays on the moment');}
     await p.click('[data-k="r"]');si(await p.isVisible('#s-run'),'the reset pick runs the routine');
     si((await p.locator('#runBody').innerText()).includes('Look at the rim'),'it starts with the player’s own cue');
-    await p.clock.runFor(1900+10100);
+    await p.clock.runFor(5000);
+    si(await p.isVisible('#cueBtn'),'and the cue waits for the tap, however long it takes');
+    await p.click('#cueBtn');await p.clock.runFor(600);
+    si(await p.locator('#swish').innerText()==='SWISH!'&&await p.isVisible('#shot'),'the tap is answered with a made shot');
+    await p.clock.runFor(1200);
+    si(await p.isVisible('#runBreath'),'then the breath');
+    await p.clock.runFor(10100);
     si((await p.locator('#runBody').innerText()).includes('Lock in.'),'and ends on the player’s own line');
     await p.clock.runFor(1900);
   }
@@ -53,15 +59,20 @@ const sitio=http.createServer((q,r)=>{const f=path.join(__dirname,decodeURICompo
   await p.goto('http://127.0.0.1:4877/005-reset.html');
   si(await p.locator('#goBtn').innerText()==='EMPEZAR','coming back, it opens in Spanish');
   si(await p.isVisible('#editBtn'),'and offers to change the routine');
+  await p.clock.install();await p.reload();await p.click('#goBtn');await p.click('[data-k="r"]');
+  si((await p.locator('#cueBtn').innerText())==='LISTO ✓','in Spanish the cue button says LISTO');
+  await p.click('#cueBtn');await p.clock.runFor(600);
+  si((await p.locator('#swish').innerText())==='¡ADENTRO!','and the made shot says ¡ADENTRO!');
+  await p.evaluate(()=>{localStorage.setItem('fc-lang','en')});
   console.log('6 · Second session the same day, and the next day');
   await p.clock.install();await p.reload();await p.click('#goBtn');
-  for(let i=0;i<5;i++){await p.click('[data-k="r"]');await p.clock.runFor(14000)}
+  for(let i=0;i<5;i++){await p.click('[data-k="r"]');await p.click('#cueBtn');await p.clock.runFor(14000)}
   si(await p.locator('#dnDays').innerText()==='1'&&await p.locator('#dnTotal').innerText()==='2','same day: streak stays 1, sessions 2');
   await p.evaluate(()=>{const d=new Date();d.setDate(d.getDate()-1);const f=x=>x.getFullYear()+'-'+('0'+(x.getMonth()+1)).slice(-2)+'-'+('0'+x.getDate()).slice(-2);localStorage.setItem('cg-reset-dias',JSON.stringify([f(d)]))});
   await p.reload();si(await p.locator('#stDays').innerText()==='1','trained yesterday, not yet today: streak still 1');
   console.log('7 · Nothing leaves the phone, nothing breaks');
   const red=[];p.on('request',q=>{if(!/127\.0\.0\.1|fonts/.test(q.url()))red.push(q.url())});
-  await p.reload();await p.click('#goBtn');await p.click('[data-k="r"]');await p.clock.runFor(14000);
+  await p.reload();await p.click('#goBtn');await p.click('[data-k="r"]');await p.click('#cueBtn');await p.clock.runFor(14000);
   si(red.length===0,'no request leaves the device');
   si(await p.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth),'no sideways scroll at phone width');
   const html=fs.readFileSync(path.join(__dirname,'005-reset.html'),'utf8').toLowerCase();
