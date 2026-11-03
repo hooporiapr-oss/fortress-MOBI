@@ -123,6 +123,7 @@ main{padding:calc(var(--nav-height) + env(safe-area-inset-top) + 18px) 16px calc
 .swish{font-family:'Bebas Neue',sans-serif;font-size:2.4rem;letter-spacing:3px;color:var(--teal);margin-top:6px;opacity:0;transition:opacity .25s}
 .swish.on{opacity:1}
 @media (prefers-reduced-motion:reduce){.shot.go .ball{animation-duration:.01s}.shot.go .net{animation:none}}
+.vid{display:block;width:100%;max-width:270px;aspect-ratio:1/1;object-fit:cover;border-radius:18px;margin:0 auto;background:#14141c;box-shadow:0 0 34px rgba(255,107,53,.25)}
 .shot-sm{height:170px;transform:scale(.8);margin-top:-20px;margin-bottom:-24px}
 .explica{opacity:0;transform:translateY(8px);transition:opacity .35s,transform .35s;display:flex;flex-direction:column;align-items:center;gap:10px;margin-top:12px;width:100%}
 .explica.on{opacity:1;transform:none}
@@ -548,7 +549,7 @@ function correrReset(){
        It waits for a tap, like the cue: an explanation that slides by
        on a timer is one nobody read. */
     var m = ronda[idx];
-    $('runBody').innerHTML = '<div class="shot shot-sm" id="shot"><div class="ball"></div><div class="rim"></div><div class="net"></div></div>' +
+    $('runBody').innerHTML = '<div id="shotSlot"></div>' +
       '<div class="swish" id="swish"></div>' +
       '<div class="explica" id="explica">' +
         '<div class="life why"><div class="life-k why-k" id="whyK"></div><div class="life-t" id="whyText"></div></div>' +
@@ -565,10 +566,8 @@ function correrReset(){
       $('lifeBtn').textContent = t('lifeNext');
     };
     repintarRun();
-    $('lifeBtn').onclick = respiracion;
-    void $('shot').offsetWidth; $('shot').classList.add('go');
-    despues(500, function(){ $('swish').classList.add('on'); swishSonido() });
-    despues(1100, function(){ $('explica').classList.add('on') });
+    $('lifeBtn').onclick = function(){ try { VIDEO.pause() } catch(e){} respiracion() };
+    tiro();
   };
   function respiracion(){
     $('runK').textContent = t('breathK');
@@ -585,6 +584,61 @@ function correrReset(){
       despues(1800, siguienteMomento);
     });
   }
+}
+
+/* ── THE MADE SHOT: OUR OWN VIDEO ─────────────────────────────────
+   swish-reset.mp4 is the phone cut of swish-cada-punto.mp4 (ours, in
+   this repo): square, just the shot, 2.2 seconds, with its own swish
+   sound landing as the ball goes through. One video element, made
+   once and loaded with the page, so every shot after the first plays
+   instantly.
+
+   The tap on DONE is what lets the phone play it with sound. If it
+   will not play with sound, it plays silently; if it will not play
+   at all (no video support, file missing), the drawn hoop and the
+   made-up swish take its place. The screen never comes up empty. */
+var VIDEO = document.createElement('video');
+VIDEO.src = 'swish-reset.mp4';
+VIDEO.preload = 'auto';
+VIDEO.playsInline = true;
+VIDEO.setAttribute('playsinline', '');
+VIDEO.setAttribute('webkit-playsinline', '');
+VIDEO.className = 'vid';
+VIDEO.id = 'swishVid';
+var videoMalo = false;
+VIDEO.addEventListener('error', function(){ videoMalo = true });
+try { if (!VIDEO.canPlayType || !VIDEO.canPlayType('video/mp4')) videoMalo = true } catch(e){ videoMalo = true }
+
+function tiro(){
+  var slot = $('shotSlot'), hecho = false;
+  function dibujado(){
+    if (hecho) return; hecho = true;
+    try { VIDEO.pause() } catch(e){}
+    slot.innerHTML = '<div class="shot shot-sm" id="shot"><div class="ball"></div><div class="rim"></div><div class="net"></div></div>';
+    void $('shot').offsetWidth; $('shot').classList.add('go');
+    despues(500, function(){ $('swish').classList.add('on'); swishSonido() });
+    despues(1100, function(){ $('explica').classList.add('on') });
+  }
+  function enVideo(){
+    if (hecho) return; hecho = true;
+    /* The ball goes through at about one second into the cut. */
+    despues(1000, function(){ $('swish').classList.add('on') });
+    despues(1500, function(){ $('explica').classList.add('on') });
+  }
+  if (videoMalo) { dibujado(); return }
+  slot.appendChild(VIDEO);
+  try { VIDEO.currentTime = 0 } catch(e){}
+  VIDEO.muted = false;
+  var intento;
+  try { intento = VIDEO.play() } catch(e){ dibujado(); return }
+  if (!intento || !intento.then) { enVideo(); return }
+  intento.then(enVideo, function(){
+    VIDEO.muted = true;
+    VIDEO.play().then(enVideo, dibujado);
+  });
+  /* A video that has not started within a second and a half is not
+     going to: the drawn hoop takes over rather than leave a black box. */
+  despues(1500, function(){ if (!hecho) dibujado() });
 }
 
 /* The swish: a short burst of filtered noise, the sound of a net.
