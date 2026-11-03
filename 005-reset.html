@@ -144,7 +144,7 @@ main{padding:calc(var(--nav-height) + env(safe-area-inset-top) + 18px) 16px calc
 <nav class="mini-nav">
   <div class="nav-row">
     <a class="nav-back" href="fortress-mobile-hub.html" id="navBack">&larr; Back</a>
-    <div class="nav-title">THE RESET</div>
+    <div class="nav-title" data-t="navT">THE RESET</div>
     <button class="lang-btn" id="langBtn" onclick="toggleLang()">ES</button>
   </div>
 </nav>
@@ -153,7 +153,7 @@ main{padding:calc(var(--nav-height) + env(safe-area-inset-top) + 18px) 16px calc
   <!-- ── START ─────────────────────────────────────────────────── -->
   <section class="screen on" id="s-start">
     <div class="kick" data-t="kick">Mindset</div>
-    <div class="title">THE <span>RESET</span></div>
+    <div class="title" id="mainTitle">THE <span>RESET</span></div>
     <div class="sub" data-t="tag">The next play is the one that counts.</div>
 
     <div class="streak">
@@ -250,7 +250,7 @@ var T = {
     b1n:'STEP 1 OF 3', b1h:'Pick your cue', b1s:'A small action that tells your body: that play is over.',
     b2n:'STEP 2 OF 3', b2h:'One breath', b2s:'Breathe in for 4, out for 6. It slows you down just enough to see the next play.', b2try:'Tap NEXT when you have tried it once.',
     b3n:'STEP 3 OF 3', b3h:'Pick your line', b3s:'Short, and something you would really say to yourself.', own:'Or write your own (up to 30 letters)',
-    then:'then', breathWord:'one breath', cueDone:'DONE ✓', cueAsk:'Do it now, then tap.', swish:'SWISH!', lifeK:'In life too', lifeNext:'NEXT ✓', whyK:'Why it works'
+    then:'then', breathWord:'one breath', navT:'THE RESET', t1:'THE', t2:'RESET', cueDone:'DONE ✓', cueAsk:'Do it now, then tap.', swish:'SWISH!', lifeK:'In life too', lifeNext:'NEXT ✓', whyK:'Why it works'
   },
   es: {
     kick:'Mentalidad', tag:'La próxima jugada es la que cuenta.',
@@ -271,7 +271,7 @@ var T = {
     b1n:'PASO 1 DE 3', b1h:'Escoge tu señal', b1s:'Un gesto pequeño que le dice a tu cuerpo: esa jugada se acabó.',
     b2n:'PASO 2 DE 3', b2h:'Una respiración', b2s:'Respira entrando en 4 y saliendo en 6. Te frena lo justo para ver la próxima jugada.', b2try:'Toca SIGUIENTE cuando lo hayas probado una vez.',
     b3n:'PASO 3 DE 3', b3h:'Escoge tu frase', b3s:'Corta, y algo que de verdad te dirías.', own:'O escribe la tuya (hasta 30 letras)',
-    then:'luego', breathWord:'una respiración', cueDone:'LISTO ✓', cueAsk:'Hazlo ahora, y toca.', swish:'¡ADENTRO!', lifeK:'En la vida también', lifeNext:'SIGUIENTE ✓', whyK:'Por qué funciona'
+    then:'luego', breathWord:'una respiración', navT:'EL RESET', t1:'EL', t2:'RESET', cueDone:'LISTO ✓', cueAsk:'Hazlo ahora, y toca.', swish:'¡ADENTRO!', lifeK:'En la vida también', lifeNext:'SIGUIENTE ✓', whyK:'Por qué funciona'
   }
 };
 
@@ -388,6 +388,8 @@ function pintar(){
   document.documentElement.lang = LANG;
   $('langBtn').textContent = LANG === 'en' ? 'ES' : 'EN';
   $('navBack').textContent = t('back');
+  $('mainTitle').innerHTML = t('t1') + ' <span>' + t('t2') + '</span>';
+  document.title = t('navT').charAt(0) + t('navT').slice(1).toLowerCase().replace('reset','Reset');
   document.querySelectorAll('[data-t]').forEach(function(el){ el.textContent = t(el.getAttribute('data-t')) });
   $('stDays').textContent = $('dnDays').textContent = racha();
   $('stTotal').textContent = $('dnTotal').textContent = sesiones();
