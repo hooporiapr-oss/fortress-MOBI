@@ -39,7 +39,7 @@ const sitio=http.createServer((q,r)=>{const f=path.join(__dirname,decodeURICompo
     await p.clock.runFor(5000);
     si(await p.isVisible('#cueBtn'),'and the cue waits for the tap, however long it takes');
     await p.click('#cueBtn');await p.clock.runFor(600);
-    si(await p.locator('#swish').innerText()==='SWISH!'&&await p.isVisible('#shot'),'the tap is answered with a made shot');
+    si(await p.locator('#swish').innerText()==='SWISH!'&&await p.isVisible('#shot'),'the tap is answered with a made shot (the drawn hoop, when the video cannot play)');
     await p.clock.runFor(700);
     si((await p.locator('#whyText').innerText()).length>20,'with why the answer works');
     si((await p.locator('#lifeText').innerText()).length>20,'and the lesson for life');
@@ -92,6 +92,35 @@ const sitio=http.createServer((q,r)=>{const f=path.join(__dirname,decodeURICompo
   await p.click('#langBtn');
   si((await p.locator('#lineText').innerText())==='Lock in.'&&(await p.locator('#runK').innerText()).toLowerCase()==='tu frase','and on the line screen');
   await p.clock.runFor(2000);
+  console.log('5c · The made shot is our video');
+  {
+    /* This test browser cannot play H.264, which every phone can, so it
+       is handed the same clip as WebM and told it can play mp4. That
+       exercises the real path: the video plays, then SWISH, then the
+       cards. The plain run above, where the video cannot play, is the
+       fallback path: the drawn hoop. */
+    const WEBM=process.env.SWISH_WEBM;
+    if(!WEBM||!fs.existsSync(WEBM)){console.log('  skip the video path: run with SWISH_WEBM=<a WebM copy of the clip> to check it')} else {
+    const c2=await b.newContext({viewport:{width:390,height:844}});
+    await c2.addInitScript(()=>{HTMLMediaElement.prototype.canPlayType=function(){return 'maybe'};localStorage.setItem('rct-mobile-pass','1');localStorage.setItem('fc-lang','en');localStorage.setItem('cg-reset-rutina',JSON.stringify({cue:0,line:0,own:''}))});
+    const v=await c2.newPage();
+    await v.route(/swish-reset\.mp4/,r=>r.fulfill({status:200,contentType:'video/webm',body:fs.readFileSync(WEBM)}));
+    await v.route(/fonts\.(googleapis|gstatic)/,r=>r.abort());
+    await v.goto('http://127.0.0.1:4877/005-reset.html');
+    await v.click('#goBtn');await v.click('[data-k="r"]');await v.click('#cueBtn');
+    await v.waitForFunction(()=>{const x=document.getElementById('swishVid');return x&&!x.paused&&x.currentTime>0},null,{timeout:5000}).then(()=>ok('the video plays on the swish screen'),()=>mal('the video did not play'));
+    si(await v.locator('#shot').count()===0,'and the drawn hoop stays out of the way');
+    await v.waitForTimeout(1700);
+    si(await v.evaluate(()=>document.getElementById('swish').classList.contains('on')&&document.getElementById('explica').classList.contains('on')),'SWISH and the two cards come in after the ball goes through');
+    const vid=await v.evaluateHandle(()=>document.getElementById('swishVid'));
+    await v.click('#lifeBtn');
+    si(await vid.evaluate(x=>x.paused)&&await v.isVisible('#runBreath'),'NEXT stops the video and moves on to the breath');
+    await v.waitForTimeout(10600);await v.waitForTimeout(2000);
+    await v.click('[data-k="r"]');await v.click('#cueBtn');
+    await v.waitForFunction(()=>{const x=document.getElementById('swishVid');return x&&!x.paused&&x.currentTime<1.2},null,{timeout:5000}).then(()=>ok('the next moment plays it again from the start'),()=>mal('the second shot did not play from the start'));
+    await c2.close();
+    }
+  }
   console.log('6 · Second session the same day, and the next day');
   await p.clock.install();await p.reload();await p.click('#goBtn');
   for(let i=0;i<5;i++){await p.click('[data-k="r"]');await p.click('#cueBtn');await p.clock.runFor(2000);await p.click('#lifeBtn');await p.clock.runFor(14000)}
