@@ -40,13 +40,19 @@ const sitio=http.createServer((q,r)=>{const f=path.join(__dirname,decodeURICompo
     si(await p.isVisible('#cueBtn'),'and the cue waits for the tap, however long it takes');
     await p.click('#cueBtn');await p.clock.runFor(600);
     si(await p.locator('#swish').innerText()==='SWISH!'&&await p.isVisible('#shot'),'the tap is answered with a made shot');
-    await p.clock.runFor(1200);
+    await p.clock.runFor(700);
+    si((await p.locator('#whyText').innerText()).length>20,'with why the answer works');
+    si((await p.locator('#lifeText').innerText()).length>20,'and the lesson for life');
+    await p.clock.runFor(8000);si(await p.isVisible('#lifeBtn')&&!(await p.isVisible('#runBreath')),'and it waits for the tap');
+    await p.click('#lifeBtn');
     si(await p.isVisible('#runBreath'),'then the breath');
     await p.clock.runFor(10100);
     si((await p.locator('#runBody').innerText()).includes('Lock in.'),'and ends on the player’s own line');
     await p.clock.runFor(1900);
   }
   si(vistos.size===5,'five different moments');
+  const fuente=fs.readFileSync(path.join(__dirname,'005-reset.html'),'utf8');
+  si((fuente.match(/life:\{en:'/g)||[]).length===10&&(fuente.match(/why:\{en:'/g)||[]).length===10,'all ten moments carry an explanation and a lesson, in both languages');
   si(await p.isVisible('#s-done'),'the finish screen');
   si(await p.locator('#dnDays').innerText()==='1'&&await p.locator('#dnTotal').innerText()==='1','streak 1, sessions 1');
   si((await p.locator('#yourReset').innerText()).includes('Lock in.'),'it shows the routine back');
@@ -63,16 +69,19 @@ const sitio=http.createServer((q,r)=>{const f=path.join(__dirname,decodeURICompo
   si((await p.locator('#cueBtn').innerText())==='LISTO ✓','in Spanish the cue button says LISTO');
   await p.click('#cueBtn');await p.clock.runFor(600);
   si((await p.locator('#swish').innerText())==='¡ADENTRO!','and the made shot says ¡ADENTRO!');
+  await p.clock.runFor(700);
+  si((await p.locator('.why-k').innerText()).toLowerCase()==='por qué funciona','the explanation comes in Spanish');
+  si((await p.locator('.life-k:not(.why-k)').innerText()).toLowerCase()==='en la vida también','and so does the lesson');
   await p.evaluate(()=>{localStorage.setItem('fc-lang','en')});
   console.log('6 · Second session the same day, and the next day');
   await p.clock.install();await p.reload();await p.click('#goBtn');
-  for(let i=0;i<5;i++){await p.click('[data-k="r"]');await p.click('#cueBtn');await p.clock.runFor(14000)}
+  for(let i=0;i<5;i++){await p.click('[data-k="r"]');await p.click('#cueBtn');await p.clock.runFor(2000);await p.click('#lifeBtn');await p.clock.runFor(14000)}
   si(await p.locator('#dnDays').innerText()==='1'&&await p.locator('#dnTotal').innerText()==='2','same day: streak stays 1, sessions 2');
   await p.evaluate(()=>{const d=new Date();d.setDate(d.getDate()-1);const f=x=>x.getFullYear()+'-'+('0'+(x.getMonth()+1)).slice(-2)+'-'+('0'+x.getDate()).slice(-2);localStorage.setItem('cg-reset-dias',JSON.stringify([f(d)]))});
   await p.reload();si(await p.locator('#stDays').innerText()==='1','trained yesterday, not yet today: streak still 1');
   console.log('7 · Nothing leaves the phone, nothing breaks');
   const red=[];p.on('request',q=>{if(!/127\.0\.0\.1|fonts/.test(q.url()))red.push(q.url())});
-  await p.reload();await p.click('#goBtn');await p.click('[data-k="r"]');await p.click('#cueBtn');await p.clock.runFor(14000);
+  await p.reload();await p.click('#goBtn');await p.click('[data-k="r"]');await p.click('#cueBtn');await p.clock.runFor(2000);await p.click('#lifeBtn');await p.clock.runFor(14000);
   si(red.length===0,'no request leaves the device');
   si(await p.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth),'no sideways scroll at phone width');
   const html=fs.readFileSync(path.join(__dirname,'005-reset.html'),'utf8').toLowerCase();
