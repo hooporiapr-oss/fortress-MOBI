@@ -397,6 +397,7 @@ function pintar(){
   if (pantalla === 's-build') pintarPaso();
   if (pantalla === 's-moment') pintarMomento();
   if (pantalla === 's-done') pintarFin();
+  if (pantalla === 's-run' && repintarRun) repintarRun();
 }
 window.toggleLang = function(){
   LANG = LANG === 'en' ? 'es' : 'en';
@@ -404,7 +405,7 @@ window.toggleLang = function(){
   pintar();
 };
 
-var pantalla = 's-start';
+var pantalla = 's-start', repintarRun = null;
 function ver(id){
   pantalla = id;
   document.querySelectorAll('.screen').forEach(function(s){ s.classList.toggle('on', s.id === id) });
@@ -518,14 +519,27 @@ function pintarMomento(){
 /* The player's own routine, played through: cue, breath, line. */
 function correrReset(){
   var r = leer(KEY_RUTINA, null) || { cue:0, line:0 };
-  var linea = r.own || w(LINES[r.line == null ? 0 : r.line]);
+  function linea(){ return r.own || w(LINES[r.line == null ? 0 : r.line]) }
+  var cue = CUES[r.cue == null ? 0 : r.cue];
   ver('s-run');
   $('runK').textContent = t('cueK');
   /* THE CUE WAITS FOR THE PLAYER. It used to pass on a timer, which
      let a player watch the words go by without doing anything. Now it
      stays until he taps, and the tap is answered with a made shot. */
-  $('runBody').innerHTML = '<div class="run-big">' + w(CUES[r.cue == null ? 0 : r.cue]) + '</div>' +
-    '<button class="cue-btn" id="cueBtn">' + t('cueDone') + '</button><div class="cue-ask">' + t('cueAsk') + '</div>';
+  $('runBody').innerHTML = '<div class="run-big" id="cueText"></div>' +
+    '<button class="cue-btn" id="cueBtn" data-t="cueDone"></button><div class="cue-ask" data-t="cueAsk"></div>';
+  /* EVERY ROUTINE SCREEN KNOWS HOW TO REPAINT ITSELF. These screens are
+     built while the routine runs, so a player who taps ES on one of
+     them would otherwise keep the English until the next moment. Each
+     step leaves its own repaint here, and the language button calls
+     it. */
+  repintarRun = function(){
+    $('runK').textContent = t('cueK');
+    $('cueText').textContent = w(cue);
+    $('cueBtn').textContent = t('cueDone');
+    $('runBody').querySelector('.cue-ask').textContent = t('cueAsk');
+  };
+  repintarRun();
   $('cueBtn').onclick = function(){
     $('runK').textContent = '';
     /* THE MADE SHOT, AND WHAT IT MEANT. The swish answers the tap, and
@@ -535,14 +549,22 @@ function correrReset(){
        on a timer is one nobody read. */
     var m = ronda[idx];
     $('runBody').innerHTML = '<div class="shot shot-sm" id="shot"><div class="ball"></div><div class="rim"></div><div class="net"></div></div>' +
-      '<div class="swish" id="swish">' + t('swish') + '</div>' +
+      '<div class="swish" id="swish"></div>' +
       '<div class="explica" id="explica">' +
-        '<div class="life why"><div class="life-k why-k">' + t('whyK') + '</div><div class="life-t" id="whyText"></div></div>' +
-        '<div class="life"><div class="life-k">' + t('lifeK') + '</div><div class="life-t" id="lifeText"></div></div>' +
-        '<button class="cue-btn" id="lifeBtn">' + t('lifeNext') + '</button>' +
+        '<div class="life why"><div class="life-k why-k" id="whyK"></div><div class="life-t" id="whyText"></div></div>' +
+        '<div class="life"><div class="life-k" id="lifeK"></div><div class="life-t" id="lifeText"></div></div>' +
+        '<button class="cue-btn" id="lifeBtn"></button>' +
       '</div>';
-    $('whyText').textContent = w(m.why);
-    $('lifeText').textContent = w(m.life);
+    repintarRun = function(){
+      $('runK').textContent = '';
+      $('swish').textContent = t('swish');
+      $('whyK').textContent = t('whyK');
+      $('whyText').textContent = w(m.why);
+      $('lifeK').textContent = t('lifeK');
+      $('lifeText').textContent = w(m.life);
+      $('lifeBtn').textContent = t('lifeNext');
+    };
+    repintarRun();
     $('lifeBtn').onclick = respiracion;
     void $('shot').offsetWidth; $('shot').classList.add('go');
     despues(500, function(){ $('swish').classList.add('on'); swishSonido() });
@@ -551,10 +573,15 @@ function correrReset(){
   function respiracion(){
     $('runK').textContent = t('breathK');
     $('runBody').innerHTML = '<div class="breath" id="runBreath"></div>';
+    repintarRun = function(){
+      $('runK').textContent = t('breathK');
+      var b = $('runBreath'); if (b) b.textContent = t(b.classList.contains('out') ? 'breathOut' : 'breathIn');
+    };
     respirar($('runBreath'), function(){
       $('runK').textContent = t('lineK');
-      var big = document.createElement('div'); big.className = 'run-big line'; big.textContent = linea;
+      var big = document.createElement('div'); big.className = 'run-big line'; big.id = 'lineText'; big.textContent = linea();
       $('runBody').innerHTML = ''; $('runBody').appendChild(big);
+      repintarRun = function(){ $('runK').textContent = t('lineK'); $('lineText').textContent = linea() };
       despues(1800, siguienteMomento);
     });
   }
