@@ -96,6 +96,33 @@ main{padding:calc(var(--nav-height) + env(safe-area-inset-top) + 18px) 16px calc
   transform:scale(.45);font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:2px;color:#fff}
 .breath.in{transition:transform 4s ease-in-out;transform:scale(1)}
 .breath.out{transition:transform 6s ease-in-out;transform:scale(.45)}
+.cue-btn{margin-top:26px;padding:16px 44px;border:none;border-radius:999px;background:var(--teal);color:#06231b;
+  font-family:'Bebas Neue',sans-serif;font-size:1.5rem;letter-spacing:.14em;cursor:pointer;box-shadow:0 0 30px rgba(0,217,165,.45)}
+.cue-btn:active{transform:scale(.96)}
+.cue-ask{font-size:.8rem;color:var(--muted);margin-top:12px}
+
+/* THE MADE SHOT. The answer to the cue: the player did the thing, and
+   the screen says so the way a court does, a ball through the net.
+   Drawn in CSS, no image to load. */
+.shot{position:relative;width:180px;height:200px;margin:0 auto}
+.rim{position:absolute;left:30px;top:92px;width:120px;height:14px;border:5px solid var(--orange);border-radius:50%;z-index:3}
+.net{position:absolute;left:42px;top:102px;width:96px;height:62px;z-index:2;
+  background:repeating-linear-gradient(60deg,transparent 0 9px,rgba(255,255,255,.55) 9px 11px),
+             repeating-linear-gradient(-60deg,transparent 0 9px,rgba(255,255,255,.55) 9px 11px);
+  clip-path:polygon(0 0,100% 0,78% 100%,22% 100%);transform-origin:top center}
+.ball{position:absolute;left:62px;top:-70px;width:56px;height:56px;border-radius:50%;z-index:1;
+  background:radial-gradient(circle at 35% 30%,#ff9a5c,#e5551f 60%,#b83e12);
+  box-shadow:inset 0 0 0 2px rgba(0,0,0,.25)}
+.ball::before,.ball::after{content:'';position:absolute;inset:0;border-radius:50%;border:2px solid rgba(40,15,5,.55)}
+.ball::before{border-left-color:transparent;border-right-color:transparent;transform:scaleX(.45)}
+.ball::after{border-top-color:transparent;border-bottom-color:transparent;transform:scaleY(.45)}
+.shot.go .ball{animation:bajar .9s cubic-bezier(.45,0,.7,1) forwards}
+.shot.go .net{animation:red .9s ease-out .35s}
+@keyframes bajar{0%{top:-70px}100%{top:150px;opacity:.15}}
+@keyframes red{0%{transform:scaleY(1)}40%{transform:scaleY(1.22) scaleX(.9)}100%{transform:scaleY(1)}}
+.swish{font-family:'Bebas Neue',sans-serif;font-size:2.4rem;letter-spacing:3px;color:var(--teal);margin-top:6px;opacity:0;transition:opacity .25s}
+.swish.on{opacity:1}
+@media (prefers-reduced-motion:reduce){.shot.go .ball{animation-duration:.01s}.shot.go .net{animation:none}}
 .prog{font-size:.66rem;font-weight:700;letter-spacing:.2em;color:var(--muted);text-align:center;margin-bottom:6px}
 
 .foot{text-align:center;margin-top:30px;font-size:.6rem;font-weight:900;letter-spacing:.24em;text-transform:uppercase;color:#4a5058}
@@ -210,7 +237,7 @@ var T = {
     b1n:'STEP 1 OF 3', b1h:'Pick your cue', b1s:'A small action that tells your body: that play is over.',
     b2n:'STEP 2 OF 3', b2h:'One breath', b2s:'Breathe in for 4, out for 6. It slows you down just enough to see the next play.', b2try:'Tap NEXT when you have tried it once.',
     b3n:'STEP 3 OF 3', b3h:'Pick your line', b3s:'Short, and something you would really say to yourself.', own:'Or write your own (up to 30 letters)',
-    then:'then', breathWord:'one breath'
+    then:'then', breathWord:'one breath', cueDone:'DONE ✓', cueAsk:'Do it now, then tap.', swish:'SWISH!'
   },
   es: {
     kick:'Mentalidad', tag:'La próxima jugada es la que cuenta.',
@@ -230,7 +257,7 @@ var T = {
     b1n:'PASO 1 DE 3', b1h:'Escoge tu señal', b1s:'Un gesto pequeño que le dice a tu cuerpo: esa jugada se acabó.',
     b2n:'PASO 2 DE 3', b2h:'Una respiración', b2s:'Respira entrando en 4 y saliendo en 6. Te frena lo justo para ver la próxima jugada.', b2try:'Toca SIGUIENTE cuando lo hayas probado una vez.',
     b3n:'PASO 3 DE 3', b3h:'Escoge tu frase', b3s:'Corta, y algo que de verdad te dirías.', own:'O escribe la tuya (hasta 30 letras)',
-    then:'luego', breathWord:'una respiración'
+    then:'luego', breathWord:'una respiración', cueDone:'LISTO ✓', cueAsk:'Hazlo ahora, y toca.', swish:'¡ADENTRO!'
   }
 };
 
@@ -458,8 +485,20 @@ function correrReset(){
   var linea = r.own || w(LINES[r.line == null ? 0 : r.line]);
   ver('s-run');
   $('runK').textContent = t('cueK');
-  $('runBody').innerHTML = '<div class="run-big">' + w(CUES[r.cue == null ? 0 : r.cue]) + '</div>';
-  despues(1800, function(){
+  /* THE CUE WAITS FOR THE PLAYER. It used to pass on a timer, which
+     let a player watch the words go by without doing anything. Now it
+     stays until he taps, and the tap is answered with a made shot. */
+  $('runBody').innerHTML = '<div class="run-big">' + w(CUES[r.cue == null ? 0 : r.cue]) + '</div>' +
+    '<button class="cue-btn" id="cueBtn">' + t('cueDone') + '</button><div class="cue-ask">' + t('cueAsk') + '</div>';
+  $('cueBtn').onclick = function(){
+    $('runK').textContent = '';
+    $('runBody').innerHTML = '<div class="shot" id="shot"><div class="ball"></div><div class="rim"></div><div class="net"></div></div>' +
+      '<div class="swish" id="swish">' + t('swish') + '</div>';
+    void $('shot').offsetWidth; $('shot').classList.add('go');
+    despues(500, function(){ $('swish').classList.add('on'); swishSonido() });
+    despues(1700, respiracion);
+  };
+  function respiracion(){
     $('runK').textContent = t('breathK');
     $('runBody').innerHTML = '<div class="breath" id="runBreath"></div>';
     respirar($('runBreath'), function(){
@@ -468,7 +507,24 @@ function correrReset(){
       $('runBody').innerHTML = ''; $('runBody').appendChild(big);
       despues(1800, siguienteMomento);
     });
-  });
+  }
+}
+
+/* The swish: a short burst of filtered noise, the sound of a net.
+   Made on the spot, nothing to download. The tap that triggers it is
+   what lets the browser play sound at all. A phone on silent, or one
+   that refuses audio, simply gets the picture without it. */
+var ctxAudio = null;
+function swishSonido(){
+  try {
+    ctxAudio = ctxAudio || new (window.AudioContext || window.webkitAudioContext)();
+    var c = ctxAudio, n = Math.floor(c.sampleRate * 0.35), buf = c.createBuffer(1, n, c.sampleRate), d = buf.getChannelData(0);
+    for (var i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, 2);
+    var src = c.createBufferSource(); src.buffer = buf;
+    var f = c.createBiquadFilter(); f.type = 'bandpass'; f.frequency.value = 2400; f.Q.value = 0.8;
+    var g = c.createGain(); g.gain.value = 0.5;
+    src.connect(f); f.connect(g); g.connect(c.destination); src.start();
+  } catch(e){}
 }
 function siguienteMomento(){
   idx++; orden = null;
