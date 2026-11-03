@@ -64,6 +64,7 @@ const sitio=http.createServer((q,r)=>{const f=path.join(__dirname,decodeURICompo
   si(await p.evaluate(()=>localStorage.getItem('fc-lang'))==='es','the choice is shared with the other games');
   await p.goto('http://127.0.0.1:4877/005-reset.html');
   si(await p.locator('#goBtn').innerText()==='EMPEZAR','coming back, it opens in Spanish');
+  si(await p.locator('.nav-title').innerText()==='EL RESET'&&(await p.locator('#mainTitle').innerText())==='EL RESET','the title is in Spanish too, top bar and start screen');
   si(await p.isVisible('#editBtn'),'and offers to change the routine');
   await p.clock.install();await p.reload();await p.click('#goBtn');await p.click('[data-k="r"]');
   si((await p.locator('#cueBtn').innerText())==='LISTO ✓','in Spanish the cue button says LISTO');
