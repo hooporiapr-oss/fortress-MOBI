@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script>
+if (localStorage.getItem('rct-mobile-pass') !== '1') {
+  window.location.replace('index.html');
+}
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>The Reset</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@400;600;700;900&display=swap" rel="stylesheet">
+<style>
+/* ══════════════════════════════════════════════════════════════════
+   THE RESET — the gym's mindset program.
+
+   What it trains is the next play: one short routine (a cue, one
+   breath, one line) that a player runs after a miss, a turnover or a
+   bad call, practised until it is automatic.
+
+   WHAT IT IS NOT, and the copy on this page keeps it that way: it is
+   training and habits, like the other stations. No health claims, no
+   talk of treating anything. The words it uses are focus, the next
+   play, being ready.
+
+   NO SCORE AND NO BOARD. Mindset is not a points game, so a session
+   ends on a streak (days in a row trained) instead of a number, and
+   nothing is posted anywhere. Everything it keeps — the routine the
+   player built and the days trained — stays on this device. The four-
+   game board and THE FOUR are untouched by it.
+   ══════════════════════════════════════════════════════════════════ */
+:root{--gold:#FFD700;--orange:#FF6B35;--teal:#00D9A5;--violet:#A78BFA;--dark:#0a0a0f;--card:#111118;--text:#fff;--muted:#8892a0;--border:rgba(255,255,255,0.1);--nav-height:50px}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{min-height:100%;font-family:'Outfit',sans-serif;background:var(--dark);color:var(--text);touch-action:manipulation;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;overflow-x:hidden}
+
+.mini-nav{position:fixed;top:0;left:0;right:0;background:var(--card);border-bottom:1px solid var(--border);padding-top:env(safe-area-inset-top);z-index:1000}
+.nav-row{display:flex;align-items:center;justify-content:space-between;height:50px;padding:0 12px;max-width:640px;margin:0 auto}
+.nav-back{display:flex;align-items:center;gap:6px;padding:8px 12px;background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:8px;font-family:'Outfit',sans-serif;font-size:.75rem;font-weight:600;cursor:pointer;text-decoration:none}
+.nav-title{font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:2px;color:var(--orange)}
+.lang-btn{padding:5px 8px;border:1px solid var(--border);background:0;color:var(--muted);border-radius:4px;font-size:.6rem;font-weight:600;cursor:pointer;min-width:28px;min-height:28px}
+
+main{padding:calc(var(--nav-height) + env(safe-area-inset-top) + 18px) 16px calc(28px + env(safe-area-inset-bottom));max-width:440px;margin:0 auto}
+.screen{display:none}
+.screen.on{display:block}
+
+.title{font-family:'Bebas Neue',sans-serif;font-size:2.4rem;letter-spacing:3px;text-align:center;color:var(--orange);line-height:1}
+.title span{color:var(--gold)}
+.sub{font-size:.82rem;color:var(--muted);text-align:center;margin-top:8px;line-height:1.45}
+.kick{font-size:.62rem;font-weight:900;letter-spacing:.3em;text-transform:uppercase;color:var(--gold);text-align:center;margin-bottom:10px}
+
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;margin-top:16px}
+.card h3{font-family:'Bebas Neue',sans-serif;font-size:1.05rem;letter-spacing:2px;color:var(--gold);margin-bottom:8px}
+.card p,.card li{font-size:.8rem;color:#c9ced6;line-height:1.5}
+.card ol{padding-left:18px}
+
+.btn{display:block;width:100%;padding:17px;border:none;border-radius:12px;background:linear-gradient(135deg,var(--gold),var(--orange));color:#1a0f0f;font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:.16em;cursor:pointer;margin-top:18px;box-shadow:0 4px 24px rgba(255,107,53,.3)}
+.btn:active{transform:scale(.98)}
+.btn:disabled{opacity:.35;box-shadow:none}
+.btn-ghost{display:block;width:100%;padding:13px;border:1px solid var(--border);border-radius:12px;background:transparent;color:var(--muted);font-family:'Outfit',sans-serif;font-size:.82rem;font-weight:600;cursor:pointer;margin-top:10px;text-align:center;text-decoration:none}
+
+.streak{display:flex;justify-content:center;gap:10px;margin-top:16px}
+.streak-box{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:10px 16px;text-align:center;min-width:110px}
+.streak-n{font-family:'Bebas Neue',sans-serif;font-size:1.9rem;color:var(--teal);line-height:1}
+.streak-l{font-size:.6rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-top:3px}
+
+/* Building the routine */
+.step-n{font-family:'Bebas Neue',sans-serif;font-size:.85rem;letter-spacing:2px;color:var(--gold)}
+.step-h{font-family:'Bebas Neue',sans-serif;font-size:1.5rem;letter-spacing:2px;margin:2px 0 4px}
+.choices{display:grid;gap:8px;margin-top:12px}
+.choice{width:100%;text-align:left;padding:14px 14px;border-radius:12px;border:1.5px solid var(--border);background:var(--card);color:#fff;font-family:'Outfit',sans-serif;font-size:.92rem;font-weight:600;cursor:pointer;line-height:1.35}
+.choice.sel{border-color:var(--gold);background:rgba(255,215,0,.08)}
+.choice:active{transform:scale(.99)}
+.own{width:100%;margin-top:8px;padding:13px;border-radius:12px;border:1.5px solid var(--border);background:#0f0f16;color:#fff;font-family:'Outfit',sans-serif;font-size:.92rem;-webkit-user-select:text;user-select:text}
+.own:focus{outline:none;border-color:var(--gold)}
+.dots{display:flex;justify-content:center;gap:6px;margin-top:4px}
+.dot{width:8px;height:8px;border-radius:50%;background:#2a2f38}
+.dot.on{background:var(--gold)}
+
+/* A pressure moment */
+.moment{background:var(--card);border:1px solid var(--border);border-left:4px solid var(--orange);border-radius:14px;padding:18px 16px;margin-top:14px}
+.moment-k{font-size:.6rem;font-weight:900;letter-spacing:.24em;text-transform:uppercase;color:var(--orange);margin-bottom:6px}
+.moment-t{font-family:'Bebas Neue',sans-serif;font-size:1.55rem;letter-spacing:1px;line-height:1.15}
+.ask{font-size:.78rem;color:var(--muted);margin-top:14px;text-align:center}
+.choice.no{border-color:rgba(255,107,53,.7);background:rgba(255,107,53,.08)}
+.nudge{min-height:2.6em;font-size:.8rem;color:var(--orange);text-align:center;margin-top:10px;line-height:1.4}
+
+/* Running the routine */
+.run{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:62vh;text-align:center}
+.run-k{font-size:.62rem;font-weight:900;letter-spacing:.3em;text-transform:uppercase;color:var(--muted);margin-bottom:16px}
+.run-big{font-family:'Bebas Neue',sans-serif;font-size:2.6rem;letter-spacing:2px;line-height:1.05;color:#fff;max-width:340px}
+.run-big.line{color:var(--gold)}
+.breath{width:200px;height:200px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  background:radial-gradient(circle at 40% 35%,rgba(0,217,165,.55),rgba(0,217,165,.12));
+  border:2px solid rgba(0,217,165,.6);box-shadow:0 0 40px rgba(0,217,165,.35);
+  transform:scale(.45);font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:2px;color:#fff}
+.breath.in{transition:transform 4s ease-in-out;transform:scale(1)}
+.breath.out{transition:transform 6s ease-in-out;transform:scale(.45)}
+.prog{font-size:.66rem;font-weight:700;letter-spacing:.2em;color:var(--muted);text-align:center;margin-bottom:6px}
+
+.foot{text-align:center;margin-top:30px;font-size:.6rem;font-weight:900;letter-spacing:.24em;text-transform:uppercase;color:#4a5058}
+.foot b{color:var(--muted);font-style:italic}
+</style>
+</head>
+<body>
+<nav class="mini-nav">
+  <div class="nav-row">
+    <a class="nav-back" href="fortress-mobile-hub.html" id="navBack">&larr; Back</a>
+    <div class="nav-title">THE RESET</div>
+    <button class="lang-btn" id="langBtn" onclick="toggleLang()">ES</button>
+  </div>
+</nav>
+
+<main>
+  <!-- ── START ─────────────────────────────────────────────────── -->
+  <section class="screen on" id="s-start">
+    <div class="kick" data-t="kick">Mindset</div>
+    <div class="title">THE <span>RESET</span></div>
+    <div class="sub" data-t="tag">The next play is the one that counts.</div>
+
+    <div class="streak">
+      <div class="streak-box"><div class="streak-n" id="stDays">0</div><div class="streak-l" data-t="stDays">Days in a row</div></div>
+      <div class="streak-box"><div class="streak-n" id="stTotal">0</div><div class="streak-l" data-t="stTotal">Sessions</div></div>
+    </div>
+
+    <div class="card">
+      <h3 data-t="howH">How it works</h3>
+      <ol>
+        <li data-t="how1">Build your reset once: a cue, one breath, one line.</li>
+        <li data-t="how2">Five game moments come at you. Pick the response that gets you back into the game.</li>
+        <li data-t="how3">Run your reset every time, until it is automatic.</li>
+      </ol>
+    </div>
+
+    <button class="btn" id="goBtn" onclick="empezar()" data-t="start">START</button>
+    <button class="btn-ghost" id="editBtn" onclick="construir()" style="display:none" data-t="edit">Change my reset</button>
+  </section>
+
+  <!-- ── BUILD THE ROUTINE ─────────────────────────────────────── -->
+  <section class="screen" id="s-build">
+    <div class="dots" id="buildDots"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+    <div id="buildStep"></div>
+    <button class="btn" id="buildNext" onclick="siguientePaso()" disabled data-t="next">NEXT</button>
+  </section>
+
+  <!-- ── A PRESSURE MOMENT ─────────────────────────────────────── -->
+  <section class="screen" id="s-moment">
+    <div class="prog" id="momProg">1 / 5</div>
+    <div class="moment">
+      <div class="moment-k" data-t="momK">Game moment</div>
+      <div class="moment-t" id="momText"></div>
+    </div>
+    <div class="ask" data-t="ask">What do you do next?</div>
+    <div class="choices" id="momChoices"></div>
+    <div class="nudge" id="momNudge"></div>
+  </section>
+
+  <!-- ── RUNNING THE RESET ─────────────────────────────────────── -->
+  <section class="screen" id="s-run">
+    <div class="run">
+      <div class="run-k" id="runK"></div>
+      <div id="runBody"></div>
+    </div>
+  </section>
+
+  <!-- ── DONE ──────────────────────────────────────────────────── -->
+  <section class="screen" id="s-done">
+    <div class="kick" data-t="doneK">Session complete</div>
+    <div class="title" data-t="doneT">5 RESETS DONE</div>
+    <div class="sub" data-t="doneS">That is the routine. Run it after every mistake in a real game, and it gets faster every time.</div>
+    <div class="streak">
+      <div class="streak-box"><div class="streak-n" id="dnDays">0</div><div class="streak-l" data-t="stDays">Days in a row</div></div>
+      <div class="streak-box"><div class="streak-n" id="dnTotal">0</div><div class="streak-l" data-t="stTotal">Sessions</div></div>
+    </div>
+    <div class="card">
+      <h3 data-t="yourH">Your reset</h3>
+      <p id="yourReset"></p>
+    </div>
+    <button class="btn" onclick="empezar()" data-t="again">GO AGAIN</button>
+    <a class="btn-ghost" href="fortress-mobile-hub.html" data-t="toGym">Back to the gym</a>
+  </section>
+
+  <div class="foot">Powered by <b>Gostar Digital</b></div>
+</main>
+
+<script>
+(function(){
+var $ = function(id){ return document.getElementById(id) };
+
+/* ── WORDS ────────────────────────────────────────────────────────
+   Both languages side by side, so a line can never exist in one and
+   not the other. Same language key as the other games ('fc-lang'),
+   so a player who chose Spanish in Recall arrives here in Spanish. */
+var T = {
+  en: {
+    kick:'Mindset', tag:'The next play is the one that counts.',
+    stDays:'Days in a row', stTotal:'Sessions',
+    howH:'How it works',
+    how1:'Build your reset once: a cue, one breath, one line.',
+    how2:'Five game moments come at you. Pick the response that gets you back into the game.',
+    how3:'Run your reset every time, until it is automatic.',
+    start:'START', edit:'Change my reset', next:'NEXT', done:'SAVE MY RESET',
+    momK:'Game moment', ask:'What do you do next?',
+    nudge:'That keeps the last play alive. Let it go and pick the reset.',
+    cueK:'Your cue', breathK:'One breath', lineK:'Your line',
+    breathIn:'IN', breathOut:'OUT',
+    doneK:'Session complete', doneT:'5 RESETS DONE',
+    doneS:'That is the routine. Run it after every mistake in a real game, and it gets faster every time.',
+    yourH:'Your reset', again:'GO AGAIN', toGym:'Back to the gym', back:'← Back',
+    b1n:'STEP 1 OF 3', b1h:'Pick your cue', b1s:'A small action that tells your body: that play is over.',
+    b2n:'STEP 2 OF 3', b2h:'One breath', b2s:'Breathe in for 4, out for 6. It slows you down just enough to see the next play.', b2try:'Tap NEXT when you have tried it once.',
+    b3n:'STEP 3 OF 3', b3h:'Pick your line', b3s:'Short, and something you would really say to yourself.', own:'Or write your own (up to 30 letters)',
+    then:'then', breathWord:'one breath'
+  },
+  es: {
+    kick:'Mentalidad', tag:'La próxima jugada es la que cuenta.',
+    stDays:'Días seguidos', stTotal:'Sesiones',
+    howH:'Cómo funciona',
+    how1:'Arma tu reset una vez: una señal, una respiración, una frase.',
+    how2:'Te llegan cinco momentos de juego. Escoge la respuesta que te devuelve al partido.',
+    how3:'Corre tu reset cada vez, hasta que salga solo.',
+    start:'EMPEZAR', edit:'Cambiar mi reset', next:'SIGUIENTE', done:'GUARDAR MI RESET',
+    momK:'Momento de juego', ask:'¿Qué haces ahora?',
+    nudge:'Eso mantiene viva la jugada pasada. Suéltala y escoge el reset.',
+    cueK:'Tu señal', breathK:'Una respiración', lineK:'Tu frase',
+    breathIn:'ENTRA', breathOut:'SALE',
+    doneK:'Sesión completa', doneT:'5 RESETS LISTOS',
+    doneS:'Esa es la rutina. Córrela después de cada error en un partido de verdad, y cada vez sale más rápido.',
+    yourH:'Tu reset', again:'OTRA VEZ', toGym:'Volver al gym', back:'← Atrás',
+    b1n:'PASO 1 DE 3', b1h:'Escoge tu señal', b1s:'Un gesto pequeño que le dice a tu cuerpo: esa jugada se acabó.',
+    b2n:'PASO 2 DE 3', b2h:'Una respiración', b2s:'Respira entrando en 4 y saliendo en 6. Te frena lo justo para ver la próxima jugada.', b2try:'Toca SIGUIENTE cuando lo hayas probado una vez.',
+    b3n:'PASO 3 DE 3', b3h:'Escoge tu frase', b3s:'Corta, y algo que de verdad te dirías.', own:'O escribe la tuya (hasta 30 letras)',
+    then:'luego', breathWord:'una respiración'
+  }
+};
+
+var CUES = [
+  { en:'Clap your hands once',  es:'Aplaude una vez' },
+  { en:'Touch your jersey',     es:'Toca tu camiseta' },
+  { en:'Look at the rim',       es:'Mira el aro' },
+  { en:'Wipe your shoes',       es:'Limpia tus tenis' }
+];
+var LINES = [
+  { en:'Next play.',     es:'Próxima jugada.' },
+  { en:'I’ve got this.', es:'Yo puedo.' },
+  { en:'Defense now.',   es:'Ahora, defensa.' },
+  { en:'Stay ready.',    es:'Siempre listo.' },
+  { en:'Breathe. Play.', es:'Respira. Juega.' }
+];
+
+/* THE MOMENTS. Each has one response that refocuses (r) and two that
+   keep the last play alive: one by stewing on it, one by trying to
+   make up for it all at once. Both wrong answers are what players
+   really do, which is the point: they should recognise themselves.
+   None of the three says "reset". The right one has to be recognised
+   for what it does, not picked for a word, and picking it is what
+   runs the player's routine. */
+var MOMENTS = [
+  { en:'You miss the go-ahead free throw.', es:'Fallas el tiro libre que ponía a tu equipo arriba.',
+    w1:{en:'Look at the bench and shake your head', es:'Mirar al banco y negar con la cabeza'},
+    w2:{en:'Keep replaying the miss in your head', es:'Seguir repitiendo el fallo en tu cabeza'},
+    r:{en:'Sprint back on defense', es:'Corre de vuelta a defender'} },
+  { en:'The ref calls a foul you did not commit.', es:'El árbitro te pita una falta que no cometiste.',
+    w1:{en:'Argue with the ref', es:'Discutir con el árbitro'},
+    w2:{en:'Stay angry through the next play', es:'Seguir enojado la próxima jugada'},
+    r:{en:'Find your man', es:'Busca a tu hombre'} },
+  { en:'Your defender just scored on you.', es:'Tu marca te acaba de anotar.',
+    w1:{en:'Blame a teammate for the switch', es:'Culpar a un compañero por el cambio'},
+    w2:{en:'Try to score right back by yourself', es:'Querer anotarle de vuelta tú solo'},
+    r:{en:'Guard him tighter', es:'Márcalo más pegado'} },
+  { en:'Coach takes you out of the game.', es:'El coach te saca del partido.',
+    w1:{en:'Walk to the bench upset', es:'Ir al banco molesto'},
+    w2:{en:'Sit down and stop watching', es:'Sentarte y dejar de mirar'},
+    r:{en:'Watch and be ready to go back in', es:'Mira el juego y prepárate para volver'} },
+  { en:'You turn the ball over.', es:'Pierdes el balón.',
+    w1:{en:'Hang your head', es:'Bajar la cabeza'},
+    w2:{en:'Force a risky pass to make up for it', es:'Forzar un pase arriesgado para compensar'},
+    r:{en:'Get back and stop the fast break', es:'Regresa y para el contraataque'} },
+  { en:'The crowd is yelling at you.', es:'El público te está gritando.',
+    w1:{en:'Yell back', es:'Gritarles de vuelta'},
+    w2:{en:'Listen to every word', es:'Escuchar cada palabra'},
+    r:{en:'Eyes on the ball', es:'Ojos en el balón'} },
+  { en:'Your team is down 10 at halftime.', es:'Tu equipo pierde por 10 al medio tiempo.',
+    w1:{en:'Decide the game is lost', es:'Dar el partido por perdido'},
+    w2:{en:'Wait for someone else to fix it', es:'Esperar a que otro lo arregle'},
+    r:{en:'Win the next possession', es:'Gana la próxima posesión'} },
+  { en:'A teammate yells at you for a mistake.', es:'Un compañero te grita por un error.',
+    w1:{en:'Yell back at him', es:'Gritarle de vuelta'},
+    w2:{en:'Stop asking for the ball', es:'Dejar de pedir el balón'},
+    r:{en:'Say "my bad", then next play', es:'Di "mi culpa", y próxima jugada'} },
+  { en:'You airball a wide-open shot.', es:'Tiras un airball estando solo.',
+    w1:{en:'Stop shooting for the rest of the game', es:'No tirar más en todo el partido'},
+    w2:{en:'Joke around so nobody sees it bothered you', es:'Hacer chistes para que no se note'},
+    r:{en:'Take the next open shot with confidence', es:'El próximo tiro abierto, tíralo con confianza'} },
+  { en:'They win the opening tip and score first.', es:'Ganan el salto inicial y anotan primero.',
+    w1:{en:'Feel the game slipping away', es:'Sentir que el partido se va'},
+    w2:{en:'Rush your first shot', es:'Apurar tu primer tiro'},
+    r:{en:'It is one possession, play the next one', es:'Es una posesión, juega la próxima'} }
+];
+
+/* ── WHAT IT KEEPS, ON THIS DEVICE ONLY ───────────────────────────
+   The routine and the days trained. Nothing leaves the phone. Every
+   read and write is guarded: a private window or blocked storage just
+   means the player builds the routine each visit. */
+var KEY_RUTINA = 'cg-reset-rutina', KEY_DIAS = 'cg-reset-dias';
+function leer(k, defecto){ try { var v = JSON.parse(localStorage.getItem(k)); return v == null ? defecto : v } catch(e){ return defecto } }
+function guardar(k, v){ try { localStorage.setItem(k, JSON.stringify(v)) } catch(e){} }
+
+var LANG = 'en';
+try { LANG = localStorage.getItem('fc-lang') || ((navigator.language||'').toLowerCase().indexOf('es') === 0 ? 'es' : 'en') } catch(e){}
+function t(k){ return (T[LANG] && T[LANG][k]) || T.en[k] || '' }
+function w(o){ return o[LANG] || o.en }
+
+function hoy(d){ d = d || new Date(); return d.getFullYear() + '-' + ('0'+(d.getMonth()+1)).slice(-2) + '-' + ('0'+d.getDate()).slice(-2) }
+function racha(){
+  var dias = leer(KEY_DIAS, []), set = {}, n = 0, d = new Date();
+  dias.forEach(function(x){ set[x] = 1 });
+  /* Today not trained yet still counts the streak up to yesterday:
+     the streak only breaks once a whole day goes by. */
+  if (!set[hoy(d)]) d.setDate(d.getDate() - 1);
+  while (set[hoy(d)]) { n++; d.setDate(d.getDate() - 1) }
+  return n;
+}
+function sesiones(){ return leer('cg-reset-total', 0) }
+
+function pintar(){
+  document.documentElement.lang = LANG;
+  $('langBtn').textContent = LANG === 'en' ? 'ES' : 'EN';
+  $('navBack').textContent = t('back');
+  document.querySelectorAll('[data-t]').forEach(function(el){ el.textContent = t(el.getAttribute('data-t')) });
+  $('stDays').textContent = $('dnDays').textContent = racha();
+  $('stTotal').textContent = $('dnTotal').textContent = sesiones();
+  $('editBtn').style.display = leer(KEY_RUTINA, null) ? 'block' : 'none';
+  if (pantalla === 's-build') pintarPaso();
+  if (pantalla === 's-moment') pintarMomento();
+  if (pantalla === 's-done') pintarFin();
+}
+window.toggleLang = function(){
+  LANG = LANG === 'en' ? 'es' : 'en';
+  try { localStorage.setItem('fc-lang', LANG) } catch(e){}
+  pintar();
+};
+
+var pantalla = 's-start';
+function ver(id){
+  pantalla = id;
+  document.querySelectorAll('.screen').forEach(function(s){ s.classList.toggle('on', s.id === id) });
+  window.scrollTo(0, 0);
+}
+
+/* ── BUILDING THE ROUTINE ─────────────────────────────────────── */
+var paso = 0, borrador = null;
+window.construir = function(){
+  var r = leer(KEY_RUTINA, null);
+  borrador = r ? { cue:r.cue, line:r.line, own:r.own || '' } : { cue:null, line:null, own:'' };
+  paso = 0; ver('s-build'); pintarPaso();
+};
+function pintarPaso(){
+  var dots = $('buildDots').children;
+  for (var i = 0; i < dots.length; i++) dots[i].classList.toggle('on', i <= paso);
+  var h = '';
+  if (paso === 0) {
+    h = '<div class="step-n">' + t('b1n') + '</div><div class="step-h">' + t('b1h') + '</div><div class="sub" style="text-align:left">' + t('b1s') + '</div><div class="choices">';
+    CUES.forEach(function(c, i){ h += '<button class="choice' + (borrador.cue === i ? ' sel' : '') + '" data-cue="' + i + '">' + w(c) + '</button>' });
+    h += '</div>';
+  } else if (paso === 1) {
+    h = '<div class="step-n">' + t('b2n') + '</div><div class="step-h">' + t('b2h') + '</div><div class="sub" style="text-align:left">' + t('b2s') + '</div>' +
+        '<div class="run" style="min-height:0;margin-top:22px"><div class="breath" id="tryBreath">' + t('breathIn') + '</div></div>' +
+        '<div class="ask">' + t('b2try') + '</div>';
+  } else {
+    h = '<div class="step-n">' + t('b3n') + '</div><div class="step-h">' + t('b3h') + '</div><div class="sub" style="text-align:left">' + t('b3s') + '</div><div class="choices">';
+    LINES.forEach(function(l, i){ h += '<button class="choice' + (borrador.line === i && !borrador.own ? ' sel' : '') + '" data-line="' + i + '">' + w(l) + '</button>' });
+    h += '</div><input class="own" id="ownLine" maxlength="30" placeholder="' + t('own') + '">';
+  }
+  $('buildStep').innerHTML = h;
+  $('buildNext').textContent = paso === 2 ? t('done') : t('next');
+  if (paso === 2) {
+    var inp = $('ownLine'); inp.value = borrador.own;
+    inp.addEventListener('input', function(){
+      borrador.own = inp.value.trim();
+      if (borrador.own) document.querySelectorAll('[data-line]').forEach(function(b){ b.classList.remove('sel') });
+      listo();
+    });
+  }
+  $('buildStep').querySelectorAll('[data-cue]').forEach(function(b){
+    b.onclick = function(){ borrador.cue = +b.getAttribute('data-cue'); pintarPaso() };
+  });
+  $('buildStep').querySelectorAll('[data-line]').forEach(function(b){
+    b.onclick = function(){ borrador.line = +b.getAttribute('data-line'); borrador.own = ''; pintarPaso() };
+  });
+  if (paso === 1) respirar($('tryBreath'), function(){ $('buildNext').disabled = false }, true);
+  listo();
+}
+var probada = false;
+function listo(){
+  var ok = paso === 0 ? borrador.cue != null
+         : paso === 1 ? probada
+         : (borrador.line != null || !!borrador.own);
+  $('buildNext').disabled = !ok;
+}
+window.siguientePaso = function(){
+  if (paso < 2) { paso++; probada = paso === 1 ? false : probada; pintarPaso(); return }
+  guardar(KEY_RUTINA, { cue:borrador.cue, line:borrador.own ? null : borrador.line, own:borrador.own });
+  sesion();
+};
+
+/* One breath on a circle: in for 4, out for 6. done() runs when the
+   breath is over. */
+var temporizadores = [];
+function despues(ms, f){ temporizadores.push(setTimeout(f, ms)) }
+function respirar(el, done, esPrueba){
+  el.className = 'breath'; el.textContent = t('breathIn');
+  void el.offsetWidth;
+  despues(60, function(){ el.classList.add('in') });
+  despues(4060, function(){ el.classList.remove('in'); el.classList.add('out'); el.textContent = t('breathOut') });
+  despues(10060, function(){ if (esPrueba) probada = true; done && done() });
+}
+
+/* ── A SESSION ───────────────────────────────────────────────────
+   Five moments, drawn fresh each time from the ten. */
+var ronda = [], idx = 0;
+window.empezar = function(){
+  if (!leer(KEY_RUTINA, null)) { construir(); return }
+  sesion();
+};
+function sesion(){
+  var bolsa = MOMENTS.slice();
+  for (var i = bolsa.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var x = bolsa[i]; bolsa[i] = bolsa[j]; bolsa[j] = x }
+  ronda = bolsa.slice(0, 5); idx = 0;
+  ver('s-moment'); pintarMomento();
+}
+var orden = null;
+function pintarMomento(){
+  var m = ronda[idx];
+  if (!orden || orden.idx !== idx) {
+    var o = ['w1','w2','r'];
+    for (var i = o.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var x = o[i]; o[i] = o[j]; o[j] = x }
+    orden = { idx:idx, o:o, malas:{} };
+  }
+  $('momProg').textContent = (idx + 1) + ' / ' + ronda.length;
+  $('momText').textContent = w(m);
+  $('momNudge').textContent = Object.keys(orden.malas).length ? t('nudge') : '';
+  var h = '';
+  orden.o.forEach(function(k){ h += '<button class="choice' + (orden.malas[k] ? ' no' : '') + '" data-k="' + k + '">' + w(m[k]) + '</button>' });
+  $('momChoices').innerHTML = h;
+  $('momChoices').querySelectorAll('[data-k]').forEach(function(b){
+    b.onclick = function(){
+      var k = b.getAttribute('data-k');
+      if (k === 'r') { correrReset(); return }
+      orden.malas[k] = 1; pintarMomento();
+    };
+  });
+}
+
+/* The player's own routine, played through: cue, breath, line. */
+function correrReset(){
+  var r = leer(KEY_RUTINA, null) || { cue:0, line:0 };
+  var linea = r.own || w(LINES[r.line == null ? 0 : r.line]);
+  ver('s-run');
+  $('runK').textContent = t('cueK');
+  $('runBody').innerHTML = '<div class="run-big">' + w(CUES[r.cue == null ? 0 : r.cue]) + '</div>';
+  despues(1800, function(){
+    $('runK').textContent = t('breathK');
+    $('runBody').innerHTML = '<div class="breath" id="runBreath"></div>';
+    respirar($('runBreath'), function(){
+      $('runK').textContent = t('lineK');
+      var big = document.createElement('div'); big.className = 'run-big line'; big.textContent = linea;
+      $('runBody').innerHTML = ''; $('runBody').appendChild(big);
+      despues(1800, siguienteMomento);
+    });
+  });
+}
+function siguienteMomento(){
+  idx++; orden = null;
+  if (idx < ronda.length) { ver('s-moment'); pintarMomento(); return }
+  var dias = leer(KEY_DIAS, []), d = hoy();
+  if (dias.indexOf(d) < 0) { dias.push(d); guardar(KEY_DIAS, dias.slice(-400)) }
+  guardar('cg-reset-total', sesiones() + 1);
+  ver('s-done'); pintar();
+}
+function pintarFin(){
+  var r = leer(KEY_RUTINA, null);
+  if (!r) return;
+  var linea = r.own || w(LINES[r.line == null ? 0 : r.line]);
+  $('yourReset').textContent = w(CUES[r.cue == null ? 0 : r.cue]) + ', ' + t('then') + ' ' + t('breathWord') + ', ' + t('then') + ' “' + linea + '”';
+}
+
+/* Leaving the page mid-breath must not leave timers running into a
+   screen that is gone. */
+window.addEventListener('pagehide', function(){ temporizadores.forEach(clearTimeout) });
+
+pintar();
+})();
+</script>
+</body>
+</html>
