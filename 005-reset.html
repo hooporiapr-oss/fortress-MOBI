@@ -2,9 +2,14 @@
 <html lang="en">
 <head>
 <script>
-if (localStorage.getItem('rct-mobile-pass') !== '1') {
-  window.location.replace('index.html');
-}
+/* THE RESET IS REACHED FROM OUTSIDE THE GYM TOO: the Cada Punto home
+   page links straight here for coaches who already have a code. So
+   instead of bouncing a visitor with no gym pass back to the front
+   door (the rule in the other games), it hands out the pass itself.
+   The gym's front door has no code anymore; the pass is only the key
+   the other games look for. What guards The Reset is the team code
+   below, not this. */
+try { localStorage.setItem('rct-mobile-pass', '1') } catch(e){}
 </script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
@@ -152,8 +157,22 @@ main{padding:calc(var(--nav-height) + env(safe-area-inset-top) + 18px) 16px calc
 </nav>
 
 <main>
+  <!-- ── THE TEAM CODE ─────────────────────────────────────────── -->
+  <section class="screen" id="s-code">
+    <div class="kick" data-t="codeK">For registered teams</div>
+    <div class="title" id="codeTitle">THE <span>RESET</span></div>
+    <div class="sub" data-t="codeS">Free for teams registered with Cada Punto Cuenta. Enter your team code to open it. Your coach has it.</div>
+    <input class="own" id="codeIn" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="60" style="margin-top:22px;text-align:center;font-size:1.05rem;letter-spacing:.06em">
+    <button class="btn" id="codeBtn" onclick="abrirConCodigo()" data-t="codeBtn">UNLOCK</button>
+    <div class="nudge" id="codeMsg"></div>
+    <div class="card" style="text-align:center">
+      <p data-t="codeNo">No code yet? Coaches register their team with Cada Punto Cuenta and get the code by email.</p>
+      <a class="btn-ghost" href="https://cadapunto.com/equipo.html" id="codeReg" data-t="codeReg">Register your team →</a>
+    </div>
+  </section>
+
   <!-- ── START ─────────────────────────────────────────────────── -->
-  <section class="screen on" id="s-start">
+  <section class="screen" id="s-start">
     <div class="kick" data-t="kick">Mindset</div>
     <div class="title" id="mainTitle">THE <span>RESET</span></div>
     <div class="sub" data-t="tag">The next play is the one that counts.</div>
@@ -235,6 +254,12 @@ var $ = function(id){ return document.getElementById(id) };
 var T = {
   en: {
     kick:'Mindset', tag:'The next play is the one that counts.',
+    codeK:'For registered teams', codeBtn:'UNLOCK', codePh:'Team code',
+    codeS:'Free for teams registered with Cada Punto Cuenta. Enter your team code to open it. Your coach has it.',
+    codeBad:'That code did not open The Reset. Check it with your coach.',
+    codeNet:'The code could not be checked right now. Try again in a moment.',
+    codeNo:'No code yet? Coaches register their team with Cada Punto Cuenta and get the code by email.',
+    codeReg:'Register your team →',
     stDays:'Days in a row', stTotal:'Sessions',
     howH:'How it works',
     how1:'Build your reset once: a cue, one breath, one line.',
@@ -256,6 +281,12 @@ var T = {
   },
   es: {
     kick:'Mentalidad', tag:'La próxima jugada es la que cuenta.',
+    codeK:'Para equipos inscritos', codeBtn:'ABRIR', codePh:'Código del equipo',
+    codeS:'Gratis para los equipos inscritos en Cada Punto Cuenta. Escribe el código de tu equipo para abrirlo. Tu coach lo tiene.',
+    codeBad:'Ese código no abrió The Reset. Revísalo con tu coach.',
+    codeNet:'No se pudo comprobar el código ahora. Intenta de nuevo en un momento.',
+    codeNo:'¿Todavía no tienes código? Los coaches inscriben su equipo en Cada Punto Cuenta y reciben el código por correo.',
+    codeReg:'Inscribir mi equipo →',
     stDays:'Días seguidos', stTotal:'Sesiones',
     howH:'Cómo funciona',
     how1:'Arma tu reset una vez: una señal, una respiración, una frase.',
@@ -390,7 +421,8 @@ function pintar(){
   document.documentElement.lang = LANG;
   $('langBtn').textContent = LANG === 'en' ? 'ES' : 'EN';
   $('navBack').textContent = t('back');
-  $('mainTitle').innerHTML = t('t1') + ' <span>' + t('t2') + '</span>';
+  $('mainTitle').innerHTML = $('codeTitle').innerHTML = t('t1') + ' <span>' + t('t2') + '</span>';
+  $('codeIn').placeholder = t('codePh');
   document.title = t('navT').charAt(0) + t('navT').slice(1).toLowerCase().replace('reset','Reset');
   document.querySelectorAll('[data-t]').forEach(function(el){ el.textContent = t(el.getAttribute('data-t')) });
   $('stDays').textContent = $('dnDays').textContent = racha();
@@ -693,6 +725,69 @@ function pintarFin(){
 /* Leaving the page mid-breath must not leave timers running into a
    screen that is gone. */
 window.addEventListener('pagehide', function(){ temporizadores.forEach(clearTimeout) });
+
+/* ── FREE WITH THE TEAM CODE ──────────────────────────────────────
+   The Reset opens with any active Cada Punto team code, checked by
+   the same bw_check every code goes through, which also carries the
+   guess limit (10 wrong codes in 15 minutes stops that connection).
+   The coach shares the code with his players; each phone enters it
+   once and stays open.
+
+   What it sends: the code, and nothing else. The routine, the streak
+   and the answers never leave the phone.
+
+   Checked again quietly on every visit, so a code that is turned off
+   closes The Reset again. A visit with no connection keeps it open:
+   being offline is not a reason to lock a player out. */
+var SB = 'https://sdaphocueugzfvjovuxd.supabase.co';
+var SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNkYXBob2N1ZXVnemZ2am92dXhkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM2MjQyMDgsImV4cCI6MjA5OTIwMDIwOH0.pDAzf4P6dD9eNEBlnP95SdF5BI-R84-Rdc0vKzYcn7M';
+var KEY_CODIGO = 'cg-reset-codigo';
+function codigoVale(k){
+  return fetch(SB + '/rest/v1/rpc/bw_check', {
+    method:'POST',
+    headers:{ 'apikey':SB_KEY, 'Authorization':'Bearer ' + SB_KEY, 'Content-Type':'application/json' },
+    body: JSON.stringify({ p_code:k })
+  }).then(function(r){ if (!r.ok) throw new Error('rpc ' + r.status); return r.json() })
+    .then(function(v){ return v === true });
+}
+/* As typed first, then clean (no accents, spaces or dashes), the same
+   way Mi calendario does: «canovanas 15u-4827» opens like
+   CANOVANAS15U4827. */
+function limpio(k){ return String(k || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase().replace(/[^A-Z0-9]/g, '') }
+function probar(k){
+  return codigoVale(k).then(function(si){
+    var n = limpio(k);
+    if (si || n === k || n.length < 4) return si ? k : null;
+    return codigoVale(n).then(function(si2){ return si2 ? n : null });
+  });
+}
+window.abrirConCodigo = function(){
+  var k = ($('codeIn').value || '').trim();
+  if (k.length < 4) { $('codeMsg').textContent = t('codeBad'); return }
+  $('codeBtn').disabled = true; $('codeMsg').textContent = '…';
+  probar(k).then(function(bueno){
+    $('codeBtn').disabled = false;
+    if (!bueno) { $('codeMsg').textContent = t('codeBad'); return }
+    try { localStorage.setItem(KEY_CODIGO, bueno) } catch(e){}
+    $('codeMsg').textContent = ''; ver('s-start'); pintar();
+  }, function(){
+    $('codeBtn').disabled = false; $('codeMsg').textContent = t('codeNet');
+  });
+};
+$('codeIn').addEventListener('keydown', function(e){ if (e.key === 'Enter') abrirConCodigo() });
+
+var guardado = null;
+try { guardado = localStorage.getItem(KEY_CODIGO) } catch(e){}
+if (guardado) {
+  ver('s-start');
+  codigoVale(guardado).then(function(si){
+    if (si) return;
+    try { localStorage.removeItem(KEY_CODIGO) } catch(e){}
+    if (pantalla === 's-start' || pantalla === 's-done') { ver('s-code'); pintar() }
+  }, function(){ /* offline: stays open */ });
+} else {
+  ver('s-code');
+}
 
 pintar();
 })();
