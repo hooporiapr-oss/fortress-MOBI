@@ -108,16 +108,17 @@ const sitio=http.createServer((q,r)=>{const f=path.join(__dirname,decodeURICompo
     await v.route(/fonts\.(googleapis|gstatic)/,r=>r.abort());
     await v.goto('http://127.0.0.1:4877/005-reset.html');
     await v.click('#goBtn');await v.click('[data-k="r"]');await v.click('#cueBtn');
-    await v.waitForFunction(()=>{const x=document.getElementById('swishVid');return x&&!x.paused&&x.currentTime>0},null,{timeout:5000}).then(()=>ok('the video plays on the swish screen'),()=>mal('the video did not play'));
+    await v.waitForFunction(()=>{const x=document.getElementById('swishVid');return x&&!x.paused&&x.currentTime>=1.4},null,{timeout:5000}).then(()=>ok('the video plays on the swish screen, starting at the shot'),()=>mal('the video did not play'));
     si(await v.locator('#shot').count()===0,'and the drawn hoop stays out of the way');
-    await v.waitForTimeout(1700);
-    si(await v.evaluate(()=>document.getElementById('swish').classList.contains('on')&&document.getElementById('explica').classList.contains('on')),'SWISH and the two cards come in after the ball goes through');
+    await v.waitForFunction(()=>document.getElementById('swish').classList.contains('on'),null,{timeout:5000});
+    si(await v.evaluate(()=>document.getElementById('swishVid').currentTime>=2.75),'SWISH lands when the clip reaches the ball going through, not before');
+    await v.waitForFunction(()=>document.getElementById('explica').classList.contains('on'),null,{timeout:5000}).then(()=>ok('then the two cards'),()=>mal('the cards did not come in'));
     const vid=await v.evaluateHandle(()=>document.getElementById('swishVid'));
     await v.click('#lifeBtn');
     si(await vid.evaluate(x=>x.paused)&&await v.isVisible('#runBreath'),'NEXT stops the video and moves on to the breath');
     await v.waitForTimeout(10600);await v.waitForTimeout(2000);
     await v.click('[data-k="r"]');await v.click('#cueBtn');
-    await v.waitForFunction(()=>{const x=document.getElementById('swishVid');return x&&!x.paused&&x.currentTime<1.2},null,{timeout:5000}).then(()=>ok('the next moment plays it again from the start'),()=>mal('the second shot did not play from the start'));
+    await v.waitForFunction(()=>{const x=document.getElementById('swishVid');return x&&!x.paused&&x.currentTime>=1.4&&x.currentTime<2.6},null,{timeout:5000}).then(()=>ok('the next moment plays it again from the shot'),()=>mal('the second shot did not play from the start'));
     await c2.close();
     }
   }
