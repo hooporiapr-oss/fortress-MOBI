@@ -74,6 +74,24 @@ const sitio=http.createServer((q,r)=>{const f=path.join(__dirname,decodeURICompo
   si((await p.locator('.why-k').innerText()).toLowerCase()==='por qué funciona','the explanation comes in Spanish');
   si((await p.locator('.life-k:not(.why-k)').innerText()).toLowerCase()==='en la vida también','and so does the lesson');
   await p.evaluate(()=>{localStorage.setItem('fc-lang','en')});
+  console.log('5b · Switching language in the middle of the routine');
+  await p.evaluate(()=>localStorage.setItem('fc-lang','en'));
+  await p.clock.install();await p.reload();await p.click('#goBtn');await p.click('[data-k="r"]');
+  si((await p.locator('#cueText').innerText())==='Look at the rim','cue in English');
+  await p.click('#langBtn');
+  si((await p.locator('#cueText').innerText())==='Mira el aro'&&(await p.locator('#cueBtn').innerText())==='LISTO ✓','tap ES on the cue screen: the cue switches on the spot');
+  await p.click('#langBtn');await p.click('#cueBtn');await p.clock.runFor(1200);
+  const whyEn=await p.locator('#whyText').innerText();
+  await p.click('#langBtn');
+  const whyEs=await p.locator('#whyText').innerText();
+  si(whyEs!==whyEn&&(await p.locator('#swish').innerText())==='¡ADENTRO!'&&(await p.locator('#whyK').innerText()).toLowerCase()==='por qué funciona','tap ES on the swish screen: the explanation and the lesson switch on the spot');
+  await p.click('#lifeBtn');await p.clock.runFor(500);
+  await p.click('#langBtn');
+  si((await p.locator('#runK').innerText()).toLowerCase()==='one breath','tap EN during the breath: it switches too');
+  await p.clock.runFor(10000);
+  await p.click('#langBtn');
+  si((await p.locator('#lineText').innerText())==='Lock in.'&&(await p.locator('#runK').innerText()).toLowerCase()==='tu frase','and on the line screen');
+  await p.clock.runFor(2000);
   console.log('6 · Second session the same day, and the next day');
   await p.clock.install();await p.reload();await p.click('#goBtn');
   for(let i=0;i<5;i++){await p.click('[data-k="r"]');await p.click('#cueBtn');await p.clock.runFor(2000);await p.click('#lifeBtn');await p.clock.runFor(14000)}
