@@ -608,6 +608,11 @@ VIDEO.id = 'swishVid';
 var videoMalo = false;
 VIDEO.addEventListener('error', function(){ videoMalo = true });
 try { if (!VIDEO.canPlayType || !VIDEO.canPlayType('video/mp4')) videoMalo = true } catch(e){ videoMalo = true }
+/* Start loading it now, while the player is still reading the start
+   screen and building the routine, so the first shot does not wait on
+   the network. Some phones ignore preload, so it is also asked to load
+   outright. */
+try { if (!videoMalo) VIDEO.load() } catch(e){}
 
 function tiro(){
   var slot = $('shotSlot'), hecho = false;
@@ -636,9 +641,10 @@ function tiro(){
     VIDEO.muted = true;
     VIDEO.play().then(enVideo, dibujado);
   });
-  /* A video that has not started within a second and a half is not
-     going to: the drawn hoop takes over rather than leave a black box. */
-  despues(1500, function(){ if (!hecho) dibujado() });
+  /* A video that has not started within three seconds (a very slow
+     connection on the first shot) is not going to: the drawn hoop
+     takes over rather than leave a black box. */
+  despues(3000, function(){ if (!hecho) dibujado() });
 }
 
 /* The swish: a short burst of filtered noise, the sound of a net.
