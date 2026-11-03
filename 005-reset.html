@@ -123,7 +123,8 @@ main{padding:calc(var(--nav-height) + env(safe-area-inset-top) + 18px) 16px calc
 .swish{font-family:'Bebas Neue',sans-serif;font-size:2.4rem;letter-spacing:3px;color:var(--teal);margin-top:6px;opacity:0;transition:opacity .25s}
 .swish.on{opacity:1}
 @media (prefers-reduced-motion:reduce){.shot.go .ball{animation-duration:.01s}.shot.go .net{animation:none}}
-.vid{display:block;width:100%;max-width:270px;aspect-ratio:1/1;object-fit:cover;border-radius:18px;margin:0 auto;background:#14141c;box-shadow:0 0 34px rgba(255,107,53,.25)}
+/* Widescreen, the clip's own shape: the whole frame, nothing cropped. */
+.vid{display:block;width:100%;max-width:440px;aspect-ratio:16/9;object-fit:cover;border-radius:18px;margin:0 auto;background:#14141c;box-shadow:0 0 34px rgba(255,107,53,.25)}
 .shot-sm{height:170px;transform:scale(.8);margin-top:-20px;margin-bottom:-24px}
 .explica{opacity:0;transform:translateY(8px);transition:opacity .35s,transform .35s;display:flex;flex-direction:column;align-items:center;gap:10px;margin-top:12px;width:100%}
 .explica.on{opacity:1;transform:none}
@@ -589,8 +590,7 @@ function correrReset(){
 /* ── THE MADE SHOT: OUR OWN VIDEO ─────────────────────────────────
    swish-reset.mp4 (ours: a copy of swish-cada-punto.mp4 in this
    repo, the full widescreen clip), played as it is: the
-   page crops it square around the hoop (the hoop sits in the middle
-   of the frame) and starts it at the shot, 1.5 seconds in, so what
+   page shows it widescreen, its own shape, and starts it at the shot, 1.5 seconds in, so what
    the player sees is the ball dropping through and its own swish
    landing about a second later. One video element, made once and
    loaded with the page, so every shot after the first plays
