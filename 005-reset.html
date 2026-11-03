@@ -587,10 +587,13 @@ function correrReset(){
 }
 
 /* ── THE MADE SHOT: OUR OWN VIDEO ─────────────────────────────────
-   swish-reset.mp4 is the phone cut of swish-cada-punto.mp4 (ours, in
-   this repo): square, just the shot, 2.2 seconds, with its own swish
-   sound landing as the ball goes through. One video element, made
-   once and loaded with the page, so every shot after the first plays
+   swish-reset.mp4 (ours: a copy of swish-cada-punto.mp4 in this
+   repo, the full widescreen clip), played as it is: the
+   page crops it square around the hoop (the hoop sits in the middle
+   of the frame) and starts it at the shot, 1.5 seconds in, so what
+   the player sees is the ball dropping through and its own swish
+   landing about a second later. One video element, made once and
+   loaded with the page, so every shot after the first plays
    instantly.
 
    The tap on DONE is what lets the phone play it with sound. If it
@@ -599,6 +602,8 @@ function correrReset(){
    made-up swish take its place. The screen never comes up empty. */
 var VIDEO = document.createElement('video');
 VIDEO.src = 'swish-reset.mp4';
+var VIDEO_DESDE = 1.5;   /* seconds into the clip where the shot starts */
+var VIDEO_SWISH = 2.75;  /* where the ball goes through the net, and its sound lands */
 VIDEO.preload = 'auto';
 VIDEO.playsInline = true;
 VIDEO.setAttribute('playsinline', '');
@@ -626,13 +631,20 @@ function tiro(){
   }
   function enVideo(){
     if (hecho) return; hecho = true;
-    /* The ball goes through at about one second into the cut. */
-    despues(1000, function(){ $('swish').classList.add('on') });
-    despues(1500, function(){ $('explica').classList.add('on') });
+    /* TIED TO THE CLIP, NOT TO A CLOCK. SWISH lands when the clip itself
+       reaches the ball going through the net, and the cards half a
+       second after, however long the phone took to start playing. */
+    function mirar(){
+      if (VIDEO.currentTime >= VIDEO_SWISH) $('swish') && $('swish').classList.add('on');
+      if (VIDEO.currentTime >= VIDEO_SWISH + 0.5 || VIDEO.ended) { $('explica') && $('explica').classList.add('on'); VIDEO.removeEventListener('timeupdate', mirar) }
+    }
+    VIDEO.addEventListener('timeupdate', mirar);
+    /* And a backstop, should the clip stall: the cards never stay hidden. */
+    despues(4000, function(){ $('swish') && $('swish').classList.add('on'); $('explica') && $('explica').classList.add('on') });
   }
   if (videoMalo) { dibujado(); return }
   slot.appendChild(VIDEO);
-  try { VIDEO.currentTime = 0 } catch(e){}
+  try { VIDEO.currentTime = VIDEO_DESDE } catch(e){}
   VIDEO.muted = false;
   var intento;
   try { intento = VIDEO.play() } catch(e){ dibujado(); return }
