@@ -169,8 +169,8 @@ const sitio=http.createServer((q,r)=>{const f=path.join(__dirname,decodeURICompo
       si((await q.locator('#cueText').innerText())==='Tap your knee pads','moment '+(i+1)+': the volleyball cue');
       await q.click('#cueBtn');await q.clock.runFor(700);
       if(i===0){
-        si(await q.isVisible('#shot .vball')&&await q.isVisible('#shot .vnet')&&await q.isVisible('#shot .vfloor'),'the made point is a volleyball over the net, landing in');
-        si(await q.locator('#swishVid').count()===0,'and not the basketball video');
+        si(await q.isVisible('#shot .vball')&&await q.isVisible('#shot .vnet')&&await q.isVisible('#shot .vfloor'),'when the clip cannot play: the drawn court, a volleyball over the net, landing in');
+        si(await q.locator('#swishVid').count()===0,'and no empty video box');
         si((await q.locator('#swish').innerText())==='POINT!','it says POINT!');
       }
       await q.clock.runFor(600);
@@ -182,7 +182,8 @@ const sitio=http.createServer((q,r)=>{const f=path.join(__dirname,decodeURICompo
     si(todosVB,'every moment was a volleyball moment');
     si(await q.isVisible('#s-done')&&(await q.locator('#dnTotal').innerText())==='1','the volleyball session counts on its own');
     si(await q.evaluate(()=>JSON.parse(localStorage.getItem('cg-reset-rutina')).own==='Basket line'),'and the basketball routine is left as it was');
-    si(vids.length===0,'the basketball video is not even downloaded for volleyball');
+    si(!vids.some(u=>/swish-reset\.mp4/.test(u)),'the basketball clip is not even downloaded for volleyball');
+    si(vids.some(u=>/volley-reset\.mp4/.test(u)),'volleyball asks for its own clip');
     await q.click('#langBtn');
     si((await q.locator('#s-done .kick').innerText()).length>0,'Spanish works on volleyball too');
     await q.clock.install();await q.reload();await q.click('#goBtn');await q.click('[data-k="r"]');
@@ -191,6 +192,24 @@ const sitio=http.createServer((q,r)=>{const f=path.join(__dirname,decodeURICompo
     si((await q.locator('#swish').innerText())==='¡PUNTO!','and ¡PUNTO!');
     si(errVB.length===0,'no errors on volleyball'+(errVB.length?': '+errVB.join(' | '):''));
     await c3.close();
+    /* The volleyball clip itself, played (see 5c for why WebM). */
+    const WV=process.env.VOLLEY_WEBM;
+    if(!WV||!fs.existsSync(WV)){console.log('  skip the volleyball clip: run with VOLLEY_WEBM=<a WebM copy of the clip> to check it')} else {
+      const c4=await b.newContext({viewport:{width:390,height:844}});
+      await c4.route(/supabase\.co\/rest\/v1\/rpc\/bw_check/,r=>r.fulfill({status:200,contentType:'application/json',body:'true'}));
+      await c4.addInitScript(()=>{HTMLMediaElement.prototype.canPlayType=function(){return 'maybe'};localStorage.setItem('fc-lang','en');localStorage.setItem('cg-reset-codigo','X');localStorage.setItem('cg-reset-rutina-vb',JSON.stringify({cue:1,line:1,own:''}))});
+      const v4=await c4.newPage();
+      await v4.route(/volley-reset\.mp4/,r=>r.fulfill({status:200,contentType:'video/webm',body:fs.readFileSync(WV)}));
+      await v4.route(/fonts\.(googleapis|gstatic)/,r=>r.abort());
+      await v4.goto('http://127.0.0.1:4877/005-reset.html?d=volleyball');
+      await v4.click('#goBtn');await v4.click('[data-k="r"]');await v4.click('#cueBtn');
+      await v4.waitForFunction(()=>{const x=document.getElementById('swishVid');return x&&!x.paused&&x.currentTime>=2.6},null,{timeout:5000}).then(()=>ok('the volleyball clip plays, starting at the spike'),()=>mal('the volleyball clip did not play'));
+      si(await v4.locator('.vbc').count()===0,'and the drawn court stays out of the way');
+      await v4.waitForFunction(()=>document.getElementById('swish').classList.contains('on'),null,{timeout:5000});
+      si(await v4.evaluate(()=>document.getElementById('swishVid').currentTime>=3.65)&&(await v4.locator('#swish').innerText())==='POINT!','POINT! lands with the ball hitting the floor, not before');
+      await v4.waitForFunction(()=>document.getElementById('explica').classList.contains('on'),null,{timeout:5000}).then(()=>ok('then the explanation'),()=>mal('the explanation did not come in'));
+      await c4.close();
+    }
   }
   console.log('6 · Second session the same day, and the next day');
   await p.clock.install();await p.reload();await p.click('#goBtn');
