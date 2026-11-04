@@ -130,6 +130,34 @@ main{padding:calc(var(--nav-height) + env(safe-area-inset-top) + 18px) 16px calc
 @media (prefers-reduced-motion:reduce){.shot.go .ball{animation-duration:.01s}.shot.go .net{animation:none}}
 /* Widescreen, the clip's own shape: the whole frame, nothing cropped. */
 .vid{display:block;width:100%;max-width:440px;aspect-ratio:16/9;object-fit:cover;border-radius:18px;margin:0 auto;background:#14141c;box-shadow:0 0 34px rgba(255,107,53,.25)}
+.vbc{position:relative;width:300px;height:206px;margin:0 auto 4px}
+/* The court, seen from behind the end line: a wood floor in
+   perspective with its lines, the net across it on two posts. */
+.vbc .vfloor{position:absolute;left:0;right:0;top:112px;bottom:0;border-radius:4px;
+  background:linear-gradient(#c97a35,#a55b22);clip-path:polygon(17% 0,83% 0,100% 100%,0 100%)}
+.vbc .vline{position:absolute;height:2px;background:rgba(255,255,255,.85)}
+.vbc .vline.ataque{left:11%;right:11%;top:140px}
+.vbc .vline.fondo{left:2%;right:2%;top:200px}
+.vbc .vpost{position:absolute;top:50px;width:6px;height:64px;border-radius:2px;background:#8b95a1}
+.vbc .vpost.l{left:44px}.vbc .vpost.r{right:44px}
+.vbc .vnet{position:absolute;left:50px;right:50px;top:56px;height:46px;border-top:5px solid #fff;border-bottom:3px solid #fff;
+  background:repeating-linear-gradient(0deg,transparent 0 7px,rgba(255,255,255,.55) 7px 8px),
+             repeating-linear-gradient(90deg,transparent 0 7px,rgba(255,255,255,.55) 7px 8px)}
+.vbc .vball{position:absolute;left:212px;top:-6px;width:34px;height:34px;border-radius:50%;z-index:3;
+  background:conic-gradient(from 30deg,#ffd23c 0 33%,#ffffff 0 66%,#2f6bd8 0);
+  box-shadow:inset -3px -4px 6px rgba(0,0,0,.25),0 0 0 1.5px rgba(0,0,0,.35)}
+.vbc .ring{position:absolute;left:112px;top:172px;width:72px;height:18px;border-radius:50%;z-index:2;
+  border:3px solid var(--teal);opacity:0;transform:scale(.2)}
+.vbc.go .vball{animation:remate .9s cubic-bezier(.3,0,.6,1) forwards}
+.vbc.go .ring{animation:onda .55s ease-out .62s forwards}
+@keyframes remate{
+  0%{left:212px;top:-6px;transform:scale(.8) rotate(0deg)}
+  40%{left:172px;top:40px;transform:scale(.95) rotate(140deg)}
+  70%{left:131px;top:150px;transform:scale(1.25) rotate(260deg)}
+  85%{left:104px;top:118px;transform:scale(1.15) rotate(320deg)}
+  100%{left:80px;top:150px;transform:scale(1.2) rotate(380deg)}}
+@keyframes onda{0%{opacity:.95;transform:scale(.2)}100%{opacity:0;transform:scale(1.5)}}
+@media (prefers-reduced-motion:reduce){.vbc.go .vball{animation-duration:.01s}.vbc.go .ring{animation:none}}
 .shot-sm{height:170px;transform:scale(.8);margin-top:-20px;margin-bottom:-24px}
 .explica{opacity:0;transform:translateY(8px);transition:opacity .35s,transform .35s;display:flex;flex-direction:column;align-items:center;gap:10px;margin-top:12px;width:100%}
 .explica.on{opacity:1;transform:none}
@@ -138,7 +166,9 @@ main{padding:calc(var(--nav-height) + env(safe-area-inset-top) + 18px) 16px calc
 .life{background:var(--card);border:1px solid rgba(0,217,165,.35);border-left:4px solid var(--teal);border-radius:14px;padding:20px 18px;text-align:left;max-width:360px}
 .life-k{font-size:.62rem;font-weight:900;letter-spacing:.26em;text-transform:uppercase;color:var(--teal);margin-bottom:8px}
 .life-t{font-size:1rem;font-weight:700;line-height:1.45;color:#fff}
-/* After .life-k, so the gold wins on the explanation card. */
+/* After .life-k, so the gold wins on the explanation card. The card
+   kept its class names from when a second, "in life" card sat under
+   it; only the explanation remains. */
 .life-k.why-k{color:var(--gold)}
 .life.why{border-color:rgba(255,215,0,.35);border-left-color:var(--gold)}
 .prog{font-size:.66rem;font-weight:700;letter-spacing:.2em;color:var(--muted);text-align:center;margin-bottom:6px}
@@ -188,7 +218,6 @@ main{padding:calc(var(--nav-height) + env(safe-area-inset-top) + 18px) 16px calc
         <li data-t="how1">Build your reset once: a cue, one breath, one line.</li>
         <li data-t="how2">Five game moments come at you. Pick the response that gets you back into the game.</li>
         <li data-t="how3">Run your reset every time, until it is automatic.</li>
-        <li data-t="how4">Every moment on the court carries a lesson for life.</li>
       </ol>
     </div>
 
@@ -253,7 +282,8 @@ var $ = function(id){ return document.getElementById(id) };
    so a player who chose Spanish in Recall arrives here in Spanish. */
 var T = {
   en: {
-    kick:'Mindset', tag:'The next play is the one that counts.',
+    kick:'Mindset · Basketball', tag:'The next play is the one that counts.',
+    kickVB:'Mindset · Volleyball', tagVB:'The next point is the one that counts.', swishVB:'POINT!',
     codeK:'For registered teams', codeBtn:'UNLOCK', codePh:'Team code',
     codeS:'Free for teams registered with Cada Punto Cuenta. Enter your team code to open it. Your coach has it.',
     codeBad:'That code did not open The Reset. Check it with your coach.',
@@ -265,7 +295,6 @@ var T = {
     how1:'Build your reset once: a cue, one breath, one line.',
     how2:'Five game moments come at you. Pick the response that gets you back into the game.',
     how3:'Run your reset every time, until it is automatic.',
-    how4:'Every moment on the court carries a lesson for life.',
     start:'START', edit:'Change my reset', next:'NEXT', done:'SAVE MY RESET',
     momK:'Game moment', ask:'What do you do next?',
     nudge:'That keeps the last play alive. Let it go and pick the reset.',
@@ -277,10 +306,11 @@ var T = {
     b1n:'STEP 1 OF 3', b1h:'Pick your cue', b1s:'A small action that tells your body: that play is over.',
     b2n:'STEP 2 OF 3', b2h:'One breath', b2s:'Breathe in for 4, out for 6. It slows you down just enough to see the next play.', b2try:'Tap NEXT when you have tried it once.',
     b3n:'STEP 3 OF 3', b3h:'Pick your line', b3s:'Short, and something you would really say to yourself.', own:'Or write your own (up to 30 letters)',
-    then:'then', breathWord:'one breath', navT:'THE RESET', t1:'THE', t2:'RESET', cueDone:'DONE ✓', cueAsk:'Do it now, then tap.', swish:'SWISH!', lifeK:'In life too', lifeNext:'NEXT ✓', whyK:'Why it works'
+    then:'then', breathWord:'one breath', navT:'THE RESET', t1:'THE', t2:'RESET', cueDone:'DONE ✓', cueAsk:'Do it now, then tap.', swish:'SWISH!', lifeNext:'NEXT ✓', whyK:'Why it works'
   },
   es: {
-    kick:'Mentalidad', tag:'La próxima jugada es la que cuenta.',
+    kick:'Mentalidad · Baloncesto', tag:'La próxima jugada es la que cuenta.',
+    kickVB:'Mentalidad · Voleibol', tagVB:'El próximo punto es el que cuenta.', swishVB:'¡PUNTO!',
     codeK:'Para equipos inscritos', codeBtn:'ABRIR', codePh:'Código del equipo',
     codeS:'Gratis para los equipos inscritos en Cada Punto Cuenta. Escribe el código de tu equipo para abrirlo. Tu coach lo tiene.',
     codeBad:'Ese código no abrió The Reset. Revísalo con tu coach.',
@@ -292,7 +322,6 @@ var T = {
     how1:'Arma tu reset una vez: una señal, una respiración, una frase.',
     how2:'Te llegan cinco momentos de juego. Escoge la respuesta que te devuelve al partido.',
     how3:'Corre tu reset cada vez, hasta que salga solo.',
-    how4:'Cada momento en la cancha trae una lección para la vida.',
     start:'EMPEZAR', edit:'Cambiar mi reset', next:'SIGUIENTE', done:'GUARDAR MI RESET',
     momK:'Momento de juego', ask:'¿Qué haces ahora?',
     nudge:'Eso mantiene viva la jugada pasada. Suéltala y escoge el reset.',
@@ -304,17 +333,25 @@ var T = {
     b1n:'PASO 1 DE 3', b1h:'Escoge tu señal', b1s:'Un gesto pequeño que le dice a tu cuerpo: esa jugada se acabó.',
     b2n:'PASO 2 DE 3', b2h:'Una respiración', b2s:'Respira entrando en 4 y saliendo en 6. Te frena lo justo para ver la próxima jugada.', b2try:'Toca SIGUIENTE cuando lo hayas probado una vez.',
     b3n:'PASO 3 DE 3', b3h:'Escoge tu frase', b3s:'Corta, y algo que de verdad te dirías.', own:'O escribe la tuya (hasta 30 letras)',
-    then:'luego', breathWord:'una respiración', navT:'EL RESET', t1:'EL', t2:'RESET', cueDone:'LISTO ✓', cueAsk:'Hazlo ahora, y toca.', swish:'¡ADENTRO!', lifeK:'En la vida también', lifeNext:'SIGUIENTE ✓', whyK:'Por qué funciona'
+    then:'luego', breathWord:'una respiración', navT:'EL RESET', t1:'EL', t2:'RESET', cueDone:'LISTO ✓', cueAsk:'Hazlo ahora, y toca.', swish:'¡ADENTRO!', lifeNext:'SIGUIENTE ✓', whyK:'Por qué funciona'
   }
 };
 
-var CUES = [
+/* ── THE SPORT ────────────────────────────────────────────────────
+   One page, two sports. Basketball by default; ?d=volleyball (or
+   ?d=voleibol) gives the volleyball Reset: its own cues, lines,
+   moments and explanations, its own made-point graphic, and its own
+   routine and streak, kept apart from basketball's on the same phone.
+   The team code is the same for both. */
+var DEP = /[?&]d=(volleyball|voleibol|vb)(&|$)/i.test(location.search) ? 'vb' : 'bk';
+
+var CUES_BK = [
   { en:'Clap your hands once',  es:'Aplaude una vez' },
   { en:'Touch your jersey',     es:'Toca tu camiseta' },
   { en:'Look at the rim',       es:'Mira el aro' },
   { en:'Wipe your shoes',       es:'Limpia tus tenis' }
 ];
-var LINES = [
+var LINES_BK = [
   { en:'Next play.',     es:'Próxima jugada.' },
   { en:'I’ve got this.', es:'Yo puedo.' },
   { en:'Defense now.',   es:'Ahora, defensa.' },
@@ -329,80 +366,147 @@ var LINES = [
    None of the three says "reset". The right one has to be recognised
    for what it does, not picked for a word, and picking it is what
    runs the player's routine. */
-var MOMENTS = [
-  { life:{en:'A missed shot is like a bad grade. You do not quit the class. You get ready for the next test.', es:'Un tiro fallado es como una mala nota. No dejas la clase. Te preparas para el próximo examen.'},
-    why:{en:'Sprinting back puts your body on the next play, and your mind follows it.', es:'Correr de vuelta pone tu cuerpo en la próxima jugada, y tu mente la sigue.'},
+var MOMENTS_BK = [
+  { why:{en:'Sprinting back puts your body on the next play, and your mind follows it.', es:'Correr de vuelta pone tu cuerpo en la próxima jugada, y tu mente la sigue.'},
     en:'You miss the go-ahead free throw.', es:'Fallas el tiro libre que ponía a tu equipo arriba.',
     w1:{en:'Look at the bench and shake your head', es:'Mirar al banco y negar con la cabeza'},
     w2:{en:'Keep replaying the miss in your head', es:'Seguir repitiendo el fallo en tu cabeza'},
     r:{en:'Sprint back on defense', es:'Corre de vuelta a defender'} },
-  { life:{en:'Life will not always be fair. What you do next is still yours.', es:'La vida no siempre será justa. Lo que haces después sigue siendo tuyo.'},
-    why:{en:'The call will not change. Finding your man is the one thing you control.', es:'La decisión no va a cambiar. Buscar a tu hombre es lo único que controlas.'},
+  { why:{en:'The call will not change. Finding your man is the one thing you control.', es:'La decisión no va a cambiar. Buscar a tu hombre es lo único que controlas.'},
     en:'The ref calls a foul you did not commit.', es:'El árbitro te pita una falta que no cometiste.',
     w1:{en:'Argue with the ref', es:'Discutir con el árbitro'},
     w2:{en:'Stay angry through the next play', es:'Seguir enojado la próxima jugada'},
     r:{en:'Find your man', es:'Busca a tu hombre'} },
-  { life:{en:'Sometimes someone will beat you. Learn from it and come back sharper.', es:'A veces alguien te va a ganar. Aprende y regresa más fuerte.'},
-    why:{en:'Tighter defense fixes what happened. Blaming or forcing a shot only adds to it.', es:'Una defensa más pegada arregla lo que pasó. Culpar o forzar un tiro solo lo empeora.'},
+  { why:{en:'Tighter defense fixes what happened. Blaming or forcing a shot only adds to it.', es:'Una defensa más pegada arregla lo que pasó. Culpar o forzar un tiro solo lo empeora.'},
     en:'Your defender just scored on you.', es:'Tu marca te acaba de anotar.',
     w1:{en:'Blame a teammate for the switch', es:'Culpar a un compañero por el cambio'},
     w2:{en:'Try to score right back by yourself', es:'Querer anotarle de vuelta tú solo'},
     r:{en:'Guard him tighter', es:'Márcalo más pegado'} },
-  { life:{en:'You will not be the starter every day. Stay ready, and your chance comes back.', es:'No todos los días serás titular. Mantente listo y tu oportunidad regresa.'},
-    why:{en:'Coaches put back in the player who stayed ready on the bench.', es:'Los coaches vuelven a meter al que se mantuvo listo en el banco.'},
+  { why:{en:'Coaches put back in the player who stayed ready on the bench.', es:'Los coaches vuelven a meter al que se mantuvo listo en el banco.'},
     en:'Coach takes you out of the game.', es:'El coach te saca del partido.',
     w1:{en:'Walk to the bench upset', es:'Ir al banco molesto'},
     w2:{en:'Sit down and stop watching', es:'Sentarte y dejar de mirar'},
     r:{en:'Watch and be ready to go back in', es:'Mira el juego y prepárate para volver'} },
-  { life:{en:'When you make a mistake, fixing the next thing beats feeling bad about the last one.', es:'Cuando te equivocas, arreglar lo próximo vale más que lamentar lo pasado.'},
-    why:{en:'Getting back stops their basket. Forcing a pass often gives them another one.', es:'Regresar evita su canasta. Forzar un pase muchas veces les regala otra.'},
+  { why:{en:'Getting back stops their basket. Forcing a pass often gives them another one.', es:'Regresar evita su canasta. Forzar un pase muchas veces les regala otra.'},
     en:'You turn the ball over.', es:'Pierdes el balón.',
     w1:{en:'Hang your head', es:'Bajar la cabeza'},
     w2:{en:'Force a risky pass to make up for it', es:'Forzar un pase arriesgado para compensar'},
     r:{en:'Get back and stop the fast break', es:'Regresa y para el contraataque'} },
-  { life:{en:'People will talk. Keep your eyes on what you are working for.', es:'La gente va a hablar. Mantén los ojos en lo que buscas.'},
-    why:{en:'The game is where the ball is. The crowd is not on the court.', es:'El juego está donde está el balón. El público no está en la cancha.'},
+  { why:{en:'The game is where the ball is. The crowd is not on the court.', es:'El juego está donde está el balón. El público no está en la cancha.'},
     en:'The crowd is yelling at you.', es:'El público te está gritando.',
     w1:{en:'Yell back', es:'Gritarles de vuelta'},
     w2:{en:'Listen to every word', es:'Escuchar cada palabra'},
     r:{en:'Eyes on the ball', es:'Ojos en el balón'} },
-  { life:{en:'Being behind is not being beaten. Win the next small thing, then the next one.', es:'Ir abajo no es estar derrotado. Gana lo próximo pequeño, y luego lo siguiente.'},
-    why:{en:'Comebacks are built one possession at a time, never all at once.', es:'Las remontadas se construyen posesión por posesión, nunca de golpe.'},
+  { why:{en:'Comebacks are built one possession at a time, never all at once.', es:'Las remontadas se construyen posesión por posesión, nunca de golpe.'},
     en:'Your team is down 10 at halftime.', es:'Tu equipo pierde por 10 al medio tiempo.',
     w1:{en:'Decide the game is lost', es:'Dar el partido por perdido'},
     w2:{en:'Wait for someone else to fix it', es:'Esperar a que otro lo arregle'},
     r:{en:'Win the next possession', es:'Gana la próxima posesión'} },
-  { life:{en:'Own your part, say sorry and keep going together. That is how teams and friendships last.', es:'Asume tu parte, pide disculpas y sigan juntos. Así duran los equipos y las amistades.'},
-    why:{en:'Owning it calms things down fast, and the team plays the next play together.', es:'Asumirlo calma las cosas rápido, y el equipo juega la próxima jugada unido.'},
+  { why:{en:'Owning it calms things down fast, and the team plays the next play together.', es:'Asumirlo calma las cosas rápido, y el equipo juega la próxima jugada unido.'},
     en:'A teammate yells at you for a mistake.', es:'Un compañero te grita por un error.',
     w1:{en:'Yell back at him', es:'Gritarle de vuelta'},
     w2:{en:'Stop asking for the ball', es:'Dejar de pedir el balón'},
     r:{en:'Say "my bad", then next play', es:'Di "mi culpa", y próxima jugada'} },
-  { life:{en:'Everybody fails in front of others sometimes. The ones who grow are the ones who try again.', es:'Todos fallamos frente a otros alguna vez. Los que crecen son los que lo vuelven a intentar.'},
-    why:{en:'Shooters keep shooting. One miss does not change your shot.', es:'Los tiradores siguen tirando. Un fallo no cambia tu tiro.'},
+  { why:{en:'Shooters keep shooting. One miss does not change your shot.', es:'Los tiradores siguen tirando. Un fallo no cambia tu tiro.'},
     en:'You airball a wide-open shot.', es:'Tiras un airball estando solo.',
     w1:{en:'Stop shooting for the rest of the game', es:'No tirar más en todo el partido'},
     w2:{en:'Joke around so nobody sees it bothered you', es:'Hacer chistes para que no se note'},
     r:{en:'Take the next open shot with confidence', es:'El próximo tiro abierto, tíralo con confianza'} },
-  { life:{en:'A bad start is not a bad day. One good next step changes it.', es:'Un mal comienzo no es un mal día. Un buen próximo paso lo cambia.'},
-    why:{en:'One possession is a small part of the game. Rushing turns one into two.', es:'Una posesión es una parte pequeña del partido. Apurarte convierte una en dos.'},
+  { why:{en:'One possession is a small part of the game. Rushing turns one into two.', es:'Una posesión es una parte pequeña del partido. Apurarte convierte una en dos.'},
     en:'They win the opening tip and score first.', es:'Ganan el salto inicial y anotan primero.',
     w1:{en:'Feel the game slipping away', es:'Sentir que el partido se va'},
     w2:{en:'Rush your first shot', es:'Apurar tu primer tiro'},
     r:{en:'It is one possession, play the next one', es:'Es una posesión, juega la próxima'} }
 ];
 
+var CUES_VB = [
+  { en:'Clap your hands once',       es:'Aplaude una vez' },
+  { en:'Tap your knee pads',         es:'Toca tus rodilleras' },
+  { en:'Look at the server\u2019s hands', es:'Mira las manos del que saca' },
+  { en:'Wipe your hands on your shorts', es:'Sécate las manos en el pantalón' }
+];
+var LINES_VB = [
+  { en:'Next ball.',       es:'Próximo balón.' },
+  { en:'Next point.',      es:'Próximo punto.' },
+  { en:'I\u2019ve got this.', es:'Yo puedo.' },
+  { en:'Eyes on the ball.', es:'Ojos en el balón.' },
+  { en:'Breathe. Play.',   es:'Respira. Juega.' }
+];
+/* The volleyball moments: the same shape as basketball's, one answer
+   that gets back into the rally and two that keep the last one alive,
+   and an explanation that stays on the court. */
+var MOMENTS_VB = [
+  { why:{en:'A soft, safe serve gives them an easy attack. Good servers bounce back by picking a target.', es:'Un saque suave y seguro les regala un ataque fácil. Los buenos sacadores se recuperan escogiendo un blanco.'},
+    en:'You serve into the net.', es:'Sacas a la malla.',
+    w1:{en:'Stare at the net', es:'Quedarte mirando la malla'},
+    w2:{en:'Serve soft next time, just to get it in', es:'Sacar suave la próxima, solo para que entre'},
+    r:{en:'Pick your target and serve with confidence', es:'Escoge tu blanco y saca con confianza'} },
+  { why:{en:'Passers fix passing by passing. Calling the ball tells your team, and yourself, that you are ready.', es:'Los pasadores arreglan el pase pasando. Pedir el balón le dice a tu equipo, y a ti, que estás listo.'},
+    en:'You shank a pass out of bounds.', es:'Se te va un pase fuera de la cancha.',
+    w1:{en:'Hang your head', es:'Bajar la cabeza'},
+    w2:{en:'Hope the next serve goes to someone else', es:'Esperar que el próximo saque vaya a otro'},
+    r:{en:'Call "mine" loud on the next serve, platform ready', es:'Grita "mía" en el próximo saque, brazos listos'} },
+  { why:{en:'Hitters who read the block score on the next swing. Stopping or swinging blind just gives the point away again.', es:'Los atacantes que leen el bloqueo anotan en el próximo remate. Parar o rematar a ciegas regala el punto otra vez.'},
+    en:'Your spike gets blocked.', es:'Te bloquean el remate.',
+    w1:{en:'Stop calling for the set', es:'Dejar de pedir el pase'},
+    w2:{en:'Swing harder, straight into the block', es:'Rematar más duro, directo al bloqueo'},
+    r:{en:'Read the block and find the open shot next time', es:'Lee el bloqueo y busca el hueco la próxima vez'} },
+  { why:{en:'The call will not change. Being ready for the next serve is the one thing you control.', es:'La decisión no va a cambiar. Estar listo para el próximo saque es lo único que controlas.'},
+    en:'The ref calls a net touch you did not make.', es:'El árbitro te pita toque de malla que no hiciste.',
+    w1:{en:'Argue with the ref', es:'Discutir con el árbitro'},
+    w2:{en:'Stay angry into the next rally', es:'Seguir enojado en la próxima jugada'},
+    r:{en:'Get in your spot, ready for the serve', es:'Ponte en tu posición, listo para el saque'} },
+  { why:{en:'A team that keeps talking fixes the court fast. A quiet court loses rallies.', es:'Un equipo que sigue hablando arregla la cancha rápido. Una cancha callada pierde jugadas.'},
+    en:'A teammate yells at you for a missed dig.', es:'Una compañera te grita por una defensa fallada.',
+    w1:{en:'Yell back', es:'Gritarle de vuelta'},
+    w2:{en:'Go quiet for the rest of the set', es:'Quedarte callada el resto del set'},
+    r:{en:'Say "my bad", then talk on the next rally', es:'Di "mi culpa", y habla en la próxima jugada'} },
+  { why:{en:'Runs end one rally at a time. One side-out stops theirs.', es:'Las rachas se cortan jugada por jugada. Un cambio de saque corta la de ellos.'},
+    en:'They go on a 5-point run.', es:'Hacen una racha de 5 puntos.',
+    w1:{en:'Decide the set is lost', es:'Dar el set por perdido'},
+    w2:{en:'Rush and swing at everything', es:'Apurarte y rematar todo'},
+    r:{en:'Win one rally, just this one', es:'Gana una jugada, solo esta'} },
+  { why:{en:'The next ball comes in seconds. Being in your spot matters more than the last one.', es:'El próximo balón llega en segundos. Estar en tu posición importa más que el anterior.'},
+    en:'You miss an easy free ball.', es:'Fallas un balón fácil.',
+    w1:{en:'Shake your head', es:'Negar con la cabeza'},
+    w2:{en:'Keep replaying it in your head', es:'Seguir repitiéndolo en tu cabeza'},
+    r:{en:'Get to your spot for the next play', es:'Vete a tu posición para la próxima jugada'} },
+  { why:{en:'Coaches bring back the player who stayed in the match from the bench.', es:'Los coaches vuelven a meter a quien siguió en el partido desde el banco.'},
+    en:'Coach subs you out.', es:'El coach te saca del partido.',
+    w1:{en:'Walk off upset', es:'Salir molesta'},
+    w2:{en:'Sit down and stop watching', es:'Sentarte y dejar de mirar'},
+    r:{en:'Watch their hitters and be ready to go back in', es:'Mira a sus atacantes y prepárate para volver'} },
+  { why:{en:'Your serve routine is the same in any gym. The crowd cannot touch it.', es:'Tu rutina de saque es la misma en cualquier cancha. El público no la puede tocar.'},
+    en:'The crowd gets loud as you step up to serve.', es:'El público se pone ruidoso cuando vas a sacar.',
+    w1:{en:'Rush the serve to get it over with', es:'Apurar el saque para salir de eso'},
+    w2:{en:'Listen to what they are yelling', es:'Escuchar lo que gritan'},
+    r:{en:'Run your routine: bounce, breathe, target', es:'Corre tu rutina: rebota, respira, apunta'} },
+  { why:{en:'A set is over, the match is not. A clean first pass starts the next one right.', es:'Un set se acabó, el partido no. Un primer pase limpio empieza bien el próximo.'},
+    en:'You lose the first set.', es:'Pierden el primer set.',
+    w1:{en:'Feel the match slipping away', es:'Sentir que el partido se va'},
+    w2:{en:'Change everything you do', es:'Cambiar todo lo que haces'},
+    r:{en:'Start the next set with your first good pass', es:'Empieza el próximo set con tu primer buen pase'} }
+];
+var CUES    = DEP === 'vb' ? CUES_VB    : CUES_BK;
+var LINES   = DEP === 'vb' ? LINES_VB   : LINES_BK;
+var MOMENTS = DEP === 'vb' ? MOMENTS_VB : MOMENTS_BK;
+
 /* ── WHAT IT KEEPS, ON THIS DEVICE ONLY ───────────────────────────
    The routine and the days trained. Nothing leaves the phone. Every
    read and write is guarded: a private window or blocked storage just
    means the player builds the routine each visit. */
-var KEY_RUTINA = 'cg-reset-rutina', KEY_DIAS = 'cg-reset-dias';
+var SUF = DEP === 'vb' ? '-vb' : '';
+var KEY_RUTINA = 'cg-reset-rutina' + SUF, KEY_DIAS = 'cg-reset-dias' + SUF, KEY_TOTAL = 'cg-reset-total' + SUF;
 function leer(k, defecto){ try { var v = JSON.parse(localStorage.getItem(k)); return v == null ? defecto : v } catch(e){ return defecto } }
 function guardar(k, v){ try { localStorage.setItem(k, JSON.stringify(v)) } catch(e){} }
 
 var LANG = 'en';
 try { LANG = localStorage.getItem('fc-lang') || ((navigator.language||'').toLowerCase().indexOf('es') === 0 ? 'es' : 'en') } catch(e){}
-function t(k){ return (T[LANG] && T[LANG][k]) || T.en[k] || '' }
+function t(k){
+  var L = T[LANG] || T.en;
+  if (DEP === 'vb') { if (L[k + 'VB'] != null) return L[k + 'VB']; if (T.en[k + 'VB'] != null) return T.en[k + 'VB'] }
+  return L[k] || T.en[k] || '';
+}
 function w(o){ return o[LANG] || o.en }
 
 function hoy(d){ d = d || new Date(); return d.getFullYear() + '-' + ('0'+(d.getMonth()+1)).slice(-2) + '-' + ('0'+d.getDate()).slice(-2) }
@@ -415,7 +519,7 @@ function racha(){
   while (set[hoy(d)]) { n++; d.setDate(d.getDate() - 1) }
   return n;
 }
-function sesiones(){ return leer('cg-reset-total', 0) }
+function sesiones(){ return leer(KEY_TOTAL, 0) }
 
 function pintar(){
   document.documentElement.lang = LANG;
@@ -576,17 +680,16 @@ function correrReset(){
   repintarRun();
   $('cueBtn').onclick = function(){
     $('runK').textContent = '';
-    /* THE MADE SHOT, AND WHAT IT MEANT. The swish answers the tap, and
-       under it the right answer explains itself: why it works on the
-       court, and the same lesson in life. Basketball as life's teacher.
-       It waits for a tap, like the cue: an explanation that slides by
-       on a timer is one nobody read. */
+    /* THE MADE SHOT, AND WHY. The swish (or, in volleyball, the point)
+       answers the tap, and under it the right answer explains itself:
+       why it works, in the sport, and only in the sport. It waits for a
+       tap, like the cue: an explanation that slides by on a timer is
+       one nobody read. */
     var m = ronda[idx];
     $('runBody').innerHTML = '<div id="shotSlot"></div>' +
       '<div class="swish" id="swish"></div>' +
       '<div class="explica" id="explica">' +
         '<div class="life why"><div class="life-k why-k" id="whyK"></div><div class="life-t" id="whyText"></div></div>' +
-        '<div class="life"><div class="life-k" id="lifeK"></div><div class="life-t" id="lifeText"></div></div>' +
         '<button class="cue-btn" id="lifeBtn"></button>' +
       '</div>';
     repintarRun = function(){
@@ -594,8 +697,6 @@ function correrReset(){
       $('swish').textContent = t('swish');
       $('whyK').textContent = t('whyK');
       $('whyText').textContent = w(m.why);
-      $('lifeK').textContent = t('lifeK');
-      $('lifeText').textContent = w(m.life);
       $('lifeBtn').textContent = t('lifeNext');
     };
     repintarRun();
@@ -633,7 +734,8 @@ function correrReset(){
    at all (no video support, file missing), the drawn hoop and the
    made-up swish take its place. The screen never comes up empty. */
 var VIDEO = document.createElement('video');
-VIDEO.src = 'swish-reset.mp4';
+/* Volleyball draws its own made point, so it never downloads the clip. */
+if (DEP !== 'vb') VIDEO.src = 'swish-reset.mp4';
 var VIDEO_DESDE = 1.5;   /* seconds into the clip where the shot starts */
 var VIDEO_SWISH = 2.75;  /* where the ball goes through the net, and its sound lands */
 VIDEO.preload = 'auto';
@@ -649,7 +751,7 @@ try { if (!VIDEO.canPlayType || !VIDEO.canPlayType('video/mp4')) videoMalo = tru
    screen and building the routine, so the first shot does not wait on
    the network. Some phones ignore preload, so it is also asked to load
    outright. */
-try { if (!videoMalo) VIDEO.load() } catch(e){}
+try { if (!videoMalo && DEP !== 'vb') VIDEO.load() } catch(e){}
 
 function tiro(){
   var slot = $('shotSlot'), hecho = false;
@@ -674,6 +776,17 @@ function tiro(){
     /* And a backstop, should the clip stall: the cards never stay hidden. */
     despues(4000, function(){ $('swish') && $('swish').classList.add('on'); $('explica') && $('explica').classList.add('on') });
   }
+  /* VOLLEYBALL HAS ITS OWN MOMENT: the ball spiked over the net and
+     landing in, with the thud of a kill. Drawn, so nothing to load. */
+  if (DEP === 'vb') {
+    hecho = true;
+    slot.innerHTML = '<div class="vbc" id="shot"><div class="vfloor"></div><div class="vline ataque"></div><div class="vline fondo"></div>' +
+      '<div class="vpost l"></div><div class="vpost r"></div><div class="vnet"></div><div class="ring"></div><div class="vball"></div></div>';
+    void $('shot').offsetWidth; $('shot').classList.add('go');
+    despues(620, function(){ $('swish').classList.add('on'); golpeSonido() });
+    despues(1150, function(){ $('explica').classList.add('on') });
+    return;
+  }
   if (videoMalo) { dibujado(); return }
   slot.appendChild(VIDEO);
   try { VIDEO.currentTime = VIDEO_DESDE } catch(e){}
@@ -696,6 +809,16 @@ function tiro(){
    what lets the browser play sound at all. A phone on silent, or one
    that refuses audio, simply gets the picture without it. */
 var ctxAudio = null;
+/* The kill: a low thump, the ball hitting the floor. */
+function golpeSonido(){
+  try {
+    ctxAudio = ctxAudio || new (window.AudioContext || window.webkitAudioContext)();
+    var c = ctxAudio, o = c.createOscillator(), g = c.createGain(), n0 = c.currentTime;
+    o.type = 'sine'; o.frequency.setValueAtTime(150, n0); o.frequency.exponentialRampToValueAtTime(55, n0 + 0.18);
+    g.gain.setValueAtTime(0.0001, n0); g.gain.exponentialRampToValueAtTime(0.7, n0 + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, n0 + 0.25);
+    o.connect(g); g.connect(c.destination); o.start(n0); o.stop(n0 + 0.26);
+  } catch(e){}
+}
 function swishSonido(){
   try {
     ctxAudio = ctxAudio || new (window.AudioContext || window.webkitAudioContext)();
@@ -712,7 +835,7 @@ function siguienteMomento(){
   if (idx < ronda.length) { ver('s-moment'); pintarMomento(); return }
   var dias = leer(KEY_DIAS, []), d = hoy();
   if (dias.indexOf(d) < 0) { dias.push(d); guardar(KEY_DIAS, dias.slice(-400)) }
-  guardar('cg-reset-total', sesiones() + 1);
+  guardar(KEY_TOTAL, sesiones() + 1);
   ver('s-done'); pintar();
 }
 function pintarFin(){
