@@ -7,12 +7,30 @@ const sitio=http.createServer((q,r)=>{const f=path.join(__dirname,decodeURICompo
   const b=await chromium.launch(fs.existsSync('/opt/pw-browsers/chromium-1194/chrome-linux/chrome')?{executablePath:'/opt/pw-browsers/chromium-1194/chrome-linux/chrome'}:{});const ctx=await b.newContext({viewport:{width:390,height:844}});
   const p=await ctx.newPage();const errores=[];p.on('pageerror',e=>errores.push(e.message));p.on('console',m=>{if(m.type()==='error'&&!/Failed to load resource/.test(m.text()))errores.push(m.text())});p.on('response',r=>{if(r.status()>=400)errores.push('missing file: '+r.url())});
   await p.route(/fonts\.(googleapis|gstatic)/,r=>r.abort());
-  console.log('1 · The gate, like the other games');
-  await p.goto('http://127.0.0.1:4877/005-reset.html');await p.waitForURL(/index\.html/);ok('no pass → sent to the front door');
-  await p.evaluate(()=>{localStorage.setItem('rct-mobile-pass','1');localStorage.setItem('fc-lang','en')});
+  /* THE CODE CHECK, FAKED: bw_check says yes to one team code only, and
+     the test can switch it to "turned off" or "no connection". */
+  let modo='normal';const enviados=[];
+  const VALIDOS=['PRUEBACODIGO-4827','PRUEBACODIGO4827'];
+  const supa=r=>{const b=JSON.parse(r.request().postData()||'{}');enviados.push(b);
+    if(modo==='caido')return r.abort();
+    r.fulfill({status:200,contentType:'application/json',body:JSON.stringify(modo==='apagado'?false:VALIDOS.includes(b.p_code))})};
+  await ctx.route(/sdaphocueugzfvjovuxd\.supabase\.co\/rest\/v1\/rpc\/bw_check/,supa);
+  console.log('1 · Free with the team code');
+  await p.goto('http://127.0.0.1:4877/005-reset.html');
+  await p.evaluate(()=>localStorage.setItem('fc-lang','en'));await p.reload();
+  si(p.url().endsWith('005-reset.html'),'a link from the Cada Punto home page lands right here, no detour');
+  si(await p.isVisible('#s-code')&&!(await p.isVisible('#s-start')),'no code yet: the code screen, not the program');
+  si(await p.locator('#codeReg').getAttribute('href')==='https://cadapunto.com/equipo.html','with the way to register a team');
+  await p.fill('#codeIn','NOTAREAL-0000');await p.click('#codeBtn');
+  await p.waitForFunction(()=>document.getElementById('codeMsg').textContent.length>5);
+  si((await p.locator('#codeMsg').innerText()).includes('did not open')&&await p.isVisible('#s-code'),'a wrong code stays locked, with a plain message');
+  await p.fill('#codeIn','pruebacodigo-4827');await p.click('#codeBtn');
+  await p.waitForSelector('#s-start.on');ok('the team code typed loosely (lowercase) opens it');
+  si(enviados.every(b=>Object.keys(b).join()==='p_code'),'only the code is sent, nothing else');
   console.log('2 · The hub');
   await p.goto('http://127.0.0.1:4877/fortress-mobile-hub.html');
-  si(await p.locator('a[href="005-reset.html"]').count()===1,'the hub has one Reset card');
+  si(await p.locator('a[href="005-reset.html"]').count()===1,'the hub has the basketball Reset card');
+  si(await p.locator('a[href="005-reset.html?d=volleyball"]').count()===1,'and the volleyball one');
   si(await p.locator('.warm-card .warm-chip').count()===4,'THE FOUR still lists exactly four stations');
   await p.click('a[href="005-reset.html"]');await p.waitForURL(/005-reset/);ok('the card opens the Reset');
   await p.clock.install();await p.reload();
@@ -42,7 +60,7 @@ const sitio=http.createServer((q,r)=>{const f=path.join(__dirname,decodeURICompo
     si(await p.locator('#swish').innerText()==='SWISH!'&&await p.isVisible('#shot'),'the tap is answered with a made shot (the drawn hoop, when the video cannot play)');
     await p.clock.runFor(700);
     si((await p.locator('#whyText').innerText()).length>20,'with why the answer works');
-    si((await p.locator('#lifeText').innerText()).length>20,'and the lesson for life');
+    si(await p.locator('#lifeText').count()===0,'and only the basketball explanation, no life lesson');
     await p.clock.runFor(8000);si(await p.isVisible('#lifeBtn')&&!(await p.isVisible('#runBreath')),'and it waits for the tap');
     await p.click('#lifeBtn');
     si(await p.isVisible('#runBreath'),'then the breath');
@@ -52,7 +70,7 @@ const sitio=http.createServer((q,r)=>{const f=path.join(__dirname,decodeURICompo
   }
   si(vistos.size===5,'five different moments');
   const fuente=fs.readFileSync(path.join(__dirname,'005-reset.html'),'utf8');
-  si((fuente.match(/life:\{en:'/g)||[]).length===10&&(fuente.match(/why:\{en:'/g)||[]).length===10,'all ten moments carry an explanation and a lesson, in both languages');
+  si((fuente.match(/life:\{en:'/g)||[]).length===0&&(fuente.match(/why:\{en:'/g)||[]).length===20,'all twenty moments (ten per sport) carry an explanation, and none a life lesson');
   si(await p.isVisible('#s-done'),'the finish screen');
   si(await p.locator('#dnDays').innerText()==='1'&&await p.locator('#dnTotal').innerText()==='1','streak 1, sessions 1');
   si((await p.locator('#yourReset').innerText()).includes('Lock in.'),'it shows the routine back');
@@ -72,7 +90,7 @@ const sitio=http.createServer((q,r)=>{const f=path.join(__dirname,decodeURICompo
   si((await p.locator('#swish').innerText())==='¡ADENTRO!','and the made shot says ¡ADENTRO!');
   await p.clock.runFor(700);
   si((await p.locator('.why-k').innerText()).toLowerCase()==='por qué funciona','the explanation comes in Spanish');
-  si((await p.locator('.life-k:not(.why-k)').innerText()).toLowerCase()==='en la vida también','and so does the lesson');
+  si(!/en la vida/i.test(await p.locator('#explica').innerText()),'and no life card in Spanish either');
   await p.evaluate(()=>{localStorage.setItem('fc-lang','en')});
   console.log('5b · Switching language in the middle of the routine');
   await p.evaluate(()=>localStorage.setItem('fc-lang','en'));
@@ -102,7 +120,8 @@ const sitio=http.createServer((q,r)=>{const f=path.join(__dirname,decodeURICompo
     const WEBM=process.env.SWISH_WEBM;
     if(!WEBM||!fs.existsSync(WEBM)){console.log('  skip the video path: run with SWISH_WEBM=<a WebM copy of the clip> to check it')} else {
     const c2=await b.newContext({viewport:{width:390,height:844}});
-    await c2.addInitScript(()=>{HTMLMediaElement.prototype.canPlayType=function(){return 'maybe'};localStorage.setItem('rct-mobile-pass','1');localStorage.setItem('fc-lang','en');localStorage.setItem('cg-reset-rutina',JSON.stringify({cue:0,line:0,own:''}))});
+    await c2.route(/supabase\.co\/rest\/v1\/rpc\/bw_check/,r=>r.fulfill({status:200,contentType:'application/json',body:'true'}));
+    await c2.addInitScript(()=>{HTMLMediaElement.prototype.canPlayType=function(){return 'maybe'};localStorage.setItem('rct-mobile-pass','1');localStorage.setItem('cg-reset-codigo','PRUEBACODIGO4827');localStorage.setItem('fc-lang','en');localStorage.setItem('cg-reset-rutina',JSON.stringify({cue:0,line:0,own:''}))});
     const v=await c2.newPage();
     await v.route(/swish-reset\.mp4/,r=>r.fulfill({status:200,contentType:'video/webm',body:fs.readFileSync(WEBM)}));
     await v.route(/fonts\.(googleapis|gstatic)/,r=>r.abort());
@@ -122,16 +141,73 @@ const sitio=http.createServer((q,r)=>{const f=path.join(__dirname,decodeURICompo
     await c2.close();
     }
   }
+  console.log('5d · Volleyball');
+  {
+    const c3=await b.newContext({viewport:{width:390,height:844}});
+    await c3.route(/supabase\.co\/rest\/v1\/rpc\/bw_check/,r=>r.fulfill({status:200,contentType:'application/json',body:'true'}));
+    await c3.addInitScript(()=>{if(!localStorage.getItem('fc-lang'))localStorage.setItem('fc-lang','en');localStorage.setItem('cg-reset-codigo','PRUEBACODIGO4827');
+      if(!localStorage.getItem('cg-reset-rutina'))localStorage.setItem('cg-reset-rutina',JSON.stringify({cue:2,line:0,own:'Basket line'}))});
+    const q=await c3.newPage();const errVB=[];q.on('pageerror',e=>errVB.push(e.message));
+    await q.route(/fonts\.(googleapis|gstatic)/,r=>r.abort());
+    const vids=[];q.on('request',r=>{if(/\.mp4/.test(r.url()))vids.push(r.url())});
+    await q.clock.install();
+    await q.goto('http://127.0.0.1:4877/005-reset.html?d=volleyball');
+    si((await q.locator('#s-start .kick').innerText()).toLowerCase()==='mindset · volleyball','it says volleyball');
+    si((await q.locator('#s-start .sub').innerText())==='The next point is the one that counts.','the next point, not the next play');
+    await q.click('#goBtn');si(await q.isVisible('#s-build'),'volleyball has its own routine: the basketball one is not reused');
+    const cues=await q.locator('[data-cue]').allInnerTexts();
+    si(cues.includes('Tap your knee pads')&&!cues.includes('Look at the rim'),'with volleyball cues');
+    await q.click('[data-cue="1"]');await q.click('#buildNext');await q.clock.runFor(10500);await q.click('#buildNext');
+    const lines=await q.locator('[data-line]').allInnerTexts();
+    si(lines.includes('Next point.'),'and volleyball lines');
+    await q.click('[data-line="1"]');await q.click('#buildNext');
+    const VB=['You serve into the net.','You shank a pass out of bounds.','Your spike gets blocked.','The ref calls a net touch you did not make.','A teammate yells at you for a missed dig.','They go on a 5-point run.','You miss an easy free ball.','Coach subs you out.','The crowd gets loud as you step up to serve.','You lose the first set.'];
+    let todosVB=true;
+    for(let i=0;i<5;i++){
+      const m=await q.locator('#momText').innerText();if(!VB.includes(m))todosVB=false;
+      await q.click('[data-k="r"]');
+      si((await q.locator('#cueText').innerText())==='Tap your knee pads','moment '+(i+1)+': the volleyball cue');
+      await q.click('#cueBtn');await q.clock.runFor(700);
+      if(i===0){
+        si(await q.isVisible('#shot .vball')&&await q.isVisible('#shot .vnet')&&await q.isVisible('#shot .vfloor'),'the made point is a volleyball over the net, landing in');
+        si(await q.locator('#swishVid').count()===0,'and not the basketball video');
+        si((await q.locator('#swish').innerText())==='POINT!','it says POINT!');
+      }
+      await q.clock.runFor(600);
+      si((await q.locator('#whyText').innerText()).length>20&&await q.locator('#lifeText').count()===0,'moment '+(i+1)+': a volleyball explanation, no life lesson');
+      await q.click('#lifeBtn');await q.clock.runFor(10100);
+      si((await q.locator('#lineText').innerText())==='Next point.','and the volleyball line');
+      await q.clock.runFor(1900);
+    }
+    si(todosVB,'every moment was a volleyball moment');
+    si(await q.isVisible('#s-done')&&(await q.locator('#dnTotal').innerText())==='1','the volleyball session counts on its own');
+    si(await q.evaluate(()=>JSON.parse(localStorage.getItem('cg-reset-rutina')).own==='Basket line'),'and the basketball routine is left as it was');
+    si(vids.length===0,'the basketball video is not even downloaded for volleyball');
+    await q.click('#langBtn');
+    si((await q.locator('#s-done .kick').innerText()).length>0,'Spanish works on volleyball too');
+    await q.clock.install();await q.reload();await q.click('#goBtn');await q.click('[data-k="r"]');
+    si((await q.locator('#cueText').innerText())==='Toca tus rodilleras','the volleyball cue in Spanish');
+    await q.click('#cueBtn');await q.clock.runFor(700);
+    si((await q.locator('#swish').innerText())==='¡PUNTO!','and ¡PUNTO!');
+    si(errVB.length===0,'no errors on volleyball'+(errVB.length?': '+errVB.join(' | '):''));
+    await c3.close();
+  }
   console.log('6 · Second session the same day, and the next day');
   await p.clock.install();await p.reload();await p.click('#goBtn');
   for(let i=0;i<5;i++){await p.click('[data-k="r"]');await p.click('#cueBtn');await p.clock.runFor(2000);await p.click('#lifeBtn');await p.clock.runFor(14000)}
   si(await p.locator('#dnDays').innerText()==='1'&&await p.locator('#dnTotal').innerText()==='2','same day: streak stays 1, sessions 2');
   await p.evaluate(()=>{const d=new Date();d.setDate(d.getDate()-1);const f=x=>x.getFullYear()+'-'+('0'+(x.getMonth()+1)).slice(-2)+'-'+('0'+x.getDate()).slice(-2);localStorage.setItem('cg-reset-dias',JSON.stringify([f(d)]))});
   await p.reload();si(await p.locator('#stDays').innerText()==='1','trained yesterday, not yet today: streak still 1');
-  console.log('7 · Nothing leaves the phone, nothing breaks');
-  const red=[];p.on('request',q=>{if(!/127\.0\.0\.1|fonts/.test(q.url()))red.push(q.url())});
+  console.log('6b · The code, on later visits');
+  await p.reload();si(await p.isVisible('#s-start'),'coming back, it opens straight away');
+  modo='caido';await p.reload();await p.waitForTimeout(300);
+  si(await p.isVisible('#s-start'),'with no connection it stays open: offline is no reason to lock a player out');
+  modo='apagado';await p.reload();await p.waitForSelector('#s-code.on',{timeout:3000}).then(()=>ok('a code that is turned off closes it again'),()=>mal('a turned-off code did not close it'));
+  modo='normal';await p.fill('#codeIn','PRUEBACODIGO-4827');await p.click('#codeBtn');await p.waitForSelector('#s-start.on');
+  console.log('7 · Only the code leaves the phone, nothing breaks');
+  const red=[];p.on('request',q=>{if(!/127\.0\.0\.1|fonts|bw_check/.test(q.url()))red.push(q.url())});
   await p.reload();await p.click('#goBtn');await p.click('[data-k="r"]');await p.click('#cueBtn');await p.clock.runFor(2000);await p.click('#lifeBtn');await p.clock.runFor(14000);
-  si(red.length===0,'no request leaves the device');
+  si(red.length===0,'nothing but the code check leaves the device, the routine and streak stay on the phone');
   si(await p.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth),'no sideways scroll at phone width');
   const html=fs.readFileSync(path.join(__dirname,'005-reset.html'),'utf8').toLowerCase();
   si(!/anxiety|ansiedad|therapy|terapia|treat|tratamiento|stress relief|cure|cura/.test(html.replace(/<style[\s\S]*?<\/style>/,'')),'no health or treatment words anywhere on the page');
