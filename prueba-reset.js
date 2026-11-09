@@ -60,7 +60,7 @@ const sitio=http.createServer((q,r)=>{const f=path.join(__dirname,decodeURICompo
     si(await p.locator('#swish').innerText()==='SWISH!'&&await p.isVisible('#shot'),'the tap is answered with a made shot (the drawn hoop, when the video cannot play)');
     await p.clock.runFor(700);
     si((await p.locator('#whyText').innerText()).length>20,'with why the answer works');
-    si(await p.locator('#lifeText').count()===0,'and only the basketball explanation, no life lesson');
+    si((await p.locator('#lifeK').textContent())==='In life too'&&(await p.locator('#lifeText').innerText()).length>20,'and the same lesson in life under it');
     await p.clock.runFor(8000);si(await p.isVisible('#lifeBtn')&&!(await p.isVisible('#runBreath')),'and it waits for the tap');
     await p.click('#lifeBtn');
     si(await p.isVisible('#runBreath'),'then the breath');
@@ -70,7 +70,7 @@ const sitio=http.createServer((q,r)=>{const f=path.join(__dirname,decodeURICompo
   }
   si(vistos.size===5,'five different moments');
   const fuente=fs.readFileSync(path.join(__dirname,'005-reset.html'),'utf8');
-  si((fuente.match(/life:\{en:'/g)||[]).length===0&&(fuente.match(/why:\{en:'/g)||[]).length===20,'all twenty moments (ten per sport) carry an explanation, and none a life lesson');
+  si((fuente.match(/life:\{en:'/g)||[]).length===10&&(fuente.match(/why:\{en:'/g)||[]).length===20,'all twenty moments (ten per sport) carry an explanation, and the ten basketball ones a life lesson');
   si(await p.isVisible('#s-done'),'the finish screen');
   si(await p.locator('#dnDays').innerText()==='1'&&await p.locator('#dnTotal').innerText()==='1','streak 1, sessions 1');
   si((await p.locator('#yourReset').innerText()).includes('Lock in.'),'it shows the routine back');
@@ -90,7 +90,7 @@ const sitio=http.createServer((q,r)=>{const f=path.join(__dirname,decodeURICompo
   si((await p.locator('#swish').innerText())==='¡ADENTRO!','and the made shot says ¡ADENTRO!');
   await p.clock.runFor(700);
   si((await p.locator('.why-k').innerText()).toLowerCase()==='por qué funciona','the explanation comes in Spanish');
-  si(!/en la vida/i.test(await p.locator('#explica').innerText()),'and no life card in Spanish either');
+  si(/en la vida/i.test(await p.locator('#explica').innerText()),'and the life card in Spanish too');
   await p.evaluate(()=>{localStorage.setItem('fc-lang','en')});
   console.log('5b · Switching language in the middle of the routine');
   await p.evaluate(()=>localStorage.setItem('fc-lang','en'));
