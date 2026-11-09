@@ -345,7 +345,11 @@ var T = {
    moments and explanations, its own made-point graphic, and its own
    routine and streak, kept apart from basketball's on the same phone.
    The team code is the same for both. */
-var DEP = /[?&]d=(volleyball|voleibol|vb)(&|$)/i.test(location.search) ? 'vb' : 'bk';
+/* BASKETBALL ONLY. The volleyball Reset was taken out: an old link
+   with ?d=volleyball now opens the basketball Reset. The volleyball
+   moments below stay in the file, unused, so nothing a player saved
+   breaks; they are never shown. */
+var DEP = 'bk';
 
 var CUES_BK = [
   { en:'Clap your hands once',  es:'Aplaude una vez' },
