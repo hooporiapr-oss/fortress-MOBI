@@ -11,6 +11,8 @@
    below, not this. */
 try { localStorage.setItem('rct-mobile-pass', '1') } catch(e){}
 </script>
+<!-- The gym's pass: a paid gym code opens The Reset too. -->
+<script src="gym-pase.js"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>The Reset</title>
@@ -285,7 +287,7 @@ var T = {
     kick:'Mindset · Basketball', tag:'The next play is the one that counts.',
     kickVB:'Mindset · Volleyball', tagVB:'The next point is the one that counts.', swishVB:'POINT!',
     codeK:'For registered teams', codeBtn:'UNLOCK', codePh:'Team code',
-    codeS:'Free for teams registered with Cada Punto Cuenta. Enter your team code to open it. Your coach has it.',
+    codeS:'Free for teams registered with Cada Punto Cuenta. Enter your team code to open it. Your coach has it. A gym plan code opens it too.',
     codeBad:'That code did not open The Reset. Check it with your coach.',
     codeNet:'The code could not be checked right now. Try again in a moment.',
     codeNo:'No code yet? Coaches register their team with Cada Punto Cuenta and get the code by email.',
@@ -306,13 +308,13 @@ var T = {
     b1n:'STEP 1 OF 3', b1h:'Pick your cue', b1s:'A small action that tells your body: that play is over.',
     b2n:'STEP 2 OF 3', b2h:'One breath', b2s:'Breathe in for 4, out for 6. It slows you down just enough to see the next play.', b2try:'Tap NEXT when you have tried it once.',
     b3n:'STEP 3 OF 3', b3h:'Pick your line', b3s:'Short, and something you would really say to yourself.', own:'Or write your own (up to 30 letters)',
-    then:'then', breathWord:'one breath', navT:'THE RESET', t1:'THE', t2:'RESET', cueDone:'DONE ✓', cueAsk:'Do it now, then tap.', swish:'SWISH!', lifeNext:'NEXT ✓', whyK:'Why it works'
+    then:'then', breathWord:'one breath', navT:'THE RESET', t1:'THE', t2:'RESET', cueDone:'DONE ✓', cueAsk:'Do it now, then tap.', swish:'SWISH!', lifeK:'In life too', lifeNext:'NEXT ✓', whyK:'Why it works'
   },
   es: {
     kick:'Mentalidad · Baloncesto', tag:'La próxima jugada es la que cuenta.',
     kickVB:'Mentalidad · Voleibol', tagVB:'El próximo punto es el que cuenta.', swishVB:'¡PUNTO!',
     codeK:'Para equipos inscritos', codeBtn:'ABRIR', codePh:'Código del equipo',
-    codeS:'Gratis para los equipos inscritos en Cada Punto Cuenta. Escribe el código de tu equipo para abrirlo. Tu coach lo tiene.',
+    codeS:'Gratis para los equipos inscritos en Cada Punto Cuenta. Escribe el código de tu equipo para abrirlo. Tu coach lo tiene. El código de un plan del gym también lo abre.',
     codeBad:'Ese código no abrió The Reset. Revísalo con tu coach.',
     codeNet:'No se pudo comprobar el código ahora. Intenta de nuevo en un momento.',
     codeNo:'¿Todavía no tienes código? Los coaches inscriben su equipo en Cada Punto Cuenta y reciben el código por correo.',
@@ -333,7 +335,7 @@ var T = {
     b1n:'PASO 1 DE 3', b1h:'Escoge tu señal', b1s:'Un gesto pequeño que le dice a tu cuerpo: esa jugada se acabó.',
     b2n:'PASO 2 DE 3', b2h:'Una respiración', b2s:'Respira entrando en 4 y saliendo en 6. Te frena lo justo para ver la próxima jugada.', b2try:'Toca SIGUIENTE cuando lo hayas probado una vez.',
     b3n:'PASO 3 DE 3', b3h:'Escoge tu frase', b3s:'Corta, y algo que de verdad te dirías.', own:'O escribe la tuya (hasta 30 letras)',
-    then:'luego', breathWord:'una respiración', navT:'EL RESET', t1:'EL', t2:'RESET', cueDone:'LISTO ✓', cueAsk:'Hazlo ahora, y toca.', swish:'¡ADENTRO!', lifeNext:'SIGUIENTE ✓', whyK:'Por qué funciona'
+    then:'luego', breathWord:'una respiración', navT:'EL RESET', t1:'EL', t2:'RESET', cueDone:'LISTO ✓', cueAsk:'Hazlo ahora, y toca.', swish:'¡ADENTRO!', lifeK:'En la vida también', lifeNext:'SIGUIENTE ✓', whyK:'Por qué funciona'
   }
 };
 
@@ -367,52 +369,62 @@ var LINES_BK = [
    for what it does, not picked for a word, and picking it is what
    runs the player's routine. */
 var MOMENTS_BK = [
-  { why:{en:'Sprinting back puts your body on the next play, and your mind follows it.', es:'Correr de vuelta pone tu cuerpo en la próxima jugada, y tu mente la sigue.'},
+  { life:{en:'A missed shot is like a bad grade. You do not quit the class. You get ready for the next test.', es:'Un tiro fallado es como una mala nota. No dejas la clase. Te preparas para el próximo examen.'},
+    why:{en:'Sprinting back puts your body on the next play, and your mind follows it.', es:'Correr de vuelta pone tu cuerpo en la próxima jugada, y tu mente la sigue.'},
     en:'You miss the go-ahead free throw.', es:'Fallas el tiro libre que ponía a tu equipo arriba.',
     w1:{en:'Look at the bench and shake your head', es:'Mirar al banco y negar con la cabeza'},
     w2:{en:'Keep replaying the miss in your head', es:'Seguir repitiendo el fallo en tu cabeza'},
     r:{en:'Sprint back on defense', es:'Corre de vuelta a defender'} },
-  { why:{en:'The call will not change. Finding your man is the one thing you control.', es:'La decisión no va a cambiar. Buscar a tu hombre es lo único que controlas.'},
+  { life:{en:'Life will not always be fair. What you do next is still yours.', es:'La vida no siempre será justa. Lo que haces después sigue siendo tuyo.'},
+    why:{en:'The call will not change. Finding your man is the one thing you control.', es:'La decisión no va a cambiar. Buscar a tu hombre es lo único que controlas.'},
     en:'The ref calls a foul you did not commit.', es:'El árbitro te pita una falta que no cometiste.',
     w1:{en:'Argue with the ref', es:'Discutir con el árbitro'},
     w2:{en:'Stay angry through the next play', es:'Seguir enojado la próxima jugada'},
     r:{en:'Find your man', es:'Busca a tu hombre'} },
-  { why:{en:'Tighter defense fixes what happened. Blaming or forcing a shot only adds to it.', es:'Una defensa más pegada arregla lo que pasó. Culpar o forzar un tiro solo lo empeora.'},
+  { life:{en:'Sometimes someone will beat you. Learn from it and come back sharper.', es:'A veces alguien te va a ganar. Aprende y regresa más fuerte.'},
+    why:{en:'Tighter defense fixes what happened. Blaming or forcing a shot only adds to it.', es:'Una defensa más pegada arregla lo que pasó. Culpar o forzar un tiro solo lo empeora.'},
     en:'Your defender just scored on you.', es:'Tu marca te acaba de anotar.',
     w1:{en:'Blame a teammate for the switch', es:'Culpar a un compañero por el cambio'},
     w2:{en:'Try to score right back by yourself', es:'Querer anotarle de vuelta tú solo'},
     r:{en:'Guard him tighter', es:'Márcalo más pegado'} },
-  { why:{en:'Coaches put back in the player who stayed ready on the bench.', es:'Los coaches vuelven a meter al que se mantuvo listo en el banco.'},
+  { life:{en:'You will not be the starter every day. Stay ready, and your chance comes back.', es:'No todos los días serás titular. Mantente listo y tu oportunidad regresa.'},
+    why:{en:'Coaches put back in the player who stayed ready on the bench.', es:'Los coaches vuelven a meter al que se mantuvo listo en el banco.'},
     en:'Coach takes you out of the game.', es:'El coach te saca del partido.',
     w1:{en:'Walk to the bench upset', es:'Ir al banco molesto'},
     w2:{en:'Sit down and stop watching', es:'Sentarte y dejar de mirar'},
     r:{en:'Watch and be ready to go back in', es:'Mira el juego y prepárate para volver'} },
-  { why:{en:'Getting back stops their basket. Forcing a pass often gives them another one.', es:'Regresar evita su canasta. Forzar un pase muchas veces les regala otra.'},
+  { life:{en:'When you make a mistake, fixing the next thing beats feeling bad about the last one.', es:'Cuando te equivocas, arreglar lo próximo vale más que lamentar lo pasado.'},
+    why:{en:'Getting back stops their basket. Forcing a pass often gives them another one.', es:'Regresar evita su canasta. Forzar un pase muchas veces les regala otra.'},
     en:'You turn the ball over.', es:'Pierdes el balón.',
     w1:{en:'Hang your head', es:'Bajar la cabeza'},
     w2:{en:'Force a risky pass to make up for it', es:'Forzar un pase arriesgado para compensar'},
     r:{en:'Get back and stop the fast break', es:'Regresa y para el contraataque'} },
-  { why:{en:'The game is where the ball is. The crowd is not on the court.', es:'El juego está donde está el balón. El público no está en la cancha.'},
+  { life:{en:'People will talk. Keep your eyes on what you are working for.', es:'La gente va a hablar. Mantén los ojos en lo que buscas.'},
+    why:{en:'The game is where the ball is. The crowd is not on the court.', es:'El juego está donde está el balón. El público no está en la cancha.'},
     en:'The crowd is yelling at you.', es:'El público te está gritando.',
     w1:{en:'Yell back', es:'Gritarles de vuelta'},
     w2:{en:'Listen to every word', es:'Escuchar cada palabra'},
     r:{en:'Eyes on the ball', es:'Ojos en el balón'} },
-  { why:{en:'Comebacks are built one possession at a time, never all at once.', es:'Las remontadas se construyen posesión por posesión, nunca de golpe.'},
+  { life:{en:'Being behind is not being beaten. Win the next small thing, then the next one.', es:'Ir abajo no es estar derrotado. Gana lo próximo pequeño, y luego lo siguiente.'},
+    why:{en:'Comebacks are built one possession at a time, never all at once.', es:'Las remontadas se construyen posesión por posesión, nunca de golpe.'},
     en:'Your team is down 10 at halftime.', es:'Tu equipo pierde por 10 al medio tiempo.',
     w1:{en:'Decide the game is lost', es:'Dar el partido por perdido'},
     w2:{en:'Wait for someone else to fix it', es:'Esperar a que otro lo arregle'},
     r:{en:'Win the next possession', es:'Gana la próxima posesión'} },
-  { why:{en:'Owning it calms things down fast, and the team plays the next play together.', es:'Asumirlo calma las cosas rápido, y el equipo juega la próxima jugada unido.'},
+  { life:{en:'Own your part, say sorry and keep going together. That is how teams and friendships last.', es:'Asume tu parte, pide disculpas y sigan juntos. Así duran los equipos y las amistades.'},
+    why:{en:'Owning it calms things down fast, and the team plays the next play together.', es:'Asumirlo calma las cosas rápido, y el equipo juega la próxima jugada unido.'},
     en:'A teammate yells at you for a mistake.', es:'Un compañero te grita por un error.',
     w1:{en:'Yell back at him', es:'Gritarle de vuelta'},
     w2:{en:'Stop asking for the ball', es:'Dejar de pedir el balón'},
     r:{en:'Say "my bad", then next play', es:'Di "mi culpa", y próxima jugada'} },
-  { why:{en:'Shooters keep shooting. One miss does not change your shot.', es:'Los tiradores siguen tirando. Un fallo no cambia tu tiro.'},
+  { life:{en:'Everybody fails in front of others sometimes. The ones who grow are the ones who try again.', es:'Todos fallamos frente a otros alguna vez. Los que crecen son los que lo vuelven a intentar.'},
+    why:{en:'Shooters keep shooting. One miss does not change your shot.', es:'Los tiradores siguen tirando. Un fallo no cambia tu tiro.'},
     en:'You airball a wide-open shot.', es:'Tiras un airball estando solo.',
     w1:{en:'Stop shooting for the rest of the game', es:'No tirar más en todo el partido'},
     w2:{en:'Joke around so nobody sees it bothered you', es:'Hacer chistes para que no se note'},
     r:{en:'Take the next open shot with confidence', es:'El próximo tiro abierto, tíralo con confianza'} },
-  { why:{en:'One possession is a small part of the game. Rushing turns one into two.', es:'Una posesión es una parte pequeña del partido. Apurarte convierte una en dos.'},
+  { life:{en:'A bad start is not a bad day. One good next step changes it.', es:'Un mal comienzo no es un mal día. Un buen próximo paso lo cambia.'},
+    why:{en:'One possession is a small part of the game. Rushing turns one into two.', es:'Una posesión es una parte pequeña del partido. Apurarte convierte una en dos.'},
     en:'They win the opening tip and score first.', es:'Ganan el salto inicial y anotan primero.',
     w1:{en:'Feel the game slipping away', es:'Sentir que el partido se va'},
     w2:{en:'Rush your first shot', es:'Apurar tu primer tiro'},
@@ -690,6 +702,9 @@ function correrReset(){
       '<div class="swish" id="swish"></div>' +
       '<div class="explica" id="explica">' +
         '<div class="life why"><div class="life-k why-k" id="whyK"></div><div class="life-t" id="whyText"></div></div>' +
+        /* AND THE SAME LESSON IN LIFE, under it: basketball as life's
+           teacher. Only the moments that carry one (the basketball ones). */
+        (m.life ? '<div class="life"><div class="life-k" id="lifeK"></div><div class="life-t" id="lifeText"></div></div>' : '') +
         '<button class="cue-btn" id="lifeBtn"></button>' +
       '</div>';
     repintarRun = function(){
@@ -697,6 +712,7 @@ function correrReset(){
       $('swish').textContent = t('swish');
       $('whyK').textContent = t('whyK');
       $('whyText').textContent = w(m.why);
+      if (m.life) { $('lifeK').textContent = t('lifeK'); $('lifeText').textContent = w(m.life) }
       $('lifeBtn').textContent = t('lifeNext');
     };
     repintarRun();
@@ -873,7 +889,13 @@ function codigoVale(k){
     headers:{ 'apikey':SB_KEY, 'Authorization':'Bearer ' + SB_KEY, 'Content-Type':'application/json' },
     body: JSON.stringify({ p_code:k })
   }).then(function(r){ if (!r.ok) throw new Error('rpc ' + r.status); return r.json() })
-    .then(function(v){ return v === true });
+    .then(function(v){
+      if (v === true) return true;
+      /* Not a team code: it may be a paid gym code (GYM-XXXX-XXXX),
+         which opens the whole gym, The Reset included. */
+      if (!window.CG) return false;
+      return CG.probar(k).then(function(g){ return !!(g && g.ok) }, function(){ return false });
+    });
 }
 /* As typed first, then clean (no accents, spaces or dashes), the same
    way Mi calendario does: «canovanas 15u-4827» opens like
@@ -903,7 +925,9 @@ $('codeIn').addEventListener('keydown', function(e){ if (e.key === 'Enter') abri
 
 var guardado = null;
 try { guardado = localStorage.getItem(KEY_CODIGO) } catch(e){}
-if (guardado) {
+if (!guardado && window.CG && CG.pagado()) {
+  ver('s-start');                      // a paid gym plan on this device
+} else if (guardado) {
   ver('s-start');
   codigoVale(guardado).then(function(si){
     if (si) return;
