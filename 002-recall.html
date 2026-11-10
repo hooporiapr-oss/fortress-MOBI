@@ -418,7 +418,7 @@ body.warm .play-container{min-height:0}
 <div class="htp-section">
 <div class="htp-toggle" id="htpToggle">
 <span class="htp-toggle-icon">📖</span>
-<span class="htp-toggle-text" id="htpToggleText">HOW TO PLAY</span>
+<span class="htp-toggle-text" id="htpToggleText">THE PLAYBOOK</span>
 <span class="htp-toggle-arrow">▼</span>
 </div>
 <div class="htp-content" id="htpContent">
@@ -449,7 +449,7 @@ body.warm .play-container{min-height:0}
 </div>
 </div>
 <div class="demo-cta">
-<button class="play-now-btn" id="playNowBtn">▶ PLAY NOW</button>
+<button class="play-now-btn" id="playNowBtn">▶ EMPEZAR</button>
 </div>
 <div class="ritnome-promo">
 <div class="pulse-dot"></div>
@@ -612,7 +612,7 @@ var translations = {
     demoLabelRecall: 'RECALL!',
     demoLabelTap: 'TAP 1, 2, 3...',
     demoLabelPerfect: '✅ PERFECT!',
-    htpToggle: 'HOW TO PLAY',
+    htpToggle: 'THE PLAYBOOK',
     objectiveTitle: 'OBJECTIVE',
     step1: '<strong>Watch</strong> the grid — numbered cells will light up',
     step2: '<strong>Memorize</strong> which cells have which numbers',
@@ -627,7 +627,7 @@ var translations = {
     speed3: '<strong>100 BPM</strong> — the same steady tempo, every round',
     tipTitle: 'TIP',
     tipText: 'Start with Game mode to get a feel for it, then use Training mode to practice one level until you\'re consistent.',
-    playNow: '▶ PLAY NOW',
+    playNow: '▶ START',
     poweredBy: 'Powered by',
     trophyTitle: 'COGNITIVO GYM',
     trophySubtitle: 'THE RECALL Progress',
@@ -657,7 +657,7 @@ var translations = {
     demoLabelRecall: '¡RECUERDA!',
     demoLabelTap: 'TOCA 1, 2, 3...',
     demoLabelPerfect: '✅ ¡PERFECTO!',
-    htpToggle: 'CÓMO JUGAR',
+    htpToggle: 'EL MANUAL',
     objectiveTitle: 'OBJETIVO',
     step1: '<strong>Observa</strong> la cuadrícula — celdas numeradas se iluminarán',
     step2: '<strong>Memoriza</strong> qué celdas tienen qué números',
@@ -672,7 +672,7 @@ var translations = {
     speed3: '<strong>100 BPM</strong> — el mismo ritmo constante, cada ronda',
     tipTitle: 'CONSEJO',
     tipText: 'Empieza con el Modo Juego para sentirlo, luego usa el Modo Entrenamiento para practicar un nivel hasta ser consistente.',
-    playNow: '▶ JUGAR AHORA',
+    playNow: '▶ EMPEZAR',
     poweredBy: 'Impulsado por',
     trophyTitle: 'COGNITIVO GYM',
     trophySubtitle: 'Progreso de THE RECALL',
@@ -736,8 +736,10 @@ function setLang(l) {
 }
 $('langEN').onclick = function() { setLang('en'); };
 $('langES').onclick = function() { setLang('es'); };
+/* Spanish first: from the hub Recall opens in Spanish unless this phone
+   already chose English with the EN button. */
 var savedLang = localStorage.getItem('lc-lang');
-if (savedLang) currentLang = savedLang;
+currentLang = savedLang === 'en' ? 'en' : 'es';
 function showScreen(name){
     screenDemo.classList.remove('active');
     screenTrophy.classList.remove('active');
