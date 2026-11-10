@@ -9,6 +9,12 @@ if (localStorage.getItem('rct-mobile-pass') !== '1') {
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>The Replay Challenge</title>
+<!-- The same two fonts the other three games load. Without them the
+     Bebas Neue title (and the Outfit text) fell back to the phone's own
+     font, so THE REPLAY looked different from THE RECALL. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
 /* THE HANDFUL OF TOKENS THE WARM-UP CHROME EXPECTS.
    This game was written with literal colours and no variables, while
