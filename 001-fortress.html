@@ -612,9 +612,123 @@ html,body{background:var(--dark)}
   padding:env(safe-area-inset-top) 12px 0;background:rgba(10,10,15,0.95);border-bottom:1px solid var(--border);backdrop-filter:blur(10px)}
 .play-screen{padding-top:calc(var(--nav-height) + 14px + env(safe-area-inset-top))}
 .play-mode-name{color:var(--gold)}
+/* ── ENGLISH / SPANISH, AND THE PLAYBOOK (Nov 2026) ─────────────
+   The ES/EN switch sits in the title bar like the other three games'.
+   The Playbook opens in place, card by card, the way Recall's and
+   Recognition's do, instead of a pop-up over the page. */
+.nav-lang{display:flex;gap:2px}
+.nav-lang-btn{padding:5px 8px;border:1px solid var(--border);background:0;color:var(--muted);border-radius:4px;font-size:0.6rem;font-weight:600;cursor:pointer;min-width:28px;min-height:28px;font-family:'Outfit',sans-serif}
+.nav-lang-btn.active{border-color:var(--gold);color:var(--gold)}
+.htp-section{width:100%;max-width:380px;margin:14px 0 18px}
+.htp-toggle{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:12px 16px;background:linear-gradient(135deg,rgba(255,215,0,0.08),rgba(255,107,53,0.05));border:1px solid rgba(255,215,0,0.2);border-radius:10px;cursor:pointer;transition:all 0.3s;color:var(--gold);font:inherit}
+.htp-toggle:active{transform:scale(0.98);border-color:var(--gold)}
+.htp-toggle-icon{font-size:1.1rem}
+.htp-toggle-text{font-family:'Bebas Neue',sans-serif;font-size:0.95rem;letter-spacing:2px;color:var(--gold)}
+.htp-toggle-arrow{color:var(--gold);font-size:0.75rem;transition:transform 0.3s}
+.htp-toggle.open .htp-toggle-arrow{transform:rotate(180deg)}
+.htp-content{max-height:0;overflow:hidden;transition:max-height 0.5s ease-out}
+.htp-content.open{max-height:2000px}
+.htp-inner{padding:15px 0 0}
+.htp-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:15px;margin-bottom:10px;text-align:left}
+.htp-card-title{font-family:'Bebas Neue',sans-serif;font-size:0.9rem;letter-spacing:2px;color:var(--gold);margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.htp-step{display:flex;gap:10px;margin-bottom:10px;align-items:flex-start}
+.htp-step:last-child{margin-bottom:0}
+.htp-step-num{width:22px;height:22px;border-radius:50%;background:var(--gold);color:var(--dark);font-family:'Bebas Neue',sans-serif;font-size:0.75rem;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.htp-step-text{font-size:0.75rem;color:var(--text);line-height:1.5}
+.htp-step-text strong{color:var(--gold)}
+.htp-dots{display:inline-flex;gap:4px;vertical-align:-2px;margin-left:4px}
+.htp-dots i{width:10px;height:10px;border-radius:3px;display:block}
+.htp-tip{background:rgba(255,215,0,0.08);border-left:3px solid var(--gold);padding:10px 12px;border-radius:0 8px 8px 0;margin-top:12px}
+.htp-tip-title{font-size:0.6rem;color:var(--gold);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px}
+.htp-tip-text{font-size:0.7rem;color:var(--muted);line-height:1.4}
 </style>
 </head>
 <body>
+<script>
+/* ── THE TWO LANGUAGES ──────────────────────────────────────────────
+   Spanish first: from the hub the Fortress opens in Spanish, and the
+   EN button switches it. The choice is kept on this phone (ft-lang),
+   so whoever switched to English stays in English next time.
+   Every word the page shows comes from here: data-t on the page,
+   FT.t('key') in the script. */
+window.FT = (function(){
+  var D = {
+    es: {
+      back:'← Atrás', home:'← Inicio', badge:'DEMO PREMIUM', sub:'Mira. Recuerda. Repite.',
+      watch:'👀 MIRA...', repeat:'🔁 ¡REPITE!', nice:'✓ ¡BIEN!',
+      pb:'EL MANUAL', playNow:'▶ JUGAR AHORA', powered:'Impulsado por',
+      objT:'OBJETIVO',
+      o1:'<strong>Mira</strong> — los balones se iluminan uno a uno, cada uno con su color',
+      o2:'Cuando veas <strong>¡TU TURNO!</strong>, <strong>repite</strong> el orden exacto',
+      o3:'Cada ronda añade <strong>un toque más</strong> a la cadena',
+      boardT:'LA CANCHA',
+      b1:'<strong>Cinco blancos</strong> en 2-1-2: las cuatro esquinas y el centro',
+      b2:'El <strong>color</strong> los distingue:',
+      b3:'Siempre <strong>120 BPM</strong> — la misma prueba cada vez',
+      modesT:'CÓMO FUNCIONA',
+      m1:'<strong>Juego</strong> — la cadena crece hasta que falles',
+      m2:'<strong>Entrenamiento</strong> — escoge el nivel donde empieza la cadena',
+      tipT:'CONSEJO',
+      tip:'Di los colores en voz alta mientras se iluminan: una cadena de colores se recuerda mejor que una de posiciones.',
+      progress:'Progreso de THE FORTRESS', selMode:'SELECCIONA MODO', game:'JUEGO', gameD:'Sube sin parar',
+      training:'ENTRENAMIENTO', trainingD:'Inicio fijo', selLevel:'SELECCIONA NIVEL', chainAt:'La cadena empieza en:',
+      letsGo:"¡PA'LANTE!", level:'Nivel', round:'Ronda', best:'Mejor', time:'Tiempo', stop:'⏹ PARAR', again:'¡OTRA VEZ!',
+      outOfTime:'¡SE ACABÓ EL TIEMPO!', tapCenter:'TOCA EL CENTRO PARA EMPEZAR',
+      roundWatch:'🧠 RONDA {n} · MIRA...', yourTurn:'🏀 ¡TU TURNO! ({n} toques)', roundDone:'¡BIEN! 🔥 Ronda {n} completa',
+      soClose:'¡CASI! Era el balón {n}', gold:'¡MEMORIA DE ORO! 🧠', great:'¡GRAN TRABAJO! 🔥', goodTry:'¡BUEN INTENTO! 💪',
+      stats:'Nivel alcanzado: {l} · Tiempo: {t}s',
+      perfect:'¡PERFECTO!', good:'¡BIEN!', early:'TEMPRANO', late:'TARDE', wrong:'¡NO!', miss:'¡FALLO!', start:'¡TOCA PARA EMPEZAR! ↓'
+    },
+    en: {
+      back:'← Back', home:'← Home', badge:'PREMIUM DEMO', sub:'Watch. Remember. Repeat.',
+      watch:'👀 WATCH...', repeat:'🔁 REPEAT!', nice:'✓ NICE!',
+      pb:'THE PLAYBOOK', playNow:'▶ PLAY NOW', powered:'Powered by',
+      objT:'OBJECTIVE',
+      o1:'<strong>Watch</strong> — the balls light up one at a time, each in its colour',
+      o2:'When you see <strong>YOUR TURN!</strong>, <strong>repeat</strong> the exact order',
+      o3:'Every round adds <strong>one more tap</strong> to the chain',
+      boardT:'THE BOARD',
+      b1:'<strong>Five targets</strong> in a 2-1-2: the four corners and the centre',
+      b2:'<strong>Colour</strong> tells them apart:',
+      b3:'Always <strong>120 BPM</strong> — the same test every time',
+      modesT:'HOW IT WORKS',
+      m1:'<strong>Game</strong> — the chain keeps growing until you miss',
+      m2:'<strong>Training</strong> — pick the level the chain starts at',
+      tipT:'TIP',
+      tip:'Say the colours out loud as they light up: a chain of colours is easier to hold than a chain of spots.',
+      progress:'THE FORTRESS Progress', selMode:'SELECT MODE', game:'GAME', gameD:'Escalating',
+      training:'TRAINING', trainingD:'Fixed Start', selLevel:'SELECT LEVEL', chainAt:'Chain starts at:',
+      letsGo:"LET'S GO!", level:'Level', round:'Round', best:'Best', time:'Time', stop:'⏹ STOP', again:'TRY AGAIN!',
+      outOfTime:'OUT OF TIME!', tapCenter:'TAP THE CENTER TO START',
+      roundWatch:'🧠 ROUND {n} · WATCH...', yourTurn:'🏀 YOUR TURN! ({n} taps)', roundDone:'NICE! 🔥 Round {n} complete',
+      soClose:'SO CLOSE! It was ball {n}', gold:'GOLDEN MEMORY! 🧠', great:'GREAT JOB! 🔥', goodTry:'GOOD TRY! 💪',
+      stats:'Level Reached: {l} · Time: {t}s',
+      perfect:'PERFECT!', good:'GOOD!', early:'EARLY', late:'LATE', wrong:'WRONG!', miss:'MISS!', start:'TAP TO START! ↓'
+    }
+  };
+  var lang = 'es';
+  try { lang = localStorage.getItem('ft-lang') === 'en' ? 'en' : 'es' } catch(e){}
+  function t(k, v){ var x = (D[lang][k] != null ? D[lang][k] : D.en[k]) || ''; for (var n in (v || {})) x = x.split('{' + n + '}').join(v[n]); return x }
+  function apply(){
+    document.documentElement.lang = lang;
+    document.querySelectorAll('[data-t]').forEach(function(el){ el.textContent = t(el.getAttribute('data-t')) });
+    document.querySelectorAll('[data-th]').forEach(function(el){ el.innerHTML = t(el.getAttribute('data-th')) });
+    var en = document.getElementById('ftEN'), es = document.getElementById('ftES');
+    if (en) { en.classList.toggle('active', lang === 'en'); es.classList.toggle('active', lang === 'es') }
+    /* the old pop-up help keeps its own EN/ES; it follows the page */
+    var hb = document.getElementById(lang === 'en' ? 'helpLangEN' : 'helpLangES'); if (hb) hb.click();
+  }
+  function set(l){ lang = l === 'en' ? 'en' : 'es'; try { localStorage.setItem('ft-lang', lang) } catch(e){} apply() }
+  document.addEventListener('DOMContentLoaded', function(){
+    apply();
+    document.getElementById('ftEN').onclick = function(){ set('en') };
+    document.getElementById('ftES').onclick = function(){ set('es') };
+    var tg = document.getElementById('htpToggle'), ct = document.getElementById('htpContent');
+    tg.onclick = function(){ tg.classList.toggle('open'); ct.classList.toggle('open') };
+  });
+  return { t: t, set: set, lang: function(){ return lang } };
+})();
+</script>
 
 <div class="confetti-container" id="confettiContainer"></div>
 <div class="milestone" id="milestone"></div>
@@ -623,25 +737,47 @@ html,body{background:var(--dark)}
 
 <div class="setup-screen" id="setupScreen">
 <div class="intro-nav-row">
-<a href="fortress-mobile-hub.html" class="back-btn">← Back</a>
+<a href="fortress-mobile-hub.html" class="back-btn" data-t="back">← Back</a>
 <div class="intro-nav-title">THE FORTRESS</div>
-<div style="width:68px"></div>
+<div class="nav-lang"><button class="nav-lang-btn" id="ftEN" type="button">EN</button><button class="nav-lang-btn active" id="ftES" type="button">ES</button></div>
 </div>
 <div class="fx-head">
-<div class="fx-badge">PREMIUM DEMO</div>
+<div class="fx-badge" data-t="badge">PREMIUM DEMO</div>
 <h1 class="fx-title">THE FORTRESS</h1>
-<p class="fx-sub">Watch. Remember. Repeat.</p>
+<p class="fx-sub" data-t="sub">Watch. Remember. Repeat.</p>
 </div>
 <div class="fx-court-wrap">
-<div class="fx-label" id="fxLabel">👀 WATCH...</div>
+<div class="fx-label" id="fxLabel" data-t="watch">👀 WATCH...</div>
 <div class="fx-court" id="fxCourt"></div>
 </div>
-<button class="intro-playbook-btn fx-htp" id="howToPlayBtn"><span>📖</span> HOW TO PLAY</button>
-<button class="play-now-btn" id="startFullGameBtn">▶ PLAY NOW</button>
+<div class="htp-section">
+<button class="htp-toggle" id="htpToggle" type="button"><span class="htp-toggle-icon">📖</span><span class="htp-toggle-text" data-t="pb">THE PLAYBOOK</span><span class="htp-toggle-arrow">▼</span></button>
+<div class="htp-content" id="htpContent"><div class="htp-inner">
+<div class="htp-card">
+<div class="htp-card-title">🎯 <span data-t="objT">OBJECTIVE</span></div>
+<div class="htp-step"><div class="htp-step-num">1</div><div class="htp-step-text" data-th="o1"></div></div>
+<div class="htp-step"><div class="htp-step-num">2</div><div class="htp-step-text" data-th="o2"></div></div>
+<div class="htp-step"><div class="htp-step-num">3</div><div class="htp-step-text" data-th="o3"></div></div>
+</div>
+<div class="htp-card">
+<div class="htp-card-title">🏀 <span data-t="boardT">THE BOARD</span></div>
+<div class="htp-step"><div class="htp-step-num">→</div><div class="htp-step-text" data-th="b1"></div></div>
+<div class="htp-step"><div class="htp-step-num">→</div><div class="htp-step-text"><span data-th="b2"></span><span class="htp-dots"><i style="background:#FFD700"></i><i style="background:#FF6B35"></i><i style="background:#FF1493"></i><i style="background:#00D9D9"></i><i style="background:#9B59B6"></i></span></div></div>
+<div class="htp-step"><div class="htp-step-num">→</div><div class="htp-step-text" data-th="b3"></div></div>
+</div>
+<div class="htp-card">
+<div class="htp-card-title">⚡ <span data-t="modesT">HOW IT WORKS</span></div>
+<div class="htp-step"><div class="htp-step-num">🎮</div><div class="htp-step-text" data-th="m1"></div></div>
+<div class="htp-step"><div class="htp-step-num">🏋</div><div class="htp-step-text" data-th="m2"></div></div>
+<div class="htp-tip"><div class="htp-tip-title">💡 <span data-t="tipT">TIP</span></div><div class="htp-tip-text" data-t="tip"></div></div>
+</div>
+</div></div>
+</div>
+<button class="play-now-btn" id="startFullGameBtn" data-t="playNow">▶ PLAY NOW</button>
 
 <div class="intro-footer">
 <div class="intro-footer-dot"></div>
-<div class="intro-footer-text">Powered by <b>Gostar Digital</b></div>
+<div class="intro-footer-text"><span data-t="powered">Powered by</span> <b>Gostar Digital</b></div>
 </div>
 </div>
 
@@ -661,7 +797,7 @@ html,body{background:var(--dark)}
 
 <div id="screen-mode">
   <div class="intro-nav-row">
-    <a href="#" class="back-btn" id="modeBack">&larr; Back</a>
+    <a href="#" class="back-btn" id="modeBack" data-t="back">&larr; Back</a>
     <div class="intro-nav-title">THE FORTRESS</div>
     <div style="width:68px"></div>
   </div>
@@ -669,25 +805,25 @@ html,body{background:var(--dark)}
     <div class="trophy-header">
       <div class="trophy-icon">&#127942;</div>
       <h1 class="trophy-title">COGNITIVO GYM</h1>
-      <p class="trophy-subtitle">THE FORTRESS Progress</p>
+      <p class="trophy-subtitle" data-t="progress">THE FORTRESS Progress</p>
     </div>
     <div class="bpm-section">
-      <div class="bpm-section-title">SELECT MODE</div>
+      <div class="bpm-section-title" data-t="selMode">SELECT MODE</div>
       <div class="mode-row">
         <div class="bpm-tier active" id="modeGame">
           <div class="bpm-tier-left"><span class="bpm-tier-icon">&#127918;</span>
-            <div><div class="bpm-tier-name">GAME</div><div class="bpm-tier-bpm">Escalating</div></div>
+            <div><div class="bpm-tier-name" data-t="game">GAME</div><div class="bpm-tier-bpm" data-t="gameD">Escalating</div></div>
           </div>
         </div>
         <div class="bpm-tier" id="modeTraining">
           <div class="bpm-tier-left"><span class="bpm-tier-icon">&#127947;</span>
-            <div><div class="bpm-tier-name">TRAINING</div><div class="bpm-tier-bpm">Fixed Start</div></div>
+            <div><div class="bpm-tier-name" data-t="training">TRAINING</div><div class="bpm-tier-bpm" data-t="trainingD">Fixed Start</div></div>
           </div>
         </div>
       </div>
     </div>
     <div class="level-section hidden" id="levelSection">
-      <div class="level-section-title">SELECT LEVEL</div>
+      <div class="level-section-title" data-t="selLevel">SELECT LEVEL</div>
       <div class="level-grid" id="levelGrid">
         <button class="level-btn active" data-level="1">1</button>
         <button class="level-btn" data-level="2">2</button>
@@ -696,11 +832,11 @@ html,body{background:var(--dark)}
         <button class="level-btn" data-level="5">5</button>
       </div>
       <div class="level-info">
-        <span class="level-info-label">Chain starts at:</span>
+        <span class="level-info-label" data-t="chainAt">Chain starts at:</span>
         <span class="level-info-value" id="cellsDisplay">1</span>
       </div>
     </div>
-    <button class="letsgo-btn" id="letsGoBtn">LET'S GO!</button>
+    <button class="letsgo-btn" id="letsGoBtn" data-t="letsGo">LET'S GO!</button>
   </div>
 </div>
 
@@ -713,7 +849,7 @@ html,body{background:var(--dark)}
      nobody reads ⌂ as "leave". It is the same .back-btn pill the
      intro and the mode screen use, so the way out looks the same on
      all three. Still the same link it always was. -->
-<a href="fortress-mobile-hub.html" class="back-btn" id="playBackBtn" title="Back to the gym">← Back</a>
+<a href="fortress-mobile-hub.html" class="back-btn" id="playBackBtn" title="Back to the gym" data-t="back">← Back</a>
 <div class="play-mode-name" id="playModeName">FREEPLAY</div>
 <div class="play-bpm" id="playBpmLabel">90 BPM</div>
 </div>
@@ -723,16 +859,16 @@ html,body{background:var(--dark)}
 <div class="court-slot" id="courtSlot"><div class="court5x5" id="congaRow"></div></div>
 
 <div class="info-strip">
-<div class="info-box"><div class="info-label">Level</div><div class="info-value" id="scoreVal">0</div></div>
-<div class="info-box"><div class="info-label">Round</div><div class="info-value" id="streak">0</div></div>
-<div class="info-box"><div class="info-label">Best</div><div class="info-value" id="best">0</div></div>
-<div class="info-box"><div class="info-label">Time</div><div class="info-value" id="liveTime">0.0</div></div>
+<div class="info-box"><div class="info-label" data-t="level">Level</div><div class="info-value" id="scoreVal">0</div></div>
+<div class="info-box"><div class="info-label" data-t="round">Round</div><div class="info-value" id="streak">0</div></div>
+<div class="info-box"><div class="info-label" data-t="best">Best</div><div class="info-value" id="best">0</div></div>
+<div class="info-box"><div class="info-label" data-t="time">Time</div><div class="info-value" id="liveTime">0.0</div></div>
 </div>
 
 <div class="feedback"><div class="feedback-text" id="feedback"></div></div>
 </div>
 
-<button class="stop-btn" id="stopBtn">⏹ STOP</button>
+<button class="stop-btn" id="stopBtn" data-t="stop">⏹ STOP</button>
 </div>
 
 <div class="standings-screen" id="standingsScreen">
@@ -747,16 +883,16 @@ html,body{background:var(--dark)}
 <div class="challenge-complete" id="challengeComplete">
 <div class="challenge-result" id="challengeResult">YOU WIN!</div>
 <div class="challenge-stats" id="challengeStats"></div>
-<button class="challenge-retry-btn" id="retryBtn">TRY AGAIN!</button>
+<button class="challenge-retry-btn" id="retryBtn" data-t="again">TRY AGAIN!</button>
 <button class="setup-stats-btn" id="endStandingsBtn" style="border:1px solid rgba(255,215,0,.35);border-radius:100px;padding:10px 18px;margin-top:12px;color:var(--gold)">🏆 View Standings</button>
 <div id="handleStandingsStatus" style="font-size:.7rem;font-weight:700;color:rgba(255,255,255,.4);margin-top:10px">Saving to standings…</div>
 <div style="display:flex;gap:12px;margin-top:14px">
-<a href="fortress-mobile-hub.html" class="setup-stats-btn" id="endHomeLink" style="border:1px solid rgba(255,255,255,.15);border-radius:100px;padding:10px 18px;text-decoration:none;display:inline-block">← Home</a>
-<button class="setup-stats-btn" id="endBackBtn" style="border:1px solid rgba(255,255,255,.15);border-radius:100px;padding:10px 18px">← Back</button>
+<a href="fortress-mobile-hub.html" class="setup-stats-btn" id="endHomeLink" style="border:1px solid rgba(255,255,255,.15);border-radius:100px;padding:10px 18px;text-decoration:none;display:inline-block" data-t="home">← Home</a>
+<button class="setup-stats-btn" id="endBackBtn" style="border:1px solid rgba(255,255,255,.15);border-radius:100px;padding:10px 18px" data-t="back">← Back</button>
 </div>
 </div>
 
-<div class="repitelo-indicator" id="repiteloIndicator">🧠 WATCH...</div>
+<div class="repitelo-indicator" id="repiteloIndicator" data-t="watch">🧠 WATCH...</div>
 <div class="repitelo-progress" id="repiteloProgress"></div>
 <div class="help-overlay" id="helpOverlay">
 <div class="help-card">
@@ -816,8 +952,8 @@ bestEl.textContent=best;
 var currentMode='repitelo';
 var challengeComplete=document.getElementById('challengeComplete'),challengeResult=document.getElementById('challengeResult'),challengeStats=document.getElementById('challengeStats'),retryBtn=document.getElementById('retryBtn'),countdownOverlay=document.getElementById('countdownOverlay'),countdownNumber=document.getElementById('countdownNumber'),repiteloIndicator=document.getElementById('repiteloIndicator'),repiteloProgress=document.getElementById('repiteloProgress');
 
-document.getElementById('howToPlayBtn').addEventListener('click',function(){showHelp('repitelo')});
-document.getElementById('howToPlayBtn').addEventListener('touchstart',function(e){e.preventDefault();showHelp('repitelo')},{passive:false});
+/* The intro's How to Play button became the Playbook, which opens in
+   place (see FT at the top). The pop-up below stays, unused from here. */
 
 
 // ══════════════════════════════════════════════════════
@@ -1399,7 +1535,7 @@ function startTurn(){
     repIsListening=false;
     repShotLog.push({hit:false,round:repRound,pts:0});
     playWrongSound(); vibrate(80);
-    repiteloIndicator.textContent='OUT OF TIME!';
+    repiteloIndicator.textContent=FT.t('outOfTime');
     repiteloIndicator.className='repitelo-indicator watching';
     setTimeout(repEndGame,900);
   }, fortTurnMs());
@@ -1485,7 +1621,7 @@ function pedirCentro(alTocar){
   var centro=tapCongas[0];           // conga0 es el centro de la cancha
   if(!centro){ esperandoCentro=false; alTocar(); return }
   centro.classList.add('latiendo');
-  repiteloIndicator.textContent='TAP THE CENTER TO START';
+  repiteloIndicator.textContent=FT.t('tapCenter');
   repiteloIndicator.className='repitelo-indicator listening';
   CENTRO_LISTO=function(){
     if(!esperandoCentro) return false;
@@ -1552,7 +1688,7 @@ if(repSequence.length===0){
   repSequence.push(otraBola(maxDrum, repSequence[repSequence.length-1]));
 }
 repRenderDots();
-repiteloIndicator.textContent='🧠 ROUND '+repRound+' · WATCH...';
+repiteloIndicator.textContent=FT.t('roundWatch',{n:repRound});
 repiteloIndicator.className='repitelo-indicator watching';
 /* One beat of WATCH..., not nearly two. The old 900ms wait before
    every round was most of a second of nothing, repeated every round,
@@ -1579,7 +1715,7 @@ repIsPlaying=false;
 repIsListening=true;
 repPlayerIndex=0;
 pintarCancha();
-repiteloIndicator.textContent='🏀 YOUR TURN! ('+repSequence.length+' taps)';
+repiteloIndicator.textContent=FT.t('yourTurn',{n:repSequence.length});
 startTurn();
 repiteloIndicator.className='repitelo-indicator listening';
 var fd=document.getElementById('repDot0');
@@ -1656,7 +1792,7 @@ repIsListening=false;
 stopTurn();
 score=repRound;scoreEl.textContent=WARM.shown();
 repShotLog.push({hit:true,round:repRound,pts:repRound});
-repiteloIndicator.textContent='NICE! 🔥 Round '+repRound+' complete';
+repiteloIndicator.textContent=FT.t('roundDone',{n:repRound});
 repiteloIndicator.className='repitelo-indicator listening';
 playCongaRoll();
 if(repRound>=3)launchConfetti();
@@ -1674,7 +1810,7 @@ repIsListening=false;
 stopTurn();
 repShotLog.push({hit:false,round:repRound,pts:0});
 playWrongSound();vibrate(80);
-repiteloIndicator.textContent='SO CLOSE! It was ball '+(expected+1);
+repiteloIndicator.textContent=FT.t('soClose',{n:expected+1});
 repiteloIndicator.className='repitelo-indicator watching';
 tapCongas.forEach(function(c){c.classList.remove('lit')});
 tapCongas[expected].classList.add('lit');
@@ -1704,9 +1840,9 @@ showFinalScore(finalLevel,finalTime);
 }
 
 function showFinalScore(finalLevel,finalTime){
-  challengeResult.textContent=finalLevel>=15?'GOLDEN MEMORY! 🧠':finalLevel>=8?'GREAT JOB! 🔥':'GOOD TRY! 💪';
+  challengeResult.textContent=finalLevel>=15?FT.t('gold'):finalLevel>=8?FT.t('great'):FT.t('goodTry');
   challengeResult.className='challenge-result '+(finalLevel>=8?'win':'lose');
-  challengeStats.textContent='Level Reached: '+finalLevel+' · Time: '+finalTime.toFixed(1)+'s';
+  challengeStats.textContent=FT.t('stats',{l:finalLevel,t:finalTime.toFixed(1)});
 
   /* AND TO THE GYM, which is what the board reads. Only outside a
      warm-up run: inside one the station posts its own score when the
@@ -2004,7 +2140,7 @@ el.classList.add('hit-correct');setTimeout(function(){el.classList.remove('hit-c
 if(isPlaying){if(repIsListening)repHandleTap(ci);return;}
 el.classList.add('tapped');createColorBurst(el,ci);createSparks(el,ci);showCallout(el);setTimeout(function(){el.classList.remove('tapped')},150);showFeedback('start');}
 
-function showFeedback(q){clearTimeout(feedbackTimeout);var t=q==='perfect'?'PERFECT!':q==='good'?'GOOD!':q==='early'?'EARLY':q==='late'?'LATE':q==='wrong'?'WRONG!':q==='miss'?'MISS!':q==='start'?'TAP TO START! ↓':'';feedback.textContent=t;feedback.className='feedback-text show '+q;feedbackTimeout=setTimeout(function(){feedback.classList.remove('show')},400)}
+function showFeedback(q){clearTimeout(feedbackTimeout);var t=['perfect','good','early','late','wrong','miss','start'].indexOf(q)>=0?FT.t(q):'';feedback.textContent=t;feedback.className='feedback-text show '+q;feedbackTimeout=setTimeout(function(){feedback.classList.remove('show')},400)}
 
 tapCongas.forEach(function(c,i){c.addEventListener('touchstart',function(e){e.preventDefault();handleTap(i,c)},{passive:false});c.addEventListener('mousedown',function(e){e.preventDefault();handleTap(i,c)});c.addEventListener('touchend',function(e){e.preventDefault()},{passive:false})});
 
@@ -2049,11 +2185,11 @@ if(warmOn()){
   }
   async function vuelta(){
     var ch = CHAINS[n++ % CHAINS.length];
-    say('👀 WATCH...'); await wait(700);
+    say(FT.t('watch')); await wait(700);
     await flash(ch, 520, 180);
-    say('🔁 REPEAT!', 'go'); await wait(500);
+    say(FT.t('repeat'), 'go'); await wait(500);
     await flash(ch, 300, 120);
-    say('✓ NICE!', 'ok'); await wait(1200);
+    say(FT.t('nice'), 'ok'); await wait(1200);
   }
   (async function(){ for (;;) { if (visible()) await vuelta(); else await wait(800) } })();
 })();
