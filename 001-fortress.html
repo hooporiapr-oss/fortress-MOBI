@@ -578,6 +578,40 @@ body.warm .countdown-overlay{z-index:2400}
   .tap-conga.latiendo{animation:none;filter:brightness(1.35);
     box-shadow:0 0 26px var(--conga-color)}
 }
+/* ── THE FIRST SCREEN, LIKE THE OTHER THREE (Nov 2026) ─────────────
+   Same dark floor as Recall, Recognition and Replay instead of the
+   purple gradient, which also darkens the game screen behind it. Same
+   order on the intro: badge, title, a small court that plays a sample
+   chain by itself, How to play, then the big PLAY NOW. Gold is the
+   Fortress colour, the way orange is Recall's and green Recognition's. */
+html,body{background:var(--dark)}
+.setup-screen{justify-content:flex-start;gap:0;padding:calc(env(safe-area-inset-top) + 62px) 0 24px}
+.fx-head{text-align:center;margin-bottom:8px}
+.fx-badge{display:inline-block;background:rgba(255,215,0,0.13);color:var(--gold);padding:4px 12px;border-radius:15px;font-size:0.55rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:6px}
+.fx-title{font-family:'Bebas Neue',sans-serif;font-size:1.8rem;letter-spacing:3px;color:var(--gold);margin:0 0 2px;font-weight:400;line-height:1.1}
+.fx-sub{font-size:0.7rem;color:var(--muted);margin:0}
+.fx-court-wrap{position:relative;margin:26px 0 10px}
+.fx-label{position:absolute;top:-24px;left:50%;transform:translateX(-50%);font-family:'Bebas Neue',sans-serif;font-size:0.7rem;letter-spacing:2px;color:var(--gold);background:rgba(0,0,0,0.85);padding:4px 12px;border-radius:10px;white-space:nowrap;z-index:5;border:1px solid rgba(255,215,0,0.4)}
+.fx-label.go{color:var(--orange);border-color:rgba(255,107,53,0.4)}
+.fx-label.ok{color:#00D9A5;border-color:rgba(0,217,165,0.4)}
+.fx-court{display:grid;grid-template-columns:repeat(5,1fr);gap:3px;width:200px;height:200px;border-radius:12px;padding:14px;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cg fill='none' stroke='%23fff' stroke-opacity='.85' stroke-width='1.1'%3E%3Crect x='34' y='2' width='32' height='38' fill='%231b3a8a' fill-opacity='.38'/%3E%3Ccircle cx='50' cy='40' r='12'/%3E%3Cpath d='M42 8H58'/%3E%3Cpath d='M42 11A8 8 0 0 0 58 11'/%3E%3Cpath d='M6 2V24.4A46 46 0 0 0 94 24.4V2'/%3E%3Cpath d='M2 98H98'/%3E%3Cpath d='M38 98A12 12 0 0 1 62 98'/%3E%3Crect x='2' y='2' width='96' height='96'/%3E%3C/g%3E%3Ccircle cx='50' cy='11' r='3' fill='none' stroke='%23ff6b35' stroke-width='1.3'/%3E%3C/svg%3E"),repeating-linear-gradient(90deg,rgba(0,0,0,.10) 0 1px,transparent 1px 9%),repeating-linear-gradient(90deg,rgba(255,255,255,.035) 0 3%,rgba(0,0,0,.035) 3% 6%,rgba(255,255,255,.02) 6% 9%),radial-gradient(120% 90% at 50% 0%,rgba(255,190,120,.22),transparent 60%),linear-gradient(180deg,#8a5228,#6b3c1c);
+  background-size:100% 100%,auto,auto,auto,auto;background-repeat:no-repeat,repeat,repeat,no-repeat,no-repeat;
+  border:2px solid #4a2a12;box-shadow:inset 0 0 30px rgba(0,0,0,.35),0 0 26px rgba(255,215,0,.12)}
+.fx-cell{border-radius:4px;background:rgba(255,255,255,0.06);border:2px solid rgba(255,255,255,0.45);transition:all .15s}
+.fx-cell.t{background:var(--c);border-color:var(--c);opacity:.45}
+.fx-cell.t.on{opacity:1;border-color:#fff;box-shadow:0 0 16px var(--c),0 0 0 2px rgba(255,255,255,.35);transform:scale(1.1)}
+.setup-screen .intro-playbook-btn.fx-htp{max-width:380px;margin:14px 0 18px;padding:12px 16px;border-radius:10px;border:1px solid rgba(255,215,0,0.2);
+  background:linear-gradient(135deg,rgba(255,215,0,0.08),rgba(255,107,53,0.05));color:var(--gold);font-family:'Bebas Neue',sans-serif;font-size:0.95rem;font-weight:400;letter-spacing:2px}
+.setup-screen .play-now-btn{max-width:320px;padding:16px 20px;font-size:1.4rem;letter-spacing:5px;border-radius:10px;margin-bottom:22px}
+@media(max-height:650px){.fx-court{width:180px;height:180px}}
+/* The game screen: the title bar sits across the top like the other
+   three (Back on the left, the name in the game's colour), and the name
+   is the Fortress gold instead of teal. */
+.play-header{position:fixed;top:0;left:0;right:0;z-index:1000;height:calc(var(--nav-height) + env(safe-area-inset-top));
+  padding:env(safe-area-inset-top) 12px 0;background:rgba(10,10,15,0.95);border-bottom:1px solid var(--border);backdrop-filter:blur(10px)}
+.play-screen{padding-top:calc(var(--nav-height) + 14px + env(safe-area-inset-top))}
+.play-mode-name{color:var(--gold)}
 </style>
 </head>
 <body>
@@ -593,13 +627,17 @@ body.warm .countdown-overlay{z-index:2400}
 <div class="intro-nav-title">THE FORTRESS</div>
 <div style="width:68px"></div>
 </div>
-<div class="bori-hero">
-<div class="intro-title">THE FORTRESS</div>
-<div class="bori-hero-sub">Watch. Remember. Repeat.</div>
+<div class="fx-head">
+<div class="fx-badge">FREE</div>
+<h1 class="fx-title">THE FORTRESS</h1>
+<p class="fx-sub">Watch. Remember. Repeat.</p>
 </div>
-
-<button class="intro-playbook-btn" id="howToPlayBtn">📖 How to Play</button>
-<button class="play-now-btn" id="startFullGameBtn">🏀 PLAY</button>
+<div class="fx-court-wrap">
+<div class="fx-label" id="fxLabel">👀 WATCH...</div>
+<div class="fx-court" id="fxCourt"></div>
+</div>
+<button class="intro-playbook-btn fx-htp" id="howToPlayBtn"><span>📖</span> HOW TO PLAY</button>
+<button class="play-now-btn" id="startFullGameBtn">▶ PLAY NOW</button>
 
 <div class="intro-footer">
 <div class="intro-footer-dot"></div>
@@ -1985,6 +2023,39 @@ if(warmOn()){
 }else{
   showScreen('setup');
 }
+})();
+</script>
+<script>
+/* THE SAMPLE ON THE FIRST SCREEN: the real Fortress board, 2-1-2 —
+   the four corners and the centre, in their game colours. A chain
+   lights up one target at a time, then plays back as the repeat, over
+   and over, only while the first screen is showing. */
+(function(){
+  var court = document.getElementById('fxCourt'), label = document.getElementById('fxLabel'), setup = document.getElementById('setupScreen');
+  if (!court) return;
+  var T = { 12: '#FFD700', 0: '#FF6B35', 4: '#FF1493', 20: '#00D9D9', 24: '#9B59B6' };
+  for (var i = 0; i < 25; i++) {
+    var c = document.createElement('div'); c.className = 'fx-cell' + (T[i] ? ' t' : '');
+    if (T[i]) c.style.setProperty('--c', T[i]);
+    court.appendChild(c);
+  }
+  var cells = court.children;
+  var CHAINS = [[12, 0, 24], [4, 20, 12, 0], [0, 24, 4, 12, 20]], n = 0;
+  function visible(){ return setup.style.display !== 'none' && !document.hidden }
+  function wait(ms){ return new Promise(function(r){ setTimeout(r, ms) }) }
+  function say(t, cls){ label.textContent = t; label.className = 'fx-label' + (cls ? ' ' + cls : '') }
+  async function flash(ch, on, off){
+    for (var k = 0; k < ch.length; k++) { var c = cells[ch[k]]; c.classList.add('on'); await wait(on); c.classList.remove('on'); await wait(off) }
+  }
+  async function vuelta(){
+    var ch = CHAINS[n++ % CHAINS.length];
+    say('👀 WATCH...'); await wait(700);
+    await flash(ch, 520, 180);
+    say('🔁 REPEAT!', 'go'); await wait(500);
+    await flash(ch, 300, 120);
+    say('✓ NICE!', 'ok'); await wait(1200);
+  }
+  (async function(){ for (;;) { if (visible()) await vuelta(); else await wait(800) } })();
 })();
 </script>
 </body>
