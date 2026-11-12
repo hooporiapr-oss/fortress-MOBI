@@ -143,11 +143,11 @@ html,body{height:100%;overflow-x:hidden;font-family:'Outfit',sans-serif;backgrou
   opacity:.82;transition:all .12s;
   cursor:pointer;outline:none;-webkit-tap-highlight-color:transparent
 }
-#conga0{--conga-color:#FFD700;--conga-glow:rgba(255,215,0,0.45)}
-#conga1{--conga-color:#FF6B35;--conga-glow:rgba(255,107,53,0.45)}
-#conga2{--conga-color:#FF1493;--conga-glow:rgba(255,20,147,0.45)}
-#conga3{--conga-color:#00D9D9;--conga-glow:rgba(0,217,217,0.45)}
-#conga4{--conga-color:#9B59B6;--conga-glow:rgba(155,89,182,0.45)}
+/* ALL FIVE ARE THE SAME BASKETBALL (Nov 2026). The five colours are
+   gone: every target is one orange ball, so a chain is held by WHERE
+   it lights up, not by colour. See the override block at the end of
+   this stylesheet. */
+#conga0,#conga1,#conga2,#conga3,#conga4{--conga-color:#F07A1E;--conga-glow:rgba(240,122,30,0.45)}
 .tap-conga.tapped{opacity:1;transform:scale(1.06);filter:brightness(1.25);
   box-shadow:0 0 30px var(--conga-glow),0 0 50px var(--conga-glow)}
 
@@ -641,6 +641,21 @@ html,body{background:var(--dark)}
 .htp-tip{background:rgba(255,215,0,0.08);border-left:3px solid var(--gold);padding:10px 12px;border-radius:0 8px 8px 0;margin-top:12px}
 .htp-tip-title{font-size:0.6rem;color:var(--gold);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px}
 .htp-tip-text{font-size:0.7rem;color:var(--muted);line-height:1.4}
+/* ── FIVE IDENTICAL BASKETBALLS (Nov 2026) ─────────────────────────
+   Each target is drawn as the same basketball over a clear square, so
+   the whole square still takes the tap. Square glows would show round
+   a round ball, so every state glows with drop-shadow, which follows
+   the ball's outline. Lit = white halo + brighter ball + bigger, the
+   one signal that says "this one", since colour no longer can. */
+.tap-conga{background:transparent url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3CradialGradient id='g' cx='38%25' cy='34%25' r='72%25'%3E%3Cstop offset='0' stop-color='%23FFB15C'/%3E%3Cstop offset='.6' stop-color='%23F07A1E'/%3E%3Cstop offset='1' stop-color='%23A8450A'/%3E%3C/radialGradient%3E%3C/defs%3E%3Ccircle cx='50' cy='50' r='47' fill='url(%23g)'/%3E%3Cg fill='none' stroke='%232a1206' stroke-width='3.4'%3E%3Cpath d='M3 50H97M50 3V97'/%3E%3Cpath d='M19 12C35 32 35 68 19 88'/%3E%3Cpath d='M81 12C65 32 65 68 81 88'/%3E%3C/g%3E%3C/svg%3E") center/92% 92% no-repeat!important;
+  border-color:transparent!important;box-shadow:none!important;opacity:.78}
+.tap-conga.tapped{filter:brightness(1.2) drop-shadow(0 0 10px rgba(240,122,30,.8))!important}
+.tap-conga.lit{opacity:1;filter:brightness(1.4) drop-shadow(0 0 8px #fff) drop-shadow(0 0 22px rgba(255,170,80,.95))!important}
+.court5x5.on-fire .tap-conga.lit{filter:brightness(1.45) drop-shadow(0 0 9px #fff) drop-shadow(0 0 30px rgba(255,107,53,.95))!important}
+.court5x5.fuego-mode .tap-conga.lit{filter:brightness(1.5) drop-shadow(0 0 10px #fff) drop-shadow(0 0 38px rgba(255,69,0,1))!important}
+.fx-cell.t{background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3CradialGradient id='g' cx='38%25' cy='34%25' r='72%25'%3E%3Cstop offset='0' stop-color='%23FFB15C'/%3E%3Cstop offset='.6' stop-color='%23F07A1E'/%3E%3Cstop offset='1' stop-color='%23A8450A'/%3E%3C/radialGradient%3E%3C/defs%3E%3Ccircle cx='50' cy='50' r='47' fill='url(%23g)'/%3E%3Cg fill='none' stroke='%232a1206' stroke-width='3.4'%3E%3Cpath d='M3 50H97M50 3V97'/%3E%3Cpath d='M19 12C35 32 35 68 19 88'/%3E%3Cpath d='M81 12C65 32 65 68 81 88'/%3E%3C/g%3E%3C/svg%3E") center/90% 90% no-repeat!important;border-color:transparent!important;opacity:.6}
+.fx-cell.t.on{opacity:1;box-shadow:none!important;filter:brightness(1.4) drop-shadow(0 0 6px #fff) drop-shadow(0 0 14px rgba(255,170,80,.95))}
+.htp-dots i{background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3CradialGradient id='g' cx='38%25' cy='34%25' r='72%25'%3E%3Cstop offset='0' stop-color='%23FFB15C'/%3E%3Cstop offset='.6' stop-color='%23F07A1E'/%3E%3Cstop offset='1' stop-color='%23A8450A'/%3E%3C/radialGradient%3E%3C/defs%3E%3Ccircle cx='50' cy='50' r='47' fill='url(%23g)'/%3E%3Cg fill='none' stroke='%232a1206' stroke-width='3.4'%3E%3Cpath d='M3 50H97M50 3V97'/%3E%3Cpath d='M19 12C35 32 35 68 19 88'/%3E%3Cpath d='M81 12C65 32 65 68 81 88'/%3E%3C/g%3E%3C/svg%3E") center/contain no-repeat!important;border-radius:50%}
 </style>
 </head>
 <body>
@@ -658,18 +673,18 @@ window.FT = (function(){
       watch:'👀 MIRA...', repeat:'🔁 ¡REPITE!', nice:'✓ ¡BIEN!',
       pb:'EL MANUAL', playNow:'▶ EMPEZAR', powered:'Impulsado por',
       objT:'OBJETIVO',
-      o1:'<strong>Mira</strong> — los balones se iluminan uno a uno, cada uno con su color',
+      o1:'<strong>Mira</strong> — los balones se iluminan uno a uno',
       o2:'Cuando veas <strong>¡TU TURNO!</strong>, <strong>repite</strong> el orden exacto',
       o3:'Cada ronda añade <strong>un toque más</strong> a la cadena',
       boardT:'LA CANCHA',
       b1:'<strong>Cinco blancos</strong> en 2-1-2: las cuatro esquinas y el centro',
-      b2:'El <strong>color</strong> los distingue:',
+      b2:'Los cinco son el <strong>mismo balón</strong>: solo cuenta <strong>dónde</strong> se ilumina',
       b3:'Siempre <strong>120 BPM</strong> — la misma prueba cada vez',
       modesT:'CÓMO FUNCIONA',
       m1:'<strong>Juego</strong> — la cadena crece hasta que falles',
       m2:'<strong>Entrenamiento</strong> — escoge el nivel donde empieza la cadena',
       tipT:'CONSEJO',
-      tip:'Di los colores en voz alta mientras se iluminan: una cadena de colores se recuerda mejor que una de posiciones.',
+      tip:'Sigue el recorrido: dibuja en tu mente la ruta de esquina a esquina mientras se iluminan.',
       progress:'Progreso de THE FORTRESS', selMode:'SELECCIONA MODO', game:'JUEGO', gameD:'Sube sin parar',
       training:'ENTRENAMIENTO', trainingD:'Inicio fijo', selLevel:'SELECCIONA NIVEL', chainAt:'La cadena empieza en:',
       letsGo:"¡PA'LANTE!", level:'Nivel', round:'Ronda', best:'Mejor', time:'Tiempo', stop:'⏹ PARAR', again:'¡OTRA VEZ!',
@@ -684,18 +699,18 @@ window.FT = (function(){
       watch:'👀 WATCH...', repeat:'🔁 REPEAT!', nice:'✓ NICE!',
       pb:'THE PLAYBOOK', playNow:'▶ START', powered:'Powered by',
       objT:'OBJECTIVE',
-      o1:'<strong>Watch</strong> — the balls light up one at a time, each in its colour',
+      o1:'<strong>Watch</strong> — the balls light up one at a time',
       o2:'When you see <strong>YOUR TURN!</strong>, <strong>repeat</strong> the exact order',
       o3:'Every round adds <strong>one more tap</strong> to the chain',
       boardT:'THE BOARD',
       b1:'<strong>Five targets</strong> in a 2-1-2: the four corners and the centre',
-      b2:'<strong>Colour</strong> tells them apart:',
+      b2:'All five are the <strong>same ball</strong>: only <strong>where</strong> it lights up counts',
       b3:'Always <strong>120 BPM</strong> — the same test every time',
       modesT:'HOW IT WORKS',
       m1:'<strong>Game</strong> — the chain keeps growing until you miss',
       m2:'<strong>Training</strong> — pick the level the chain starts at',
       tipT:'TIP',
-      tip:'Say the colours out loud as they light up: a chain of colours is easier to hold than a chain of spots.',
+      tip:'Follow the path: picture the route from corner to corner as they light up.',
       progress:'THE FORTRESS Progress', selMode:'SELECT MODE', game:'GAME', gameD:'Escalating',
       training:'TRAINING', trainingD:'Fixed Start', selLevel:'SELECT LEVEL', chainAt:'Chain starts at:',
       letsGo:"LET'S GO!", level:'Level', round:'Round', best:'Best', time:'Time', stop:'⏹ STOP', again:'TRY AGAIN!',
@@ -1430,7 +1445,7 @@ var bombaLoop=null,bombaGain=null,bombaPlaying=false;
 function startBombaLoop(){if(bombaPlaying||!audioCtx)return;bombaPlaying=true;bombaGain=audioCtx.createGain();bombaGain.gain.value=0.1;bombaGain.connect(audioCtx.destination);var pat=[{time:0,pitch:0},{time:0.5,pitch:2},{time:0.75,pitch:1},{time:1,pitch:0},{time:1.5,pitch:2},{time:1.75,pitch:1}];function sched(){if(!bombaPlaying)return;var iv=60/bpm;var n=audioCtx.currentTime;pat.forEach(function(note){var t=n+(note.time*iv);var p=congaPitches[note.pitch];var o=audioCtx.createOscillator();var g=audioCtx.createGain();o.type='sine';o.frequency.setValueAtTime(p.freq*0.8,t);o.frequency.exponentialRampToValueAtTime(p.freqDecay*0.8,t+0.15);g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(0.12,t+0.005);g.gain.exponentialRampToValueAtTime(0.001,t+0.15);o.connect(g);g.connect(bombaGain);o.start(t);o.stop(t+0.18)});bombaLoop=setTimeout(sched,2*iv*1000)}sched()}
 function stopBombaLoop(){bombaPlaying=false;if(bombaLoop){clearTimeout(bombaLoop);bombaLoop=null}}
 
-var congaColors=['#FFD700','#FF6B35','#FF1493','#00D9D9','#9B59B6'];
+var congaColors=['#F07A1E','#F07A1E','#F07A1E','#F07A1E','#F07A1E'];   /* one ball, one colour */
 var callouts=['SWISH!','ON FIRE!','BUCKET!','NOTHING BUT NET!',"LET'S GO!",'CLUTCH!','BALLER!','NICE!','🔥','💥','⚡','🎯','💪','🏀','👏','🏆'];
 var calloutCounter=0;
 
@@ -2169,7 +2184,7 @@ if(warmOn()){
 (function(){
   var court = document.getElementById('fxCourt'), label = document.getElementById('fxLabel'), setup = document.getElementById('setupScreen');
   if (!court) return;
-  var T = { 12: '#FFD700', 0: '#FF6B35', 4: '#FF1493', 20: '#00D9D9', 24: '#9B59B6' };
+  var T = { 12: '#F07A1E', 0: '#F07A1E', 4: '#F07A1E', 20: '#F07A1E', 24: '#F07A1E' };   /* the same ball on all five */
   for (var i = 0; i < 25; i++) {
     var c = document.createElement('div'); c.className = 'fx-cell' + (T[i] ? ' t' : '');
     if (T[i]) c.style.setProperty('--c', T[i]);
