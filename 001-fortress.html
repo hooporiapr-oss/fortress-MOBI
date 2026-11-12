@@ -656,6 +656,19 @@ html,body{background:var(--dark)}
 .fx-cell.t{background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3CradialGradient id='g' cx='38%25' cy='34%25' r='72%25'%3E%3Cstop offset='0' stop-color='%23FFB15C'/%3E%3Cstop offset='.6' stop-color='%23F07A1E'/%3E%3Cstop offset='1' stop-color='%23A8450A'/%3E%3C/radialGradient%3E%3C/defs%3E%3Ccircle cx='50' cy='50' r='47' fill='url(%23g)'/%3E%3Cg fill='none' stroke='%232a1206' stroke-width='3.4'%3E%3Cpath d='M3 50H97M50 3V97'/%3E%3Cpath d='M19 12C35 32 35 68 19 88'/%3E%3Cpath d='M81 12C65 32 65 68 81 88'/%3E%3C/g%3E%3C/svg%3E") center/90% 90% no-repeat!important;border-color:transparent!important;opacity:.6}
 .fx-cell.t.on{opacity:1;box-shadow:none!important;filter:brightness(1.4) drop-shadow(0 0 6px #fff) drop-shadow(0 0 14px rgba(255,170,80,.95))}
 .htp-dots i{background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3CradialGradient id='g' cx='38%25' cy='34%25' r='72%25'%3E%3Cstop offset='0' stop-color='%23FFB15C'/%3E%3Cstop offset='.6' stop-color='%23F07A1E'/%3E%3Cstop offset='1' stop-color='%23A8450A'/%3E%3C/radialGradient%3E%3C/defs%3E%3Ccircle cx='50' cy='50' r='47' fill='url(%23g)'/%3E%3Cg fill='none' stroke='%232a1206' stroke-width='3.4'%3E%3Cpath d='M3 50H97M50 3V97'/%3E%3Cpath d='M19 12C35 32 35 68 19 88'/%3E%3Cpath d='M81 12C65 32 65 68 81 88'/%3E%3C/g%3E%3C/svg%3E") center/contain no-repeat!important;border-radius:50%}
+/* ── NO GRID, BIGGER BALLS (Nov 2026) ──────────────────────────────
+   The twenty empty boxes are gone, so the court reads as a court with
+   five balls on it. Each ball is drawn on ::before, half again the
+   size of its square and spilling into the empty space round it; the
+   pseudo-element belongs to the button, so the bigger ball is also the
+   bigger thing to tap. The square itself stays where the game expects
+   it, so nothing in the game's logic moves. */
+.cell-filler{background:transparent!important;border-color:transparent!important;box-shadow:none!important}
+.tap-conga{position:relative;background:transparent!important;overflow:visible}
+.tap-conga::before{content:'';position:absolute;inset:-26%;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3CradialGradient id='g' cx='38%25' cy='34%25' r='72%25'%3E%3Cstop offset='0' stop-color='%23FFB15C'/%3E%3Cstop offset='.6' stop-color='%23F07A1E'/%3E%3Cstop offset='1' stop-color='%23A8450A'/%3E%3C/radialGradient%3E%3C/defs%3E%3Ccircle cx='50' cy='50' r='47' fill='url(%23g)'/%3E%3Cg fill='none' stroke='%232a1206' stroke-width='3.4'%3E%3Cpath d='M3 50H97M50 3V97'/%3E%3Cpath d='M19 12C35 32 35 68 19 88'/%3E%3Cpath d='M81 12C65 32 65 68 81 88'/%3E%3C/g%3E%3C/svg%3E") center/contain no-repeat;border-radius:50%}
+.fx-cell{background:transparent!important;border-color:transparent!important}
+.fx-cell.t{position:relative;background:transparent!important}
+.fx-cell.t::before{content:'';position:absolute;inset:-28%;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3CradialGradient id='g' cx='38%25' cy='34%25' r='72%25'%3E%3Cstop offset='0' stop-color='%23FFB15C'/%3E%3Cstop offset='.6' stop-color='%23F07A1E'/%3E%3Cstop offset='1' stop-color='%23A8450A'/%3E%3C/radialGradient%3E%3C/defs%3E%3Ccircle cx='50' cy='50' r='47' fill='url(%23g)'/%3E%3Cg fill='none' stroke='%232a1206' stroke-width='3.4'%3E%3Cpath d='M3 50H97M50 3V97'/%3E%3Cpath d='M19 12C35 32 35 68 19 88'/%3E%3Cpath d='M81 12C65 32 65 68 81 88'/%3E%3C/g%3E%3C/svg%3E") center/contain no-repeat;border-radius:50%}
 </style>
 </head>
 <body>
