@@ -375,8 +375,10 @@ console.log('\n10 · The hub and the final scoreboard both lead here\n');
      do with gym teams or codes, and a stray team id on a fundraiser
      URL is the kind of thing somebody later tries to make mean
      something. */
-  si(/href="https:\/\/cadapunto\.com"/.test(hub),
-     'and the fundraiser card points at cadapunto.com');
+  /* The fundraiser card ("Play. Score. Raise Money.") was taken off
+     the hub: the gym is the product now, and nothing on it leaves. */
+  si(!/cpc-card|Raise Money|cadapunto\.com/.test(hub),
+     'the hub no longer carries the fundraiser card');
   si(!/cadapunto\.com\?e=|cadapunto\.com\/\?e=/.test(hub),
      'without a team tail, which would mean nothing over there');
 
@@ -400,10 +402,10 @@ console.log('\n10 · The hub and the final scoreboard both lead here\n');
   await pagH.evaluate(() => window.scrollTo(0, 99999));
   await pagH.waitForTimeout(300);
   const abajo = await pagH.evaluate(() => {
-    const b = document.querySelector('.cpc-btn').getBoundingClientRect();
+    const b = document.querySelector('.hub-foot').getBoundingClientRect();
     return b.top >= 0 && b.bottom <= window.innerHeight;
   });
-  si(abajo, 'and scrolling to the end actually reaches the bottom card');
+  si(abajo, 'and scrolling to the end actually reaches the footer');
   await ctxH.close();
 }
 
