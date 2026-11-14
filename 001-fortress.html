@@ -671,7 +671,8 @@ html,body{background:var(--dark)}
 .fx-cell.t::before{content:'';position:absolute;inset:-28%;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3CradialGradient id='g' cx='38%25' cy='34%25' r='72%25'%3E%3Cstop offset='0' stop-color='%23FFB15C'/%3E%3Cstop offset='.6' stop-color='%23F07A1E'/%3E%3Cstop offset='1' stop-color='%23A8450A'/%3E%3C/radialGradient%3E%3C/defs%3E%3Ccircle cx='50' cy='50' r='47' fill='url(%23g)'/%3E%3Cg fill='none' stroke='%232a1206' stroke-width='3.4'%3E%3Cpath d='M3 50H97M50 3V97'/%3E%3Cpath d='M19 12C35 32 35 68 19 88'/%3E%3Cpath d='M81 12C65 32 65 68 81 88'/%3E%3C/g%3E%3C/svg%3E") center/contain no-repeat;border-radius:50%}
 /* Training mode removed: every game is plain play from level 1. */
 #modeTraining,#levelSection{display:none!important}
-#modeGame{grid-column:1/-1;flex:1 1 100%;width:100%;box-sizing:border-box}
+/* Only one mode is left, so no mode picker: the start button opens the game. */
+.mode-row,.bpm-section-title:has(+ .mode-row),#selectModeTitle,[data-t="selMode"]{display:none!important}
 </style>
 </head>
 <body>
@@ -738,7 +739,7 @@ window.FT = (function(){
     }
   };
   var lang = 'es';
-  try { lang = localStorage.getItem('ft-lang') === 'en' ? 'en' : 'es' } catch(e){}
+  /* every game opens in Spanish; the EN button still switches for the visit */
   function t(k, v){ var x = (D[lang][k] != null ? D[lang][k] : D.en[k]) || ''; for (var n in (v || {})) x = x.split('{' + n + '}').join(v[n]); return x }
   function apply(){
     document.documentElement.lang = lang;

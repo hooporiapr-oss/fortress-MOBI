@@ -391,13 +391,14 @@ body.warm .play-container{min-height:0}
 .play-action-btn{display:none!important}
 /* Training mode removed: every game is plain play from level 1. */
 #modeTraining,#levelSection{display:none!important}
-#modeGame{grid-column:1/-1;flex:1 1 100%;width:100%;box-sizing:border-box}
+/* Only one mode is left, so no mode picker: the start button opens the game. */
+.mode-row,.bpm-section-title:has(+ .mode-row),#selectModeTitle,[data-t="selMode"]{display:none!important}
 </style>
 </head>
 <body>
 <nav class="mini-nav">
 <div class="nav-row">
-<a href="fortress-mobile-hub.html" class="back-btn" id="backBtn">← Back</a>
+<a href="fortress-mobile-hub.html" class="back-btn" id="backBtn">← Atrás</a>
 <div class="nav-title">THE RECALL</div>
 <div class="nav-right">
 <div class="nav-lang">
@@ -575,7 +576,7 @@ body.warm .play-container{min-height:0}
     </div>
   </div>
   <button class="final-again" id="finalAgain">&#9654; PLAY AGAIN</button>
-  <a class="final-back" href="fortress-mobile-hub.html">&larr; Back</a>
+  <a class="final-back" id="finalBack" href="fortress-mobile-hub.html">&larr; Atrás</a>
 </div>
 
 <div id="screen-end">
@@ -586,7 +587,7 @@ body.warm .play-container{min-height:0}
     <div class="final-stat-cell"><div class="final-stat-label">Rounds</div><div class="final-stat-val" id="endRounds">0</div></div>
   </div>
   <button class="again-btn" id="endAgainBtn">&#9654; PLAY AGAIN</button>
-  <a class="end-back" href="fortress-mobile-hub.html">&larr; Back to the gym</a>
+  <a class="end-back" id="endBack" href="fortress-mobile-hub.html">&larr; Volver al gym</a>
 </div>
 
 <div id="quarterStatsScreen">
@@ -699,10 +700,11 @@ var translations = {
     bestLabel: 'Mejor'
   }
 };
+function backLabels(){ var en=currentLang==='en'; var a=document.getElementById('backBtn'), b=document.getElementById('finalBack'), c=document.getElementById('endBack'); if(a) a.textContent=en?'← Back':'← Atrás'; if(b) b.innerHTML=en?'&larr; Back':'&larr; Atrás'; if(c) c.innerHTML=en?'&larr; Back to the gym':'&larr; Volver al gym'; }
 function t(key) {
   return translations[currentLang][key] || translations['en'][key] || key;
 }
-function updateUILanguage() {
+function updateUILanguage() { backLabels();
   $('demoBadge').textContent = t('demoBadge');
   $('demoSubtitle').textContent = t('demoSubtitle');
   $('htpToggleText').textContent = t('htpToggle');
@@ -741,8 +743,8 @@ $('langEN').onclick = function() { setLang('en'); };
 $('langES').onclick = function() { setLang('es'); };
 /* Spanish first: from the hub Recall opens in Spanish unless this phone
    already chose English with the EN button. */
-var savedLang = localStorage.getItem('lc-lang');
-currentLang = savedLang === 'en' ? 'en' : 'es';
+/* every game opens in Spanish; the EN button still switches for the visit */
+currentLang = 'es';
 function showScreen(name){
     screenDemo.classList.remove('active');
     screenTrophy.classList.remove('active');

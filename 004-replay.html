@@ -636,7 +636,8 @@ body.warm .play-container{min-height:0}
 #controls{display:none}
 /* Training mode removed: every game is plain play from level 1. */
 #modeTraining,#levelSection{display:none!important}
-#modeGame{grid-column:1/-1;flex:1 1 100%;width:100%;box-sizing:border-box}
+/* Only one mode is left, so no mode picker: the start button opens the game. */
+.mode-row,.bpm-section-title:has(+ .mode-row),#selectModeTitle,[data-t="selMode"]{display:none!important}
 </style>
 </style>
 </head>
@@ -717,7 +718,7 @@ body.warm .play-container{min-height:0}
 <div id="screen-mode">
   <nav class="mini-nav">
     <div class="nav-row">
-      <a class="intro-back" href="#" id="modeBack">&larr; Back</a>
+      <a class="intro-back" href="#" id="modeBack">&larr; Atrás</a>
       <div class="nav-title">THE REPLAY</div>
       <div style="width:74px"></div>
     </div>
@@ -726,7 +727,7 @@ body.warm .play-container{min-height:0}
     <div class="trophy-header">
       <div class="trophy-icon">&#127942;</div>
       <h1 class="trophy-title">COGNITIVO GYM</h1>
-      <p class="trophy-subtitle">THE REPLAY Progress</p>
+      <p class="trophy-subtitle" id="modeSub">Progreso de THE REPLAY</p>
     </div>
     <div class="bpm-section">
       <div class="bpm-section-title">SELECT MODE</div>
@@ -765,7 +766,7 @@ body.warm .play-container{min-height:0}
         <span class="level-info-value" id="cellsDisplay">1</span>
       </div>
     </div>
-    <button class="letsgo-btn" id="letsGoBtn">LET'S GO!</button>
+    <button class="letsgo-btn" id="letsGoBtn">¡PA'LANTE!</button>
   </div>
 </div>
 
@@ -971,7 +972,7 @@ var STR = {
     cTip:'Practise as much as you like — nothing counts until you start an official run. Humming the notes back is the trick most people land on.',
     namePh:'Your name',
     start:'▶ START', startOfficial:'▶ START OFFICIAL RUN', startPractice:'▶ PRACTICE RUN',
-    officialKick:'Official Run',
+    officialKick:'Official Run', modeBack:'&larr; Back', modeSub:'THE REPLAY Progress', letsGo:"LET'S GO!",
     officialNote:'This run counts. Your sponsors pay on the points you score, and you only get one.',
     alreadyRun:'Your official run is already in: <b>sequence {L}, {P} points</b>. You can keep practising, but this score is final.',
     confirmOfficial:'This is your official run. Your sponsors pay on the points you score, and you only get one. Ready?',
@@ -1017,7 +1018,7 @@ var STR = {
     cTip:'Practica todo lo que quieras — nada cuenta hasta que empieces una corrida oficial. Tararear las notas de vuelta es el truco que casi todos descubren.',
     namePh:'Tu nombre',
     start:'▶ EMPEZAR', startOfficial:'▶ EMPEZAR CORRIDA OFICIAL', startPractice:'▶ CORRIDA DE PRÁCTICA',
-    officialKick:'Corrida Oficial',
+    officialKick:'Corrida Oficial', modeBack:'&larr; Atrás', modeSub:'Progreso de THE REPLAY', letsGo:"¡PA'LANTE!",
     officialNote:'Esta corrida cuenta. Tus padrinos pagan por los puntos que anotes, y solo tienes una.',
     alreadyRun:'Tu corrida oficial ya está hecha: <b>secuencia {L}, {P} puntos</b>. Puedes seguir practicando, pero esa puntuación es final.',
     confirmOfficial:'Esta es tu corrida oficial. Tus padrinos pagan por los puntos que anotes, y solo tienes una. ¿Listo?',
@@ -1051,7 +1052,8 @@ var STR = {
 };
 
 var LANG = 'en';
-try { LANG = localStorage.getItem('fc-lang') || ((navigator.language||'').toLowerCase().indexOf('es')===0 ? 'es' : 'en'); } catch(e){}
+/* every game opens in Spanish; the EN button still switches for the visit */
+LANG = 'es';
 
 function T(key, vals){
   var out = (STR[LANG] && STR[LANG][key]) || STR.en[key] || key;
@@ -1065,6 +1067,7 @@ function applyLang(){
     .forEach(function(id){ var el=$(id); if(el) el.innerHTML = T(id); });
   document.documentElement.lang = LANG;
   $('obKick').textContent = T('officialKick');
+  $('modeBack').innerHTML = T('modeBack'); $('modeSub').textContent = T('modeSub'); $('letsGoBtn').textContent = T('letsGo');
   $('lblLevel').textContent = T('lblLevel');
   $('lblPoints').textContent = T('lblPoints');
   $('lblTime').textContent = T('lblTime');
