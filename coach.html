@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Coach View | Cognitivo Gym</title>
+<!-- Coach View for hooporia.mobi — for coaches only, the same as on vreaction.com.
+     Opens with a Coach code (License Admin → Coach tab); a game code never opens it,
+     so no kid sees a ranking.
+     Every Fortress player of the coach's school, A–Z (never ranked): longest chain,
+     latest chain with a trend arrow, how many runs, and the last day played.
+     Tap a player for their progress chart.
+     Only The Fortress has names here: Recall, Recognition and Replay keep an
+     anonymous board (a player is a code, not a name), by design.
+     The code is kept in memory only: reload, Lock or ← THE GYM closes the view. -->
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+[hidden]{display:none !important}
+html,body{background:#0a0a0f;color:#fff;font-family:Arial,sans-serif}
+body{min-height:100vh;padding:20px 16px 40px;display:flex;flex-direction:column;align-items:center}
+.top{width:100%;max-width:720px;display:flex;justify-content:space-between;gap:8px;margin-bottom:18px}
+.pill{padding:8px 16px;border:2px solid rgba(255,255,255,.25);background:rgba(0,0,0,.5);color:#fff;font:900 .78rem Arial,sans-serif;letter-spacing:.08em;text-transform:uppercase;border-radius:999px;text-decoration:none;cursor:pointer}
+.t{font-size:2rem;font-weight:900;font-style:italic;letter-spacing:.06em;text-transform:uppercase;text-align:center;text-shadow:0 0 30px rgba(255,215,0,.45)}
+.t span{color:#FFD700}
+.sub{font-size:.75rem;letter-spacing:.14em;text-transform:uppercase;color:#a7adba;margin:6px 0 16px;text-align:center}
+#gate{width:100%;max-width:360px;display:flex;flex-direction:column;gap:12px;align-items:stretch;margin-top:20px}
+#code{padding:14px;border-radius:12px;border:2px solid rgba(255,215,0,.45);background:rgba(255,215,0,.06);color:#fff;font:900 1.1rem Arial,sans-serif;text-align:center;letter-spacing:.12em;text-transform:uppercase}
+#open{padding:14px;border-radius:12px;border:0;background:linear-gradient(135deg,#FFD700,#FF6B35);color:#1a0f0f;font:900 1rem Arial,sans-serif;letter-spacing:.1em;text-transform:uppercase;cursor:pointer}
+#err{min-height:1.2em;text-align:center;font-size:.85rem;color:#a7adba}
+.note{font-size:.72rem;color:#7d8696;text-align:center;line-height:1.4}
+#view{width:100%;max-width:720px}
+.gtitle{font-size:.72rem;font-weight:900;letter-spacing:.14em;text-transform:uppercase;color:#a855f7;text-align:center;margin-bottom:10px}
+.head,.row{display:grid;grid-template-columns:minmax(0,1.6fr) repeat(3,minmax(0,1fr)) 54px;gap:6px;align-items:center}
+.head{font-size:.6rem;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:#7d8696;padding:0 12px 6px}
+.head span:not(:first-child),.row span:not(:first-child){text-align:center}
+.row{padding:12px;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);margin-bottom:7px;cursor:pointer;width:100%;color:#fff;font:inherit;text-align:left}
+.row:active{background:rgba(255,215,0,.1)}
+.nm{font-weight:900;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.v{font-weight:900;font-size:.95rem}
+.v small{display:block;font-size:.58rem;color:#7d8696;font-weight:700;letter-spacing:.04em}
+.up{color:#3ddc84}.dn{color:#ff6b6b}.eq{color:#a7adba}
+.last{font-size:.72rem;color:#a7adba}
+.empty{color:#a7adba;text-align:center;padding:24px}
+.count{font-size:.7rem;color:#7d8696;text-align:center;margin-top:10px;line-height:1.5}
+#player{width:100%;max-width:640px}
+.pname{font-size:1.5rem;font-weight:900;text-align:center;margin-bottom:4px}
+.pcat{font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;color:#a7adba;text-align:center;margin-bottom:16px}
+.game{border-radius:14px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.03);padding:14px;margin-bottom:12px}
+.gname{font-size:.72rem;font-weight:900;letter-spacing:.14em;text-transform:uppercase;margin-bottom:10px;color:#a855f7}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:8px}
+.cell{text-align:center;padding:8px 4px;border-radius:10px;background:rgba(255,255,255,.04)}
+.cell b{display:block;font-size:1.4rem}
+.cell i{font-style:normal;font-size:.58rem;color:#a7adba;letter-spacing:.08em;text-transform:uppercase}
+.chg{font-size:.78rem;color:#c8ccd4;text-align:center;margin-bottom:6px}
+svg.chart{width:100%;height:auto;display:block}
+@media(max-width:520px){
+  .head,.row{grid-template-columns:minmax(0,1.4fr) repeat(3,minmax(0,1fr))}
+  .head span:last-child,.row .last{display:none}
+  .v{font-size:.85rem}
+}
+</style>
+</head>
+<body>
+<div class="top">
+  <a class="pill" href="index.html">← THE GYM</a>
+  <button class="pill" id="lockBtn" type="button" hidden>🔒 Lock</button>
+</div>
+<div class="t">COACH <span>VIEW</span></div>
+<div class="sub" id="sub">Coaches only</div>
+
+<div id="gate">
+  <input id="code" type="text" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Coach code">
+  <button id="open" type="button">Open</button>
+  <div id="err"></div>
+  <div class="note">A Coach code is made in License Admin → Coach. A game code does not open this view.</div>
+</div>
+
+<div id="view" hidden>
+  <div class="gtitle">🏰 The Fortress</div>
+  <div class="head"><span>Player · A–Z</span><span>Longest</span><span>Latest</span><span>Runs</span><span>Last</span></div>
+  <div id="list"></div>
+  <div class="count" id="count"></div>
+</div>
+
+<div id="player" hidden>
+  <div class="top" style="max-width:none"><button class="pill" id="backList" type="button">← All players</button></div>
+  <div class="pname" id="pname"></div>
+  <div class="pcat" id="pcat"></div>
+  <div id="pbody"></div>
+</div>
+
+<script>
+var SB_URL='https://sdaphocueugzfvjovuxd.supabase.co';
+var SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNkYXBob2N1ZXVnemZ2am92dXhkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM2MjQyMDgsImV4cCI6MjA5OTIwMDIwOH0.pDAzf4P6dD9eNEBlnP95SdF5BI-R84-Rdc0vKzYcn7M';
+var TABLE='ritnome_mobile_fortress_standings';   // The Fortress on hooporia.mobi
+var H={'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY};
+function $(id){return document.getElementById(id)}
+function esc(x){return String(x==null?'':x).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+
+// ── The coach code: held in memory only ──
+var school='', players={};
+function deviceId(){var id=null;try{id=localStorage.getItem('gostar-device-id')}catch(e){}
+  if(!id){id='d-'+Math.random().toString(36).slice(2)+Math.random().toString(36).slice(2);try{localStorage.setItem('gostar-device-id',id)}catch(e){}}return id}
+function rpc(name,body){return fetch(SB_URL+'/rest/v1/rpc/'+name,{method:'POST',headers:Object.assign({'Content-Type':'application/json'},H),body:JSON.stringify(body)})}
+var checking=false;
+function openView(){
+  if(checking)return;
+  var code=$('code').value.trim(); if(!code)return;
+  checking=true; $('err').style.color=''; $('err').textContent='Checking…';
+  rpc('check_access',{p_code:code,p_product:'coach',p_device:deviceId()})
+    .then(function(r){if(!r.ok)throw 0;return r.json()})
+    .then(function(lic){
+      checking=false;
+      if(!lic||!lic.ok){
+        var m=lic&&lic.reason==='expired'?'This code has expired.':lic&&lic.reason==='revoked'?'This code is no longer active.':lic&&lic.reason==='devices'?'This code is in use on too many devices.':'Not a Coach code — check with your administrator.';
+        $('err').style.color='#ff8888';$('err').textContent=m;$('code').value='';return;
+      }
+      school=lic.school_name||'';
+      $('code').value=''; $('err').textContent='';
+      $('gate').hidden=true; $('view').hidden=false; $('lockBtn').hidden=false;
+      $('sub').textContent='Coaches only'+(school?' · '+school:'');
+      $('list').innerHTML='<div class="empty">Loading…</div>';
+      loadAll();
+    })
+    .catch(function(){checking=false;$('err').style.color='#ff8888';$('err').textContent='Connection problem — please try again.'});
+}
+$('open').onclick=openView;
+$('code').addEventListener('keydown',function(e){if(e.key==='Enter')openView()});
+$('lockBtn').onclick=function(){school='';players={};
+  $('view').hidden=true;$('player').hidden=true;$('gate').hidden=false;$('lockBtn').hidden=true;
+  $('sub').textContent='Coaches only';$('list').innerHTML='';$('count').textContent=''};
+
+// ── Reading the board: this school's runs, oldest first, 1000 rows at a time.
+//    Tries the fuller reads first and falls back, so a column this board does not
+//    have (date, hidden flag) never leaves the coach with nothing. ──
+function readAll(){
+  var sc='school_name=eq.'+encodeURIComponent(school);
+  var tries=[
+    sc+'&hidden=is.false&select=player_name,level_achieved,time_seconds,created_at&order=created_at.asc',
+    sc+'&select=player_name,level_achieved,time_seconds,created_at&order=created_at.asc',
+    sc+'&select=player_name,level_achieved,time_seconds,id&order=id.asc',
+    sc+'&select=player_name,level_achieved,time_seconds'
+  ];
+  function tryS(i){
+    if(i>=tries.length)return Promise.reject(0);
+    var out=[];
+    function page(from){
+      return fetch(SB_URL+'/rest/v1/'+TABLE+'?'+tries[i]+'&offset='+from+'&limit=1000',{headers:H})
+        .then(function(r){if(!r.ok)throw 0;return r.json()})
+        .then(function(rows){out=out.concat(rows||[]);return rows&&rows.length===1000?page(from+1000):out});
+    }
+    return page(0).catch(function(){return tryS(i+1)});
+  }
+  return tryS(0);
+}
+function loadAll(){
+  readAll().then(function(rows){
+    players={};
+    rows.forEach(function(r){
+      var k=String(r.player_name||'').trim().toLowerCase(), lv=parseInt(r.level_achieved,10); if(!k||!(lv>0))return;
+      var p=players[k]||(players[k]={name:String(r.player_name).trim(),runs:[],last:''});
+      p.runs.push({v:lv,t:r.time_seconds,at:r.created_at||''});
+      p.name=String(r.player_name).trim();      // the newest spelling of the name (rows come oldest first)
+      if(r.created_at&&r.created_at>p.last)p.last=r.created_at;
+    });
+    render();
+  }).catch(function(){$('list').innerHTML='<div class="empty">Could not load the board.</div>'});
+}
+
+// ── The list: A–Z, never ranked ──
+function trend(a){
+  if(a.length<2)return '';
+  var x=a[a.length-1].v,y=a[a.length-2].v;
+  return x>y?' <span class="up" title="Up from the run before">↑</span>':x<y?' <span class="dn" title="Down from the run before">↓</span>':' <span class="eq" title="Same as the run before">→</span>';
+}
+function topLv(a){var t=0;a.forEach(function(x){if(x.v>t)t=x.v});return t}
+function day(at){if(!at)return '—';var d=new Date(at);return isNaN(d)?'—':(d.getMonth()+1)+'/'+d.getDate()}
+function render(){
+  var keys=Object.keys(players).sort(function(a,b){return players[a].name.localeCompare(players[b].name,undefined,{sensitivity:'base'})});
+  $('list').innerHTML=keys.length?keys.map(function(k){var p=players[k],r=p.runs;
+    return '<button class="row" type="button" data-k="'+esc(k)+'"><span class="nm">'+esc(p.name)+'</span>'+
+      '<span class="v">Level '+topLv(r)+'</span>'+
+      '<span class="v">'+r[r.length-1].v+trend(r)+'</span>'+
+      '<span class="v">'+r.length+'</span>'+
+      '<span class="last">'+day(p.last)+'</span></button>';
+  }).join(''):'<div class="empty">No Fortress players yet'+(school?' at '+esc(school):'')+'.</div>';
+  $('count').innerHTML=keys.length?keys.length+' player'+(keys.length>1?'s':'')+' · listed A–Z, not ranked<br>Recall, Recognition and Replay keep no names, so only The Fortress shows here.':'';
+  $('list').querySelectorAll('.row').forEach(function(b){b.onclick=function(){showPlayer(b.dataset.k)}});
+}
+
+// ── One player: their chain over time ──
+function chart(pts){
+  if(pts.length<2)return '';
+  var vals=pts.map(function(p){return p.v}),mn=Math.min.apply(null,vals),mx=Math.max.apply(null,vals),topI=vals.indexOf(mx);
+  var lo=Math.max(0,mn-1),hi=Math.max(mx+1,lo+4);
+  var W=560,Hh=220,L=44,R=16,T=20,B=30;
+  var X=function(i){return L+(W-L-R)*i/(pts.length-1)},Y=function(v){return T+(Hh-T-B)*(hi-v)/(hi-lo)};
+  var g=Math.max(1,Math.ceil((hi-lo)/5));
+  var s='<svg class="chart" viewBox="0 0 '+W+' '+Hh+'">';
+  for(var y=lo;y<=hi;y+=g)s+='<line x1="'+L+'" x2="'+(W-R)+'" y1="'+Y(y)+'" y2="'+Y(y)+'" stroke="rgba(255,255,255,.08)"/><text x="'+(L-8)+'" y="'+(Y(y)+4)+'" fill="#9fb3c8" font-size="12" text-anchor="end">'+y+'</text>';
+  s+='<polyline fill="none" stroke="#a855f7" stroke-width="3" stroke-linejoin="round" stroke-linecap="round" points="'+pts.map(function(p,i){return X(i).toFixed(1)+','+Y(p.v).toFixed(1)}).join(' ')+'"/>';
+  pts.forEach(function(p,i){var t=i===topI;s+='<circle cx="'+X(i).toFixed(1)+'" cy="'+Y(p.v).toFixed(1)+'" r="'+(t?7:4.5)+'" fill="'+(t?'#FFD700':'#a855f7')+'" stroke="#000" stroke-width="1.5"><title>Level '+p.v+' · '+day(p.at)+'</title></circle>'});
+  s+='<text x="'+L+'" y="'+(Hh-8)+'" fill="#9fb3c8" font-size="12">'+(pts[0].at?day(pts[0].at):'earlier')+'</text><text x="'+(W-R)+'" y="'+(Hh-8)+'" fill="#9fb3c8" font-size="12" text-anchor="end">'+(pts[pts.length-1].at?day(pts[pts.length-1].at):'latest')+'</text>';
+  return s+'</svg>';
+}
+function showPlayer(k){
+  var p=players[k]; if(!p)return;
+  $('view').hidden=true; $('player').hidden=false; window.scrollTo(0,0);
+  $('pname').textContent=p.name;
+  $('pcat').textContent=(school?school+' · ':'')+'last played '+day(p.last);
+  var a=p.runs, pts=a.slice(-40), first=pts[0].v, last=pts[pts.length-1].v, best=topLv(a), d=last-first;
+  var bestT=null; a.forEach(function(x){if(x.v===best&&x.t!=null&&(bestT==null||x.t<bestT))bestT=+x.t});
+  $('pbody').innerHTML='<div class="game"><div class="gname">🏰 The Fortress · chain</div>'+
+    '<div class="stats"><div class="cell"><b>'+first+'</b><i>First</i></div><div class="cell"><b>'+last+'</b><i>Latest</i></div><div class="cell"><b>'+best+'</b><i>Longest</i></div></div>'+
+    '<div class="chg">'+(a.length<2?'One run so far':'<b>'+(d>0?'+':'')+d+' level'+(Math.abs(d)===1?'':'s')+'</b> since the first run · '+a.length+' runs')+
+      (bestT!=null&&!isNaN(bestT)?' · fastest at Level '+best+': '+bestT.toFixed(2)+' s':'')+'</div>'+
+    chart(pts)+'</div>';
+}
+$('backList').onclick=function(){$('player').hidden=true;$('view').hidden=false};
+</script>
+</body>
+</html>

@@ -29,6 +29,7 @@ html,body{height:100%;font-family:'Outfit',sans-serif;background:var(--dark);col
 .enter-btn:active{transform:scale(.98)}
 .err{margin-top:14px;color:#ff8888;font-size:.85rem;font-weight:700;min-height:18px;max-width:320px}
 
+.coach-link{display:inline-block;margin-top:10px;padding:7px 14px;border-radius:999px;border:1px solid rgba(255,255,255,.18);color:#9aa3b2;font-size:.66rem;font-weight:900;letter-spacing:.08em;text-transform:uppercase;text-decoration:none}
 .brandmark{margin-top:40px;font-size:.68rem;font-weight:900;letter-spacing:.3em;text-transform:uppercase;color:#4a5058}
 .brandmark b{color:var(--muted);font-style:italic}
 </style>
@@ -46,6 +47,7 @@ html,body{height:100%;font-family:'Outfit',sans-serif;background:var(--dark);col
   <input class="code-input" id="gate-code" maxlength="40" placeholder="• • • •" autocomplete="off" autocapitalize="characters" onkeydown="if(event.key==='Enter')tryEnter()">
   <button class="enter-btn" id="enterBtn" onclick="tryEnter()">Start Training →</button>
   <div class="err" id="gate-err"></div>
+  <a class="coach-link" href="coach.html">🧑‍🏫 Coach View</a>
 
   <div class="brandmark">Powered by <b>Gostar Digital</b></div>
 </div>
