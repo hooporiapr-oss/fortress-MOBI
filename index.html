@@ -20,11 +20,14 @@ html,body{height:100%;font-family:'Outfit',sans-serif;background:var(--dark);col
 .site-title{font-family:'Bebas Neue',sans-serif;font-size:2.4rem;letter-spacing:5px;background:linear-gradient(135deg,var(--gold),var(--orange));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:6px}
 .site-sub{font-size:.7rem;font-weight:700;letter-spacing:.3em;text-transform:uppercase;color:var(--muted);margin-bottom:34px}
 
-/* One button where the code panel was. Same width as the panel it
-   replaces, so the page keeps its proportions. */
-.enter-btn{width:100%;max-width:340px;padding:18px;border:none;border-radius:10px;background:linear-gradient(135deg,var(--gold),var(--orange));color:#1a0f0f;font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:.18em;text-transform:uppercase;cursor:pointer;box-shadow:0 4px 24px rgba(255,107,53,.35)}
+.code-label{font-size:.68rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+.code-input{width:100%;max-width:340px;padding:16px;border-radius:10px;border:2px solid rgba(255,215,0,.35);background:rgba(255,255,255,.05);color:#fff;font-family:'Courier New',monospace;font-size:1.4rem;font-weight:900;letter-spacing:.25em;text-transform:uppercase;text-align:center;-webkit-user-select:text;user-select:text}
+.code-input:focus{outline:none;border-color:var(--gold);box-shadow:0 0 24px rgba(255,215,0,.3)}
+.code-input.shake{animation:shake .35s}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-10px)}40%{transform:translateX(10px)}60%{transform:translateX(-6px)}80%{transform:translateX(6px)}}
+.enter-btn{width:100%;max-width:340px;margin-top:14px;padding:18px;border:none;border-radius:10px;background:linear-gradient(135deg,var(--gold),var(--orange));color:#1a0f0f;font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:.18em;text-transform:uppercase;cursor:pointer;box-shadow:0 4px 24px rgba(255,107,53,.35)}
 .enter-btn:active{transform:scale(.98)}
-.enter-note{font-size:.68rem;color:var(--muted);margin-top:14px;line-height:1.4;max-width:300px}
+.err{margin-top:14px;color:#ff8888;font-size:.85rem;font-weight:700;min-height:18px;max-width:320px}
 
 .brandmark{margin-top:40px;font-size:.68rem;font-weight:900;letter-spacing:.3em;text-transform:uppercase;color:#4a5058}
 .brandmark b{color:var(--muted);font-style:italic}
@@ -39,8 +42,10 @@ html,body{height:100%;font-family:'Outfit',sans-serif;background:var(--dark);col
   <div class="site-title">COGNITIVO GYM</div>
   <div class="site-sub">Cada Punto Cuenta</div>
 
-  <button class="enter-btn" id="enterBtn" onclick="enter()">Start Training →</button>
-  <div class="enter-note">No code needed — tap to start.</div>
+  <div class="code-label">Access Code</div>
+  <input class="code-input" id="gate-code" maxlength="40" placeholder="• • • •" autocomplete="off" autocapitalize="characters" onkeydown="if(event.key==='Enter')tryEnter()">
+  <button class="enter-btn" id="enterBtn" onclick="tryEnter()">Start Training →</button>
+  <div class="err" id="gate-err"></div>
 
   <div class="brandmark">Powered by <b>Gostar Digital</b></div>
 </div>
@@ -49,46 +54,83 @@ html,body{height:100%;font-family:'Outfit',sans-serif;background:var(--dark);col
 var $=function(id){return document.getElementById(id)};
 
 // ══════════════════════════════════════════════════════
-//  OPEN ENTRY — the access code is gone.
+//  ACCESS CODE — the same way in as vreaction.com.
 //
-//  This page used to ask for a license code and check it against
-//  Supabase (check_license, product 'fortress-mobile') before letting
-//  anyone through. That whole layer is removed: no code, no lookup,
-//  no license key kept on the device. Anyone with the link plays.
+//  Codes are issued in License Admin → "Hooporia Mobi" tab (product
+//  key 'fortress-mobile', kept from the old name so codes already
+//  issued keep working). The database's check_access answers yes or
+//  no plus the school name, judges expiry on its own clock and counts
+//  devices for codes with a device limit.
 //
-//  ONE THING FROM THE OLD GATE HAS TO STAY, and it is not optional.
-//  Every game file in this product starts with:
+//  The pass lives in sessionStorage ('fortress-mobile-gate-pass'):
+//  a sign-in lasts until the browser tab or app is closed, then the
+//  code is asked again. Every game page checks that key first. The
+//  old open-entry key ('rct-mobile-pass', still set by The Reset,
+//  which stays open to everyone) no longer opens the games.
 //
-//      if (localStorage.getItem('rct-mobile-pass') !== '1')
-//          window.location.replace('index.html');
-//
-//  So a game that finds no pass key sends the player straight back
-//  here. Drop the key as well as the code and the two pages bounce
-//  the player between each other forever — the gate would be gone and
-//  the product would be unreachable, which is the opposite of opening
-//  it up. Setting it here keeps every game file working untouched.
-//
-//  It is set on the way through rather than on page load, so the
-//  landing screen is a real screen somebody arrives at, not a flash
-//  of gold before a redirect.
-//
-//  WHAT WENT WITH THE CODE: the school name. It used to come back
-//  from check_license and travel with the device, and the standings
-//  read it from there. With no license there is nobody to ask, so
-//  runs recorded from this device carry no school. If the standings
-//  need to tell schools apart again, that name has to come from
-//  somewhere else — asking the player once, or a per-school link.
+//  The code's school goes to 'rct-mobile-school', which The Fortress
+//  board already reads, so each school has its own board again.
 // ══════════════════════════════════════════════════════
-function enter(){
-  try {
-    localStorage.setItem('rct-mobile-pass','1');
-    /* Anything a previous licensed install left behind is cleared, so
-       a device that used to be licensed does not keep claiming a
-       school it can no longer prove. */
-    localStorage.removeItem('rct-mobile-license');
-    localStorage.removeItem('rct-mobile-school');
-  } catch(e){}
-  window.location.href = 'fortress-mobile-hub.html';
+var SUPABASE_URL = 'https://sdaphocueugzfvjovuxd.supabase.co';
+var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNkYXBob2N1ZXVnemZ2am92dXhkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM2MjQyMDgsImV4cCI6MjA5OTIwMDIwOH0.pDAzf4P6dD9eNEBlnP95SdF5BI-R84-Rdc0vKzYcn7M';
+var PRODUCT = 'fortress-mobile';
+function deviceId(){
+  var id = null;
+  try { id = localStorage.getItem('gostar-device-id'); } catch(e){}
+  if (!id){
+    id = 'd-' + Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2);
+    try { localStorage.setItem('gostar-device-id', id); } catch(e){}
+  }
+  return id;
+}
+function rpc(name, body){
+  return fetch(SUPABASE_URL + '/rest/v1/rpc/' + name, {
+    method: 'POST',
+    headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY, 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+}
+var checking = false;
+function tryEnter(){
+  if (checking) return;
+  var input = $('gate-code').value.trim();
+  if (!input) return;
+  checking = true;
+  $('gate-err').style.color = 'var(--muted)';
+  $('gate-err').textContent = 'Checking…';
+  rpc('check_access', { p_code: input, p_product: PRODUCT, p_device: deviceId() })
+  .then(function(r){ if (!r.ok) throw new Error('lookup failed'); return r.json(); })
+  .then(function(lic){
+    if (!lic || !lic.ok){
+      checking = false;
+      if (lic && lic.reason === 'devices') return reject('This code is already in use on ' + (lic.max_devices || 5) + ' devices. Ask your administrator to reset it.');
+      if (lic && lic.reason === 'expired') return reject('This license has expired');
+      if (lic && lic.reason === 'revoked') return reject('This code is no longer active.');
+      return reject('Invalid code — check with your administrator');
+    }
+    try {
+      sessionStorage.setItem('fortress-mobile-gate-pass', '1');
+      sessionStorage.setItem('fortress-mobile-license', input.toUpperCase());
+      localStorage.setItem('rct-mobile-school', lic.school_name || '');
+      localStorage.removeItem('rct-mobile-license');
+    } catch(e){}
+    // The code's age group (License Admin), if it has one. No answer = none, never a block.
+    return rpc('license_category', { p_code: input, p_product: PRODUCT })
+      .then(function(r){ return r.ok ? r.json() : null })
+      .catch(function(){ return null })
+      .then(function(cat){
+        try { sessionStorage.setItem('fortress-mobile-category', (typeof cat === 'string' ? cat : '') || ''); } catch(e){}
+        window.location.href = 'fortress-mobile-hub.html';
+      });
+  })
+  .catch(function(){ checking = false; reject('Connection problem — please try again'); });
+}
+function reject(msg){
+  $('gate-err').style.color = '#ff8888';
+  $('gate-err').textContent = msg;
+  var box = $('gate-code');
+  box.classList.remove('shake'); void box.offsetWidth; box.classList.add('shake');
+  box.value = ''; box.focus();
 }
 
 // ── 120 beat: visual (strobe + flying gold dots), matching the hub's own ambient effect ──

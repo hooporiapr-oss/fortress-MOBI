@@ -23,6 +23,7 @@ const sitio=http.createServer((q,r)=>{const f=path.join(__dirname,decodeURICompo
   si(await p.locator('#s-code,#codeIn').count()===0,'and there is no code screen at all');
   si(enviados.length===0,'no code check is ever sent');
   console.log('2 · The hub');
+  await p.evaluate(()=>sessionStorage.setItem('fortress-mobile-gate-pass','1'));   // the hub needs the access code (The Reset does not)
   await p.goto('http://127.0.0.1:4877/fortress-mobile-hub.html');
   si(await p.locator('a[href="005-reset.html"]').count()===1,'the hub has the basketball Reset card');
   si(await p.locator('a[href*="d=volleyball"]').count()===0,'and no volleyball one');
@@ -116,7 +117,7 @@ const sitio=http.createServer((q,r)=>{const f=path.join(__dirname,decodeURICompo
     if(!WEBM||!fs.existsSync(WEBM)){console.log('  skip the video path: run with SWISH_WEBM=<a WebM copy of the clip> to check it')} else {
     const c2=await b.newContext({viewport:{width:390,height:844}});
     await c2.route(/supabase\.co\/rest\/v1\/rpc\/bw_check/,r=>r.fulfill({status:200,contentType:'application/json',body:'true'}));
-    await c2.addInitScript(()=>{HTMLMediaElement.prototype.canPlayType=function(){return 'maybe'};localStorage.setItem('rct-mobile-pass','1');localStorage.setItem('cg-reset-codigo','PRUEBACODIGO4827');localStorage.setItem('fc-lang','en');localStorage.setItem('cg-reset-rutina',JSON.stringify({cue:0,line:0,own:''}))});
+    await c2.addInitScript(()=>{HTMLMediaElement.prototype.canPlayType=function(){return 'maybe'};localStorage.setItem('rct-mobile-pass','1');sessionStorage.setItem('fortress-mobile-gate-pass','1');localStorage.setItem('cg-reset-codigo','PRUEBACODIGO4827');localStorage.setItem('fc-lang','en');localStorage.setItem('cg-reset-rutina',JSON.stringify({cue:0,line:0,own:''}))});
     const v=await c2.newPage();
     await v.route(/swish-reset\.mp4/,r=>r.fulfill({status:200,contentType:'video/webm',body:fs.readFileSync(WEBM)}));
     await v.route(/fonts\.(googleapis|gstatic)/,r=>r.abort());

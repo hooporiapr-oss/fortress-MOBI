@@ -392,7 +392,7 @@ console.log('\n10 · The hub and the final scoreboard both lead here\n');
      not which property produced it. */
   const ctxH = await navegador.newContext({ viewport: { width: 390, height: 844 } });
   await ctxH.addInitScript(() => {
-    try { localStorage.setItem('rct-mobile-pass', '1') } catch(e){}
+    try { localStorage.setItem('rct-mobile-pass', '1'); sessionStorage.setItem('fortress-mobile-gate-pass', '1') } catch(e){}
   });
   const pagH = await ctxH.newPage();
   await pagH.goto('http://localhost:' + PUERTO + '/fortress-mobile-hub.html');
@@ -416,7 +416,7 @@ console.log('\n10b · The hub settles the team for every way out of it\n');
      door rather than leaning on a tail hung off each card. */
   const ctx = await navegador.newContext({ viewport: { width: 390, height: 844 } });
   await ctx.addInitScript(() => {
-    try { localStorage.setItem('rct-mobile-pass', '1') } catch(e){}
+    try { localStorage.setItem('rct-mobile-pass', '1'); sessionStorage.setItem('fortress-mobile-gate-pass', '1') } catch(e){}
   });
   const pag = await ctx.newPage();
   pag.on('pageerror', (e) => mal('the hub threw: ' + e.message));

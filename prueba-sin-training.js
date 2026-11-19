@@ -4,7 +4,7 @@ let bad = 0; const is = (c, m) => { console.log((c ? '  ok   ' : '  BAD  ') + m)
 (async () => { const b = await chromium.launch(); const errs = [];
   for (const f of ['001-fortress.html', '002-recall.html', '003-recognition.html', '004-replay.html']) {
     const c = await b.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
-    await c.route(/^https?:\/\//, (r) => r.abort()); await c.addInitScript(() => { try { localStorage.setItem('rct-mobile-pass', '1'); ['ft-lang','lc-lang','fc-lang'].forEach(function(k){ localStorage.setItem(k, 'en') }) } catch (e) {} }); const p = await c.newPage(); p.on('pageerror', (e) => errs.push(f + ': ' + e.message));
+    await c.route(/^https?:\/\//, (r) => r.abort()); await c.addInitScript(() => { try { localStorage.setItem('rct-mobile-pass', '1'); sessionStorage.setItem('fortress-mobile-gate-pass', '1'); ['ft-lang','lc-lang','fc-lang'].forEach(function(k){ localStorage.setItem(k, 'en') }) } catch (e) {} }); const p = await c.newPage(); p.on('pageerror', (e) => errs.push(f + ': ' + e.message));
     await p.goto('file://' + path.resolve(f)); await p.waitForTimeout(600);
     // walk to the mode screen whatever its entry button is called
     for (const sel of ['#startBtn', '#btnStart', '#playBtn', 'button:has-text("JUGAR")', 'button:has-text("PLAY")', 'button:has-text("EMPEZAR")']) { const l = p.locator(sel).first(); if (await l.count() && await l.isVisible()) { await l.click().catch(() => {}); await p.waitForTimeout(300); break } }

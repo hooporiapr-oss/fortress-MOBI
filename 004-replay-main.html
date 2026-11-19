@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
 <script>
-if (localStorage.getItem('rct-mobile-pass') !== '1') {
+/* Access code (index.html): a sign-in lasts until this browser tab/app is closed, like vreaction.com */
+if ((function(){ try { return sessionStorage.getItem('fortress-mobile-gate-pass') } catch(e){ return null } })() !== '1') {
   window.location.replace('index.html');
 }
 </script>
