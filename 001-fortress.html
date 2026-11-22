@@ -1611,7 +1611,8 @@ function showModeScreen(){
   setupScreen.style.display='none';
   playScreen.classList.add('hidden');
   challengeComplete.classList.remove('show');
-  document.getElementById('screen-mode').classList.add('show');
+  /* The play-center screen is skipped: straight to the countdown. */
+  document.getElementById('letsGoBtn').click();
 }
 function hideModeScreen(){ document.getElementById('screen-mode').classList.remove('show') }
 function paintMode(){

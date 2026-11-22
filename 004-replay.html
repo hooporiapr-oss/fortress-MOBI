@@ -2272,7 +2272,8 @@ function showModeScreen(){
   stopDemo();
   $('screen-intro').style.display='none';
   $('screen-end').style.display='none';
-  $('screen-mode').classList.add('show');
+  /* The play-center screen is skipped: straight to the countdown. */
+  $('letsGoBtn').click();
 }
 function hideModeScreen(){
   $('screen-mode').classList.remove('show');

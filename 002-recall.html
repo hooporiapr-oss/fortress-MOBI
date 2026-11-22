@@ -827,7 +827,7 @@ function startDemo(){demoEpoch++;clearDemoTimeouts();runDemoRound(demoEpoch)}
 function stopDemo(){demoEpoch++;clearDemoTimeouts()}
 var htpToggle=$('htpToggle'),htpContent=$('htpContent');
 htpToggle.onclick=function(){htpToggle.classList.toggle('open');htpContent.classList.toggle('open')};
-$('playNowBtn').onclick=function(){stopDemo();showScreen('trophy')};
+$('playNowBtn').onclick=function(){stopDemo();$('letsGoBtn').click()};
 
 var BPM=100;
 var STARTING_CELLS=3;
@@ -1665,7 +1665,7 @@ $('playActionBtn').onclick=startRun;
 $('endAgainBtn').onclick=function(){
   hideEndScreen();
   restartGame();
-  showScreen('trophy');
+  $('letsGoBtn').click();
 };
 initDemoCourt();
 updateUILanguage();
