@@ -12,6 +12,7 @@ else if (!(function(){ try { var p = JSON.parse(localStorage.getItem('hooporia-p
 }
 </script>
 <script src="jugador-hm.js"></script>
+<script src="fin-hm.js"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>The Replay Challenge</title>
@@ -2065,8 +2066,17 @@ function showFinal(finalLevel,finalTime){
   $('endNum').textContent=finalLevel;
   $('endPoints').textContent=points;
   $('endTime').textContent=finalTime.toFixed(1)+'s';
-  $('screen-game').style.display='none';
-  $('screen-end').style.display='flex';
+  /* In the gym, it ends the Fortress way: the message over the court, ¡OTRA VEZ!,
+     ← Inicio, ← Atrás (fin-hm.js). A challenge or tryout run keeps its own screen. */
+  if (window.HM_FIN && !TRYOUT && !IS_OFFICIAL && !CHALLENGE_ID){
+    var es = !HM_FIN.en();
+    HM_FIN.show({ level: finalLevel,
+      stats: (es ? 'Cadena más larga: ' : 'Longest chain: ') + finalLevel + ' · ' + (es ? 'Tiempo: ' : 'Time: ') + finalTime.toFixed(1) + 's',
+      again: function(){ $('againBtn').click() } });
+  } else {
+    $('screen-game').style.display='none';
+    $('screen-end').style.display='flex';
+  }
 
   var status=$('saveStatus');
 

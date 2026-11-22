@@ -12,6 +12,7 @@ else if (!(function(){ try { var p = JSON.parse(localStorage.getItem('hooporia-p
 }
 </script>
 <script src="jugador-hm.js"></script>
+<script src="fin-hm.js"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>THE RECOGNITION | Ritnome</title>
@@ -1548,7 +1549,13 @@ function showEndScreen(){
   $('endNum').textContent = gameState.best || 0;
   $('endScore').textContent = gameState.sc || 0;
   $('endRounds').textContent = gameState.roundsDone || 0;
-  el.classList.add('show');
+  /* Ends the Fortress way: the message over the court, ¡OTRA VEZ!, ← Inicio, ← Atrás (fin-hm.js) */
+  if (window.HM_FIN){
+    var es = !HM_FIN.en();
+    HM_FIN.show({ level: gameState.best || 0,
+      stats: (es ? 'Secuencia más larga: ' : 'Longest sequence: ') + (gameState.best || 0) + ' · ' + (es ? 'Puntos: ' : 'Points: ') + (gameState.sc || 0),
+      again: function(){ $('endAgainBtn').click() } });
+  } else el.classList.add('show');
 
   /* AND TO THE GYM, which is what the board reads. Only outside a
      warm-up run: inside one the station posts its own score when the
