@@ -12,17 +12,17 @@
    ══════════════════════════════════════════════════════════════════ */
 (function(){
   var GAMES = [
-    { k: 'recall',      n: 'The Recall',      d: { en: 'Visual memory — a pattern flashes at once, then is rebuilt in order.', es: 'Memoria visual — un patrón aparece de una vez y se reconstruye en orden.' } },
-    { k: 'recognition', n: 'The Recognition', d: { en: 'Change detection — spot what changed between a pattern and its echo.', es: 'Detección de cambios — descubre qué cambió entre un patrón y su eco.' } },
-    { k: 'replay',      n: 'The Replay',      d: { en: 'Working memory — a sequence that keeps growing by one each round.', es: 'Memoria de trabajo — una secuencia que crece uno más cada ronda.' } },
-    { k: 'fortress',    n: 'The Fortress',    d: { en: 'Sequence recall under load — repeat longer and longer target chains.', es: 'Secuencias bajo carga — repite cadenas cada vez más largas.' } }
+    { k: 'recall',      n: 'The Recall',      d: { en: 'Visual memory — a pattern flashes at once, then is rebuilt in order.', es: 'Memoria visual — un patrón aparece de una vez y se reconstruye en orden.' }, c: { en: 'See a play once and remember it; read the formation at a glance.', es: 'Ver la jugada una vez y recordarla; leer la formación de un vistazo.' } },
+    { k: 'recognition', n: 'The Recognition', d: { en: 'Change detection — spot what changed between a pattern and its echo.', es: 'Detección de cambios — descubre qué cambió entre un patrón y su eco.' }, c: { en: 'Catch the defensive switch, the help or the rotation before anyone else.', es: 'Notar el cambio de la defensa, la ayuda o la rotación antes que nadie.' } },
+    { k: 'replay',      n: 'The Replay',      d: { en: 'Working memory — a sequence that keeps growing by one each round.', es: 'Memoria de trabajo — una secuencia que crece uno más cada ronda.' }, c: { en: 'Run multi-step plays and carry out the scouting report without missing a thing.', es: 'Ejecutar jugadas de varios pasos y aplicar el scouting sin olvidar nada.' } },
+    { k: 'fortress',    n: 'The Fortress',    d: { en: 'Sequence recall under load — repeat longer and longer target chains.', es: 'Secuencias bajo carga — repite cadenas cada vez más largas.' }, c: { en: 'Make the right call late in the game, tired and under pressure.', es: 'Decidir bien en el cierre del partido, cansado y con presión.' } }
   ];
   var TX = {
-    es: { title: 'Reporte de Progreso del Jugador', age: 'Edad', days: 'Días de entrenamiento', sessions: 'Sesiones', first: 'Primera', latest: 'Última', best: 'Mejor',
+    es: { court: 'En la cancha:', title: 'Reporte de Progreso del Jugador', age: 'Edad', days: 'Días de entrenamiento', sessions: 'Sesiones', first: 'Primera', latest: 'Última', best: 'Mejor',
           gain: 'Primera → mejor', notYet: 'Todavía sin entrenar.', one: 'Una sesión hasta ahora — la gráfica empieza con la segunda.',
           foot: 'Las puntuaciones son los puntos ganados en cada estación; una cadena más larga o más rápida suma más. Generado el ',
           print: '🖨 Imprimir / PDF', share: '📤 Compartir', making: 'Preparando…', saved: 'Imagen guardada — compártela desde tus fotos o descargas.', fail: 'No se pudo compartir — usa Imprimir / PDF.' },
-    en: { title: 'Player Progress Report', age: 'Age', days: 'Training days', sessions: 'Sessions', first: 'First', latest: 'Latest', best: 'Best',
+    en: { court: 'On the court:', title: 'Player Progress Report', age: 'Age', days: 'Training days', sessions: 'Sessions', first: 'First', latest: 'Latest', best: 'Best',
           gain: 'First → best', notYet: 'Not trained yet.', one: 'One session so far — the chart starts with the second.',
           foot: 'Scores are points earned in each station; a longer or faster chain scores more. Generated ',
           print: '🖨 Print / Save PDF', share: '📤 Share', making: 'Preparing…', saved: 'Picture saved — share it from your photos or downloads.', fail: 'Could not share — use Print / Save PDF.' }
@@ -71,10 +71,11 @@
       + '<div><b>' + (first ? dstr(first) : '—') + '</b><i>' + tx('first') + '</i></div><div><b>' + (last ? dstr(last) : '—') + '</b><i>' + tx('latest') + '</i></div></div>';
     var body = GAMES.map(function(g){
       var a = runs.filter(function(r){ return r.game === g.k }).map(function(r){ return { v: +r.score || 0, at: r.at } });
-      if (!a.length) return '<div class="rp-game"><div class="rp-gname">' + g.n + '</div><div class="rp-gdesc">' + g.d[LANG] + '</div><div class="rp-one">' + tx('notYet') + '</div></div>';
+      var court = '<div class="rp-court">🏀 <b>' + tx('court') + '</b> ' + g.c[LANG] + '</div>';
+      if (!a.length) return '<div class="rp-game"><div class="rp-gname">' + g.n + '</div><div class="rp-gdesc">' + g.d[LANG] + '</div>' + court + '<div class="rp-one">' + tx('notYet') + '</div></div>';
       var f = a[0].v, l = a[a.length - 1].v, best = Math.max.apply(null, a.map(function(x){ return x.v }));
       var gain = f > 0 ? Math.round((best - f) / f * 100) : null;
-      return '<div class="rp-game"><div class="rp-gname">' + g.n + '</div><div class="rp-gdesc">' + g.d[LANG] + '</div>'
+      return '<div class="rp-game"><div class="rp-gname">' + g.n + '</div><div class="rp-gdesc">' + g.d[LANG] + '</div>' + court
         + '<div class="rp-stats"><div><b>' + f + '</b><i>' + tx('first') + '</i></div><div><b>' + l + '</b><i>' + tx('latest') + '</i></div><div><b>' + best + '</b><i>' + tx('best') + '</i></div>'
         + '<div><b>' + (gain == null ? (best > 0 ? '+' + best : '—') : (gain >= 0 ? '+' : '') + gain + '%') + '</b><i>' + tx('gain') + '</i></div><div><b>' + a.length + '</b><i>' + tx('sessions') + '</i></div></div>'
         + chart(a.slice(-40)) + '</div>';
@@ -96,6 +97,7 @@
     + '.rp-games{display:grid;grid-template-columns:1fr 1fr;gap:12px}'
     + '.rp-game{border:1px solid #d9dce1;border-radius:12px;padding:12px;break-inside:avoid}'
     + '.rp-gname{font-weight:900;font-size:1rem}.rp-gdesc{font-size:.74rem;color:#555;margin:2px 0 8px;line-height:1.3}'
+    + '.rp-court{font-size:.74rem;color:#7a5b00;background:#fff7d6;border-radius:8px;padding:5px 8px;margin:-2px 0 8px;line-height:1.3;-webkit-print-color-adjust:exact;print-color-adjust:exact}'
     + '.rp-stats{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;margin-bottom:6px}'
     + '.rp-chart{width:100%;height:auto;display:block}.rp-grid{stroke:#e5e7eb}.rp-ax{fill:#666;font-size:11px}'
     + '.rp-line{fill:none;stroke:#6d28d9;stroke-width:2.5;stroke-linejoin:round}.rp-pt{fill:#6d28d9}.rp-best{fill:#d4a017;stroke:#111;stroke-width:1}'
