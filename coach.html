@@ -7,11 +7,12 @@
 <!-- Coach View for hooporia.mobi — for coaches only, the same as on vreaction.com.
      Opens with a Coach code (License Admin → Coach tab); a game code never opens it,
      so no kid sees a ranking.
-     Every Fortress player of the coach's school, A–Z (never ranked): longest chain,
-     latest chain with a trend arrow, how many runs, and the last day played.
-     Tap a player for their progress chart.
-     Only The Fortress has names here: Recall, Recognition and Replay keep an
-     anonymous board (a player is a code, not a name), by design.
+     Every player of the coach's school who filled in his info after signing in
+     (name, age, grade — jugador-hm.js), A–Z (never ranked): his best score in each
+     of the four stations and the last day played. Tap a player for each station's
+     first, latest and best score, and a progress chart.
+     The players' info is private: it is read only through hooporia_coach() with a
+     Coach code for that school (hooporia-players.sql).
      The code is kept in memory only: reload, Lock or ← THE GYM closes the view. -->
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -30,7 +31,9 @@ body{min-height:100vh;padding:20px 16px 40px;display:flex;flex-direction:column;
 .note{font-size:.72rem;color:#7d8696;text-align:center;line-height:1.4}
 #view{width:100%;max-width:720px}
 .gtitle{font-size:.72rem;font-weight:900;letter-spacing:.14em;text-transform:uppercase;color:#a855f7;text-align:center;margin-bottom:10px}
-.head,.row{display:grid;grid-template-columns:minmax(0,1.6fr) repeat(3,minmax(0,1fr)) 54px;gap:6px;align-items:center}
+.head,.row{display:grid;grid-template-columns:minmax(0,1.7fr) repeat(4,minmax(0,1fr)) 54px;gap:6px;align-items:center}
+.row .nm{white-space:normal;overflow-wrap:anywhere;line-height:1.15}
+.nm small{display:block;font-size:.68rem;font-weight:700;color:#FFD700;letter-spacing:.02em;margin-top:2px}
 .head{font-size:.6rem;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:#7d8696;padding:0 12px 6px}
 .head span:not(:first-child),.row span:not(:first-child){text-align:center}
 .row{padding:12px;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);margin-bottom:7px;cursor:pointer;width:100%;color:#fff;font:inherit;text-align:left}
@@ -54,7 +57,7 @@ body{min-height:100vh;padding:20px 16px 40px;display:flex;flex-direction:column;
 .chg{font-size:.78rem;color:#c8ccd4;text-align:center;margin-bottom:6px}
 svg.chart{width:100%;height:auto;display:block}
 @media(max-width:520px){
-  .head,.row{grid-template-columns:minmax(0,1.4fr) repeat(3,minmax(0,1fr))}
+  .head,.row{grid-template-columns:minmax(0,1.5fr) repeat(4,minmax(0,1fr))}
   .head span:last-child,.row .last{display:none}
   .v{font-size:.85rem}
 }
@@ -76,8 +79,8 @@ svg.chart{width:100%;height:auto;display:block}
 </div>
 
 <div id="view" hidden>
-  <div class="gtitle">🏰 The Fortress</div>
-  <div class="head"><span>Player · A–Z</span><span>Longest</span><span>Latest</span><span>Runs</span><span>Last</span></div>
+  <div class="gtitle">🏀 Players · best score in each station</div>
+  <div class="head"><span>Player · A–Z</span><span>Recall</span><span>Recog.</span><span>Replay</span><span>Fortress</span><span>Last</span></div>
   <div id="list"></div>
   <div class="count" id="count"></div>
 </div>
@@ -92,7 +95,6 @@ svg.chart{width:100%;height:auto;display:block}
 <script>
 var SB_URL='https://sdaphocueugzfvjovuxd.supabase.co';
 var SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNkYXBob2N1ZXVnemZ2am92dXhkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM2MjQyMDgsImV4cCI6MjA5OTIwMDIwOH0.pDAzf4P6dD9eNEBlnP95SdF5BI-R84-Rdc0vKzYcn7M';
-var TABLE='ritnome_mobile_fortress_standings';   // The Fortress on hooporia.mobi
 var H={'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY};
 function $(id){return document.getElementById(id)}
 function esc(x){return String(x==null?'':x).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
@@ -103,24 +105,26 @@ function deviceId(){var id=null;try{id=localStorage.getItem('gostar-device-id')}
   if(!id){id='d-'+Math.random().toString(36).slice(2)+Math.random().toString(36).slice(2);try{localStorage.setItem('gostar-device-id',id)}catch(e){}}return id}
 function rpc(name,body){return fetch(SB_URL+'/rest/v1/rpc/'+name,{method:'POST',headers:Object.assign({'Content-Type':'application/json'},H),body:JSON.stringify(body)})}
 var checking=false;
+var GAMES=[['recall','🧠 The Recall'],['recognition','👁 The Recognition'],['replay','🔁 The Replay'],['fortress','🏰 The Fortress']];
+function gradeLabel(g){if(!g)return '';if(g==='K')return 'Kinder';if(g==='College')return 'College';var n=+g;if(!n)return String(g);return n+(n===1?'st':n===2?'nd':n===3?'rd':'th')+' grade'}
+function info(p){return (p.age?p.age+' yrs':'')+(p.age&&p.grade?' · ':'')+gradeLabel(p.grade)}
+function infoShort(p){return info(p).replace(' grade','')}
 function openView(){
   if(checking)return;
   var code=$('code').value.trim(); if(!code)return;
   checking=true; $('err').style.color=''; $('err').textContent='Checking…';
-  rpc('check_access',{p_code:code,p_product:'coach',p_device:deviceId()})
+  rpc('hooporia_coach',{p_code:code})
     .then(function(r){if(!r.ok)throw 0;return r.json()})
-    .then(function(lic){
+    .then(function(d){
       checking=false;
-      if(!lic||!lic.ok){
-        var m=lic&&lic.reason==='expired'?'This code has expired.':lic&&lic.reason==='revoked'?'This code is no longer active.':lic&&lic.reason==='devices'?'This code is in use on too many devices.':'Not a Coach code — check with your administrator.';
-        $('err').style.color='#ff8888';$('err').textContent=m;$('code').value='';return;
+      if(!d||!d.school&&d.school!==''){
+        $('err').style.color='#ff8888';$('err').textContent='Not a Coach code — or it is no longer active.';$('code').value='';return;
       }
-      school=lic.school_name||'';
+      school=d.school||'';
       $('code').value=''; $('err').textContent='';
       $('gate').hidden=true; $('view').hidden=false; $('lockBtn').hidden=false;
       $('sub').textContent='Coaches only'+(school?' · '+school:'');
-      $('list').innerHTML='<div class="empty">Loading…</div>';
-      loadAll();
+      build(d); render();
     })
     .catch(function(){checking=false;$('err').style.color='#ff8888';$('err').textContent='Connection problem — please try again.'});
 }
@@ -130,91 +134,57 @@ $('lockBtn').onclick=function(){school='';players={};
   $('view').hidden=true;$('player').hidden=true;$('gate').hidden=false;$('lockBtn').hidden=true;
   $('sub').textContent='Coaches only';$('list').innerHTML='';$('count').textContent=''};
 
-// ── Reading the board: this school's runs, oldest first, 1000 rows at a time.
-//    Tries the fuller reads first and falls back, so a column this board does not
-//    have (date, hidden flag) never leaves the coach with nothing. ──
-function readAll(){
-  var sc='school_name=eq.'+encodeURIComponent(school);
-  var tries=[
-    sc+'&hidden=is.false&select=player_name,level_achieved,time_seconds,created_at&order=created_at.asc',
-    sc+'&select=player_name,level_achieved,time_seconds,created_at&order=created_at.asc',
-    sc+'&select=player_name,level_achieved,time_seconds,id&order=id.asc',
-    sc+'&select=player_name,level_achieved,time_seconds'
-  ];
-  function tryS(i){
-    if(i>=tries.length)return Promise.reject(0);
-    var out=[];
-    function page(from){
-      return fetch(SB_URL+'/rest/v1/'+TABLE+'?'+tries[i]+'&offset='+from+'&limit=1000',{headers:H})
-        .then(function(r){if(!r.ok)throw 0;return r.json()})
-        .then(function(rows){out=out.concat(rows||[]);return rows&&rows.length===1000?page(from+1000):out});
-    }
-    return page(0).catch(function(){return tryS(i+1)});
-  }
-  return tryS(0);
+// ── The players: their info (the newest one they gave) and their scores per station ──
+function build(d){
+  players={};
+  function who(r){var k=String(r.name||'').trim().toLowerCase(); if(!k)return null;
+    var p=players[k]||(players[k]={name:String(r.name).trim(),age:null,grade:'',games:{},last:''});
+    if(!p.at||r.at>=p.at){p.at=r.at; if(r.age)p.age=r.age; if(r.grade)p.grade=r.grade; p.name=String(r.name).trim()}
+    if(r.at&&r.at>p.last)p.last=r.at; return p}
+  (d.players||[]).forEach(who);
+  (d.runs||[]).forEach(function(r){var p=who(r); if(!p)return; (p.games[r.game]||(p.games[r.game]=[])).push({v:+r.score||0,at:r.at})});
 }
-function loadAll(){
-  readAll().then(function(rows){
-    players={};
-    rows.forEach(function(r){
-      var k=String(r.player_name||'').trim().toLowerCase(), lv=parseInt(r.level_achieved,10); if(!k||!(lv>0))return;
-      var p=players[k]||(players[k]={name:String(r.player_name).trim(),runs:[],last:''});
-      p.runs.push({v:lv,t:r.time_seconds,at:r.created_at||''});
-      p.name=String(r.player_name).trim();      // the newest spelling of the name (rows come oldest first)
-      if(r.created_at&&r.created_at>p.last)p.last=r.created_at;
-    });
-    render();
-  }).catch(function(){$('list').innerHTML='<div class="empty">Could not load the board.</div>'});
-}
-
-// ── The list: A–Z, never ranked ──
-function trend(a){
-  if(a.length<2)return '';
-  var x=a[a.length-1].v,y=a[a.length-2].v;
-  return x>y?' <span class="up" title="Up from the run before">↑</span>':x<y?' <span class="dn" title="Down from the run before">↓</span>':' <span class="eq" title="Same as the run before">→</span>';
-}
-function topLv(a){var t=0;a.forEach(function(x){if(x.v>t)t=x.v});return t}
+function best(a){var t=0;(a||[]).forEach(function(x){if(x.v>t)t=x.v});return t}
 function day(at){if(!at)return '—';var d=new Date(at);return isNaN(d)?'—':(d.getMonth()+1)+'/'+d.getDate()}
 function render(){
   var keys=Object.keys(players).sort(function(a,b){return players[a].name.localeCompare(players[b].name,undefined,{sensitivity:'base'})});
-  $('list').innerHTML=keys.length?keys.map(function(k){var p=players[k],r=p.runs;
-    return '<button class="row" type="button" data-k="'+esc(k)+'"><span class="nm">'+esc(p.name)+'</span>'+
-      '<span class="v">Level '+topLv(r)+'</span>'+
-      '<span class="v">'+r[r.length-1].v+trend(r)+'</span>'+
-      '<span class="v">'+r.length+'</span>'+
+  $('list').innerHTML=keys.length?keys.map(function(k){var p=players[k];
+    return '<button class="row" type="button" data-k="'+esc(k)+'"><span class="nm">'+esc(p.name)+'<small>'+esc(infoShort(p))+'</small></span>'+
+      GAMES.map(function(g){var a=p.games[g[0]];return '<span class="v">'+(a&&a.length?best(a):'—')+'</span>'}).join('')+
       '<span class="last">'+day(p.last)+'</span></button>';
-  }).join(''):'<div class="empty">No Fortress players yet'+(school?' at '+esc(school):'')+'.</div>';
-  $('count').innerHTML=keys.length?keys.length+' player'+(keys.length>1?'s':'')+' · listed A–Z, not ranked<br>Recall, Recognition and Replay keep no names, so only The Fortress shows here.':'';
+  }).join(''):'<div class="empty">No players yet'+(school?' at '+esc(school):'')+'.<br>Players show up here once they sign in and fill in their name, age and grade.</div>';
+  $('count').innerHTML=keys.length?keys.length+' player'+(keys.length>1?'s':'')+' · listed A–Z, not ranked · best score in each station':'';
   $('list').querySelectorAll('.row').forEach(function(b){b.onclick=function(){showPlayer(b.dataset.k)}});
 }
 
-// ── One player: their chain over time ──
+// ── One player: each station over time ──
 function chart(pts){
   if(pts.length<2)return '';
   var vals=pts.map(function(p){return p.v}),mn=Math.min.apply(null,vals),mx=Math.max.apply(null,vals),topI=vals.indexOf(mx);
-  var lo=Math.max(0,mn-1),hi=Math.max(mx+1,lo+4);
-  var W=560,Hh=220,L=44,R=16,T=20,B=30;
+  var lo=Math.max(0,mn-Math.max(1,Math.round((mx-mn)*.15))),hi=Math.max(mx+Math.max(1,Math.round((mx-mn)*.15)),lo+4);
+  var W=560,Hh=200,L=48,R=16,T=18,B=30;
   var X=function(i){return L+(W-L-R)*i/(pts.length-1)},Y=function(v){return T+(Hh-T-B)*(hi-v)/(hi-lo)};
-  var g=Math.max(1,Math.ceil((hi-lo)/5));
+  var g=Math.max(1,Math.ceil((hi-lo)/4));
   var s='<svg class="chart" viewBox="0 0 '+W+' '+Hh+'">';
   for(var y=lo;y<=hi;y+=g)s+='<line x1="'+L+'" x2="'+(W-R)+'" y1="'+Y(y)+'" y2="'+Y(y)+'" stroke="rgba(255,255,255,.08)"/><text x="'+(L-8)+'" y="'+(Y(y)+4)+'" fill="#9fb3c8" font-size="12" text-anchor="end">'+y+'</text>';
   s+='<polyline fill="none" stroke="#a855f7" stroke-width="3" stroke-linejoin="round" stroke-linecap="round" points="'+pts.map(function(p,i){return X(i).toFixed(1)+','+Y(p.v).toFixed(1)}).join(' ')+'"/>';
-  pts.forEach(function(p,i){var t=i===topI;s+='<circle cx="'+X(i).toFixed(1)+'" cy="'+Y(p.v).toFixed(1)+'" r="'+(t?7:4.5)+'" fill="'+(t?'#FFD700':'#a855f7')+'" stroke="#000" stroke-width="1.5"><title>Level '+p.v+' · '+day(p.at)+'</title></circle>'});
-  s+='<text x="'+L+'" y="'+(Hh-8)+'" fill="#9fb3c8" font-size="12">'+(pts[0].at?day(pts[0].at):'earlier')+'</text><text x="'+(W-R)+'" y="'+(Hh-8)+'" fill="#9fb3c8" font-size="12" text-anchor="end">'+(pts[pts.length-1].at?day(pts[pts.length-1].at):'latest')+'</text>';
+  pts.forEach(function(p,i){var t=i===topI;s+='<circle cx="'+X(i).toFixed(1)+'" cy="'+Y(p.v).toFixed(1)+'" r="'+(t?7:4.5)+'" fill="'+(t?'#FFD700':'#a855f7')+'" stroke="#000" stroke-width="1.5"><title>'+p.v+' · '+day(p.at)+'</title></circle>'});
+  s+='<text x="'+L+'" y="'+(Hh-8)+'" fill="#9fb3c8" font-size="12">'+day(pts[0].at)+'</text><text x="'+(W-R)+'" y="'+(Hh-8)+'" fill="#9fb3c8" font-size="12" text-anchor="end">'+day(pts[pts.length-1].at)+'</text>';
   return s+'</svg>';
 }
 function showPlayer(k){
   var p=players[k]; if(!p)return;
   $('view').hidden=true; $('player').hidden=false; window.scrollTo(0,0);
   $('pname').textContent=p.name;
-  $('pcat').textContent=(school?school+' · ':'')+'last played '+day(p.last);
-  var a=p.runs, pts=a.slice(-40), first=pts[0].v, last=pts[pts.length-1].v, best=topLv(a), d=last-first;
-  var bestT=null; a.forEach(function(x){if(x.v===best&&x.t!=null&&(bestT==null||x.t<bestT))bestT=+x.t});
-  $('pbody').innerHTML='<div class="game"><div class="gname">🏰 The Fortress · chain</div>'+
-    '<div class="stats"><div class="cell"><b>'+first+'</b><i>First</i></div><div class="cell"><b>'+last+'</b><i>Latest</i></div><div class="cell"><b>'+best+'</b><i>Longest</i></div></div>'+
-    '<div class="chg">'+(a.length<2?'One run so far':'<b>'+(d>0?'+':'')+d+' level'+(Math.abs(d)===1?'':'s')+'</b> since the first run · '+a.length+' runs')+
-      (bestT!=null&&!isNaN(bestT)?' · fastest at Level '+best+': '+bestT.toFixed(2)+' s':'')+'</div>'+
-    chart(pts)+'</div>';
+  $('pcat').textContent=[info(p),school,'last played '+day(p.last)].filter(Boolean).join(' · ');
+  $('pbody').innerHTML=GAMES.map(function(g){
+    var a=p.games[g[0]]||[];
+    if(!a.length)return '<div class="game"><div class="gname">'+g[1]+'</div><div class="chg">Not played yet</div></div>';
+    var pts=a.slice(-40),first=a[0].v,last=a[a.length-1].v,b=best(a),d=last-first;
+    return '<div class="game"><div class="gname">'+g[1]+' · score</div>'+
+      '<div class="stats"><div class="cell"><b>'+first+'</b><i>First</i></div><div class="cell"><b>'+last+'</b><i>Latest</i></div><div class="cell"><b>'+b+'</b><i>Best</i></div></div>'+
+      '<div class="chg">'+(a.length<2?'One run so far':'<b>'+(d>0?'+':'')+d+'</b> since the first run · '+a.length+' runs')+'</div>'+chart(pts)+'</div>';
+  }).join('');
 }
 $('backList').onclick=function(){$('player').hidden=true;$('view').hidden=false};
 </script>

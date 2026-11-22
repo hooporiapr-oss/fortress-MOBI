@@ -6,7 +6,12 @@
 if ((function(){ try { return sessionStorage.getItem('fortress-mobile-gate-pass') } catch(e){ return null } })() !== '1') {
   window.location.replace('index.html');
 }
+/* No player info yet (name, age, grade): the hub asks for it first (jugador-hm.js) */
+else if (!(function(){ try { var p = JSON.parse(localStorage.getItem('hooporia-player') || 'null'); return p && p.name && (p.school || '') === (localStorage.getItem('rct-mobile-school') || '') } catch(e){ return false } })()) {
+  window.location.replace('fortress-mobile-hub.html');
+}
 </script>
+<script src="jugador-hm.js"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>THE RECALL | Ritnome</title>
@@ -1011,6 +1016,8 @@ function gymAnotar(puntos){
     var juego = gymJuego();
     var p = parseInt(puntos, 10);
     if (!juego || !isFinite(p) || p < 0) return;
+    /* the player's info (name, age, grade) goes with the score to the coach's board */
+    if (window.HM_PLAYER) HM_PLAYER.score(juego, p);
     gymCodigo().then(function(codigo){
       if (!codigo) return;
       gymLlamar('/anotar', { codigo: codigo, juego: juego, puntos: p })

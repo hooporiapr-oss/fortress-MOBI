@@ -112,6 +112,7 @@ function tryEnter(){
     }
     try {
       sessionStorage.setItem('fortress-mobile-gate-pass', '1');
+      sessionStorage.setItem('hm-fresh-login', '1');   // the hub asks who is training (jugador-hm.js)
       sessionStorage.setItem('fortress-mobile-license', input.toUpperCase());
       localStorage.setItem('rct-mobile-school', lic.school_name || '');
       localStorage.removeItem('rct-mobile-license');

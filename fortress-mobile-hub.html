@@ -7,6 +7,7 @@ if ((function(){ try { return sessionStorage.getItem('fortress-mobile-gate-pass'
   window.location.replace('index.html');
 }
 </script>
+<script src="jugador-hm.js"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>Cognitivo Gym</title>
@@ -119,6 +120,8 @@ if ((function(){ try { return sessionStorage.getItem('fortress-mobile-gate-pass'
   <div class="hub-head">
     <div class="hub-kicker">🧠 Cada Punto Cuenta</div>
     <div class="hub-title">COGNITIVO GYM</div>
+    <!-- who is training (jugador-hm.js): name · age · grade, and Change -->
+    <div id="hm-pill" hidden style="margin-top:12px;display:none;align-items:center;gap:10px;padding:7px 8px 7px 14px;border-radius:999px;border:1px solid rgba(255,215,0,.45);background:rgba(255,215,0,.06);font-size:.85rem;font-weight:700"><span id="hm-who"></span><button type="button" id="hm-chg" style="border:0;border-radius:999px;padding:5px 11px;background:rgba(255,255,255,.12);color:#fff;font:800 .72rem Outfit,Arial,sans-serif;letter-spacing:.06em;cursor:pointer">CHANGE</button></div>
   </div>
 
   <!-- The Fortress used to sit up here on its own as the featured
@@ -238,6 +241,10 @@ var EQUIPO_ABIERTO = 'demo';
 })();
 
 var $=function(id){return document.getElementById(id)};
+/* Who is training: asked once after signing in, before any station (jugador-hm.js) */
+function hmShow(p){ if(!p)return; $('hm-who').textContent='👤 '+HM_PLAYER.line(p); $('hm-pill').hidden=false; $('hm-pill').style.display='inline-flex' }
+HM_PLAYER.ensure(hmShow);
+$('hm-chg').onclick=function(){ HM_PLAYER.change(hmShow) };
 var BPM=120, beatMs=60000/BPM;
 var audioCtx=null, audioReady=false, soundOn=true;
 function toggleSound(){
