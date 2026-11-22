@@ -256,7 +256,7 @@ var EQUIPO_ABIERTO = 'demo';
 
 var $=function(id){return document.getElementById(id)};
 /* Who is training: asked once after signing in, before any station (jugador-hm.js) */
-function hmShow(p){ if(!p)return; $('hm-who').textContent='👤 '+HM_PLAYER.line(p); $('hm-pill').hidden=false; $('hm-pill').style.display='inline-flex' }
+function hmShow(p){ if(HM_PLAYER.admin()){ $('hm-who').textContent='🛠 Admin · scores not saved'; $('hm-chg').hidden=true; $('hm-pill').hidden=false; $('hm-pill').style.display='inline-flex'; return } if(!p)return; $('hm-who').textContent='👤 '+HM_PLAYER.line(p); $('hm-pill').hidden=false; $('hm-pill').style.display='inline-flex' }
 HM_PLAYER.ensure(hmShow);
 $('hm-chg').onclick=function(){ HM_PLAYER.change(hmShow) };
 var BPM=120, beatMs=60000/BPM;

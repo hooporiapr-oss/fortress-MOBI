@@ -52,6 +52,7 @@
 
     /* a score, saved with the player's info. Fire and forget: it never holds up a game. */
     score: function(game, points){
+      if (HM.admin()) return;
       var p = HM.get(); if (!p) return;
       try {
         fetch(SB + '/rest/v1/hooporia_mobi_runs', {
@@ -64,7 +65,11 @@
     },
 
     /* The hub: ask, or confirm after a fresh sign-in. done() runs once someone is set. */
+    /* the admin's device (signed in with a code whose category is "Admin"):
+       no "Who's training?", and nothing it plays is saved to anyone's scores */
+    admin: function(){ return get('hm-admin') === '1' },
     ensure: function(done){
+      if (HM.admin()){ del('hm-fresh-login', true); done && done(null); return }
       var p = HM.get(), fresh = get('hm-fresh-login', true) === '1';
       if (p && !fresh){ done && done(p); return }
       if (p && fresh) confirmBox(p, done); else form(done);

@@ -7,7 +7,7 @@ if ((function(){ try { return sessionStorage.getItem('fortress-mobile-gate-pass'
   window.location.replace('index.html');
 }
 /* No player info yet (name, age, grade): the hub asks for it first (jugador-hm.js) */
-else if (!(function(){ try { var p = JSON.parse(localStorage.getItem('hooporia-player') || 'null'); return p && p.name && (p.school || '') === (localStorage.getItem('rct-mobile-school') || '') } catch(e){ return false } })()) {
+else if (!(function(){ try { if (localStorage.getItem('hm-admin') === '1') return true; var p = JSON.parse(localStorage.getItem('hooporia-player') || 'null'); return p && p.name && (p.school || '') === (localStorage.getItem('rct-mobile-school') || '') } catch(e){ return false } })()) {
   window.location.replace('fortress-mobile-hub.html');
 }
 </script>

@@ -129,6 +129,8 @@ function tryEnter(auto){
       .catch(function(){ return null })
       .then(function(cat){
         try { sessionStorage.setItem('fortress-mobile-category', (typeof cat === 'string' ? cat : '') || ''); } catch(e){}
+        // an admin code (category "Admin") skips "Who's training?" — and saves no scores
+        try { if (typeof cat === 'string' && /^\s*admin\s*$/i.test(cat)) localStorage.setItem('hm-admin', '1'); else localStorage.removeItem('hm-admin'); } catch(e){}
         window.location.href = 'fortress-mobile-hub.html';
       });
   })
