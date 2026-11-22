@@ -394,6 +394,21 @@ body.warm .play-container{min-height:0}
 #modeTraining,#levelSection{display:none!important}
 /* Only one mode is left, so no mode picker: the start button opens the game. */
 .mode-row,.bpm-section-title:has(+ .mode-row),#selectModeTitle,[data-t="selMode"]{display:none!important}
+
+/* ══ DESKTOP / LANDSCAPE TABLET — FULL SCREEN PLAY ══════════════════
+   On a phone nothing here applies. On a wide screen the court grows to
+   fill the height of the window (up to 760px) instead of staying the
+   phone's 340px, the column widens to fit it, and the numbers around it
+   grow to match. --desk is the space the rest of the play screen needs
+   above and below the court. */
+@media (min-width:900px) and (min-height:560px){
+  :root{--desk:270px;--court-d:min(calc(100dvh - var(--desk)),760px)}
+  .play-container{max-width:max(420px,calc(var(--court-d) + 60px))}
+  .play-court-wrap{max-width:var(--court-d)}
+  .play-court{gap:8px;padding:34px !important}
+  .play-stat-value{font-size:2.2rem}
+  .play-message-text{font-size:1.2rem}
+}
 </style>
 </head>
 <body>
