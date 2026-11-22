@@ -93,9 +93,13 @@ function rpc(name, body){
   });
 }
 var checking = false;
-function tryEnter(){
+/* auto = the code this device remembered: it signs itself in, so a player types the
+   code only the first time. It is still checked every time — a code turned off in
+   License Admin stops working here too, and the box comes back. */
+function tryEnter(auto){
   if (checking) return;
-  var input = $('gate-code').value.trim();
+  var input = typeof auto === 'string' ? auto : $('gate-code').value.trim();
+  var silent = typeof auto === 'string';
   if (!input) return;
   checking = true;
   $('gate-err').style.color = 'var(--muted)';
@@ -105,6 +109,7 @@ function tryEnter(){
   .then(function(lic){
     if (!lic || !lic.ok){
       checking = false;
+      if (silent){ try { localStorage.removeItem('hm-remember') } catch(e){} $('gate-err').textContent = ''; return; }
       if (lic && lic.reason === 'devices') return reject('This code is already in use on ' + (lic.max_devices || 5) + ' devices. Ask your administrator to reset it.');
       if (lic && lic.reason === 'expired') return reject('This license has expired');
       if (lic && lic.reason === 'revoked') return reject('This code is no longer active.');
@@ -112,7 +117,8 @@ function tryEnter(){
     }
     try {
       sessionStorage.setItem('fortress-mobile-gate-pass', '1');
-      sessionStorage.setItem('hm-fresh-login', '1');   // the hub asks who is training (jugador-hm.js)
+      if (!silent) sessionStorage.setItem('hm-fresh-login', '1');   // the hub asks "Is this you?" (jugador-hm.js) — not on a remembered sign-in
+      localStorage.setItem('hm-remember', input.toUpperCase());       // this device signs itself in next time
       sessionStorage.setItem('fortress-mobile-license', input.toUpperCase());
       localStorage.setItem('rct-mobile-school', lic.school_name || '');
       localStorage.removeItem('rct-mobile-license');
@@ -126,8 +132,13 @@ function tryEnter(){
         window.location.href = 'fortress-mobile-hub.html';
       });
   })
-  .catch(function(){ checking = false; reject('Connection problem — please try again'); });
+  .catch(function(){ checking = false; if (silent){ $('gate-err').textContent = ''; return; } reject('Connection problem — please try again'); });
 }
+// A device that signed in before goes straight in
+(function(){
+  var r = null; try { r = localStorage.getItem('hm-remember') } catch(e){}
+  if (r){ $('gate-err').style.color = 'var(--muted)'; $('gate-err').textContent = 'Signing in…'; tryEnter(r); }
+})();
 function reject(msg){
   $('gate-err').style.color = '#ff8888';
   $('gate-err').textContent = msg;
