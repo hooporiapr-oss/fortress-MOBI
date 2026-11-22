@@ -136,6 +136,7 @@
   }
   /* draws the bar and the report into box; the language switch redraws it in place */
   function mount(box, d, name){
+    try { LANG = localStorage.getItem('rp-lang') === 'en' ? 'en' : 'es' } catch(e){}   // the same choice as the page around it
     if (!document.getElementById('rp-bar-css')){ var s = document.createElement('style'); s.id = 'rp-bar-css'; s.textContent = BAR_CSS; document.head.appendChild(s) }
     HM_REPORT.css();
     box.innerHTML = '<div class="rp-bar"><div class="rp-lang"><button type="button" data-l="es"' + (LANG === 'es' ? ' class="on"' : '') + '>ES</button><button type="button" data-l="en"' + (LANG === 'en' ? ' class="on"' : '') + '>EN</button></div>'

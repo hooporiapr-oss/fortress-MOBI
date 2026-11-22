@@ -28,10 +28,13 @@ body{min-height:100vh;padding:20px 16px 40px;display:flex;flex-direction:column;
 #code{padding:14px;border-radius:12px;border:2px solid rgba(255,215,0,.45);background:rgba(255,215,0,.06);color:#fff;font:900 1.1rem Arial,sans-serif;text-align:center;letter-spacing:.12em;text-transform:uppercase}
 #open{padding:14px;border-radius:12px;border:0;background:linear-gradient(135deg,#FFD700,#FF6B35);color:#1a0f0f;font:900 1rem Arial,sans-serif;letter-spacing:.1em;text-transform:uppercase;cursor:pointer}
 #err{min-height:1.2em;text-align:center;font-size:.85rem;color:#a7adba}
+.cvlang{display:inline-flex;border:2px solid rgba(255,255,255,.25);border-radius:999px;overflow:hidden}
+.cvlang button{border:0;background:transparent;color:#a7adba;font:900 .75rem Arial,sans-serif;letter-spacing:.08em;padding:8px 12px;cursor:pointer}
+.cvlang button.on{background:#FFD700;color:#111}
 .note{font-size:.72rem;color:#7d8696;text-align:center;line-height:1.4}
 #view{width:100%;max-width:720px}
 .gtitle{font-size:.72rem;font-weight:900;letter-spacing:.14em;text-transform:uppercase;color:#a855f7;text-align:center;margin-bottom:10px}
-.head,.row{display:grid;grid-template-columns:minmax(0,1.7fr) repeat(4,minmax(0,1fr)) 54px;gap:6px;align-items:center}
+.head,.row{display:grid;grid-template-columns:minmax(0,1.7fr) repeat(4,minmax(0,1fr)) 66px;gap:6px;align-items:center}
 .row .nm{white-space:normal;overflow-wrap:anywhere;line-height:1.15}
 .nm small{display:block;font-size:.68rem;font-weight:700;color:#FFD700;letter-spacing:.02em;margin-top:2px}
 .head{font-size:.6rem;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:#7d8696;padding:0 12px 6px}
@@ -65,35 +68,36 @@ svg.chart{width:100%;height:auto;display:block}
 </head>
 <body>
 <div class="top">
-  <a class="pill" href="index.html">← THE GYM</a>
-  <button class="pill" id="lockBtn" type="button" hidden>🔒 Lock</button>
+  <a class="pill" href="index.html" data-cv="gym">← EL GYM</a>
+  <span style="display:inline-flex;gap:8px"><span class="cvlang" id="cvLang"><button type="button" data-l="es">ES</button><button type="button" data-l="en">EN</button></span>
+  <button class="pill" id="lockBtn" type="button" hidden data-cv="lock">🔒 Bloquear</button></span>
 </div>
 <div class="t">COACH <span>VIEW</span></div>
-<div class="sub" id="sub">Coaches only</div>
+<div class="sub" id="sub">Solo coaches</div>
 
 <div id="gate">
-  <input id="code" type="text" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Coach code">
-  <button id="open" type="button">Open</button>
+  <input id="code" type="text" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Código de coach" data-cvp="code">
+  <button id="open" type="button" data-cv="open">Abrir</button>
   <div id="err"></div>
-  <div class="note">A Coach code is made in License Admin → Coach. A game code does not open this view.</div>
+  <div class="note" data-cv="note">El código de coach se crea en License Admin → Coach. Un código de juego no abre esta vista.</div>
 </div>
 
 <div id="view" hidden>
-  <div class="gtitle">🏀 Players · best score in each station</div>
-  <div class="head"><span>Player · A–Z</span><span>Recall</span><span>Recog.</span><span>Replay</span><span>Fortress</span><span>Last</span></div>
+  <div class="gtitle" data-cv="gtitle">🏀 Jugadores · mejor puntuación en cada estación</div>
+  <div class="head"><span data-cv="hPlayer">Jugador</span><span>Recall</span><span>Recog.</span><span>Replay</span><span>Fortress</span><span data-cv="hLast">Última fecha</span></div>
   <div id="list"></div>
   <div class="count" id="count"></div>
 </div>
 
 <!-- a player's progress report (report.js — the same one the player sees), to print or save as PDF -->
 <div id="report" hidden style="width:100%;max-width:760px">
-  <div class="top" style="max-width:none"><button class="pill" id="repBack" type="button">← Back</button></div>
+  <div class="top" style="max-width:none"><button class="pill" id="repBack" type="button" data-cv="back">← Atrás</button></div>
   <div id="repOut"></div>
 </div>
 <style>@media print{.top,.t,.sub{display:none !important}html,body{background:#fff !important}}</style>
 
 <div id="player" hidden>
-  <div class="top" style="max-width:none"><button class="pill" id="backList" type="button">← All players</button><button class="pill" id="repBtn" type="button" style="border-color:#FFD700;color:#FFD700">📄 Progress report</button></div>
+  <div class="top" style="max-width:none"><button class="pill" id="backList" type="button" data-cv="all">← Todos</button><button class="pill" id="repBtn" type="button" style="border-color:#FFD700;color:#FFD700" data-cv="rep">📄 Reporte de progreso</button></div>
   <div class="pname" id="pname"></div>
   <div class="pcat" id="pcat"></div>
   <div id="pbody"></div>
@@ -113,34 +117,69 @@ function deviceId(){var id=null;try{id=localStorage.getItem('gostar-device-id')}
   if(!id){id='d-'+Math.random().toString(36).slice(2)+Math.random().toString(36).slice(2);try{localStorage.setItem('gostar-device-id',id)}catch(e){}}return id}
 function rpc(name,body){return fetch(SB_URL+'/rest/v1/rpc/'+name,{method:'POST',headers:Object.assign({'Content-Type':'application/json'},H),body:JSON.stringify(body)})}
 var checking=false;
+// ── Spanish first, English with the switch (the same choice the progress report uses) ──
+var LANG=(function(){try{return localStorage.getItem('rp-lang')==='en'?'en':'es'}catch(e){return 'es'}})();
+var CV={
+  es:{gym:'← EL GYM',lock:'🔒 Bloquear',only:'Solo coaches',code:'Código de coach',open:'Abrir',note:'El código de coach se crea en License Admin → Coach. Un código de juego no abre esta vista.',
+      gtitle:'🏀 Jugadores · mejor puntuación en cada estación',hPlayer:'Jugador',hLast:'Última fecha',back:'← Atrás',all:'← Todos',rep:'📄 Reporte de progreso',
+      checking:'Verificando…',bad:'No es un código de coach — o ya no está activo.',conn:'Problema de conexión — intenta otra vez.',
+      none:'Todavía no hay jugadores',at:' en ',noneHow:'Los jugadores aparecen aquí cuando entran y llenan su nombre, edad y grado.',
+      count:function(n){return n+' jugador'+(n>1?'es':'')+' · en orden A–Z, sin ranking · mejor puntuación en cada estación'},
+      yrs:'años',lastDate:'última fecha ',notYet:'Todavía no ha jugado',score:' · puntuación',first:'Primera',latest:'Última',best:'Mejor',
+      one:'Una sesión hasta ahora',since:function(d,n){return '<b>'+(d>0?'+':'')+d+'</b> desde la primera · '+n+' sesiones'}},
+  en:{gym:'← THE GYM',lock:'🔒 Lock',only:'Coaches only',code:'Coach code',open:'Open',note:'A Coach code is made in License Admin → Coach. A game code does not open this view.',
+      gtitle:'🏀 Players · best score in each station',hPlayer:'Player',hLast:'Last date',back:'← Back',all:'← All players',rep:'📄 Progress report',
+      checking:'Checking…',bad:'Not a Coach code — or it is no longer active.',conn:'Connection problem — please try again.',
+      none:'No players yet',at:' at ',noneHow:'Players show up here once they sign in and fill in their name, age and grade.',
+      count:function(n){return n+' player'+(n>1?'s':'')+' · listed A–Z, not ranked · best score in each station'},
+      yrs:'yrs',lastDate:'last date ',notYet:'Not played yet',score:' · score',first:'First',latest:'Latest',best:'Best',
+      one:'One run so far',since:function(d,n){return '<b>'+(d>0?'+':'')+d+'</b> since the first run · '+n+' runs'}}
+};
+function L(k){return CV[LANG][k]}
+function applyLang(){
+  document.documentElement.lang=LANG;
+  document.querySelectorAll('[data-cv]').forEach(function(e){e.textContent=L(e.getAttribute('data-cv'))});
+  document.querySelectorAll('[data-cvp]').forEach(function(e){e.placeholder=L(e.getAttribute('data-cvp'))});
+  document.querySelectorAll('#cvLang button').forEach(function(b){b.classList.toggle('on',b.getAttribute('data-l')===LANG)});
+  $('sub').textContent=L('only')+(school?' · '+school:'');
+}
+document.querySelectorAll('#cvLang button').forEach(function(b){b.onclick=function(){
+  LANG=b.getAttribute('data-l'); try{localStorage.setItem('rp-lang',LANG)}catch(e){}
+  applyLang();
+  if(!$('view').hidden)render();
+  if(!$('player').hidden&&CUR)showPlayer(CUR);
+  if(!$('report').hidden&&DATA&&CUR)$('repBtn').onclick();
+}});
 var GAMES=[['recall','🧠 The Recall'],['recognition','👁 The Recognition'],['replay','🔁 The Replay'],['fortress','🏰 The Fortress']];
-function gradeLabel(g){if(!g)return '';if(g==='K')return 'Kinder';if(g==='College')return 'College';var n=+g;if(!n)return String(g);return n+(n===1?'st':n===2?'nd':n===3?'rd':'th')+' grade'}
-function info(p){return (p.age?p.age+' yrs':'')+(p.age&&p.grade?' · ':'')+gradeLabel(p.grade)}
-function infoShort(p){return info(p).replace(' grade','')}
+function gradeLabel(g){if(!g)return '';var n=+g;
+  if(LANG==='es'){if(g==='K')return 'Kínder';if(g==='College')return 'Universidad';if(!n)return String(g);return n+({1:'ro',2:'do',3:'ro',4:'to',5:'to',6:'to',7:'mo',8:'vo',9:'no',10:'mo',11:'mo',12:'mo'}[n]||'')+' grado'}
+  if(g==='K')return 'Kinder';if(g==='College')return 'College';if(!n)return String(g);return n+(n===1?'st':n===2?'nd':n===3?'rd':'th')+' grade'}
+function info(p){return (p.age?p.age+' '+L('yrs'):'')+(p.age&&p.grade?' · ':'')+gradeLabel(p.grade)}
+function infoShort(p){return info(p).replace(' grade','').replace(' grado','')}
 function openView(){
   if(checking)return;
   var code=$('code').value.trim(); if(!code)return;
-  checking=true; $('err').style.color=''; $('err').textContent='Checking…';
+  checking=true; $('err').style.color=''; $('err').textContent=L('checking');
   rpc('hooporia_coach',{p_code:code})
     .then(function(r){if(!r.ok)throw 0;return r.json()})
     .then(function(d){
       checking=false;
       if(!d||!d.school&&d.school!==''){
-        $('err').style.color='#ff8888';$('err').textContent='Not a Coach code — or it is no longer active.';$('code').value='';return;
+        $('err').style.color='#ff8888';$('err').textContent=L('bad');$('code').value='';return;
       }
       school=d.school||'';
       $('code').value=''; $('err').textContent='';
       $('gate').hidden=true; $('view').hidden=false; $('lockBtn').hidden=false;
-      $('sub').textContent='Coaches only'+(school?' · '+school:'');
+      $('sub').textContent=L('only')+(school?' · '+school:'');
       DATA=d; build(d); render();
     })
-    .catch(function(){checking=false;$('err').style.color='#ff8888';$('err').textContent='Connection problem — please try again.'});
+    .catch(function(){checking=false;$('err').style.color='#ff8888';$('err').textContent=L('conn')});
 }
 $('open').onclick=openView;
 $('code').addEventListener('keydown',function(e){if(e.key==='Enter')openView()});
 $('lockBtn').onclick=function(){school='';players={};DATA=null;CUR=null;$('report').hidden=true;
   $('view').hidden=true;$('player').hidden=true;$('gate').hidden=false;$('lockBtn').hidden=true;
-  $('sub').textContent='Coaches only';$('list').innerHTML='';$('count').textContent=''};
+  $('sub').textContent=L('only');$('list').innerHTML='';$('count').textContent=''};
 
 // ── The players: their info (the newest one they gave) and their scores per station ──
 function build(d){
@@ -160,8 +199,8 @@ function render(){
     return '<button class="row" type="button" data-k="'+esc(k)+'"><span class="nm">'+esc(p.name)+'<small>'+esc(infoShort(p))+'</small></span>'+
       GAMES.map(function(g){var a=p.games[g[0]];return '<span class="v">'+(a&&a.length?best(a):'—')+'</span>'}).join('')+
       '<span class="last">'+day(p.last)+'</span></button>';
-  }).join(''):'<div class="empty">No players yet'+(school?' at '+esc(school):'')+'.<br>Players show up here once they sign in and fill in their name, age and grade.</div>';
-  $('count').innerHTML=keys.length?keys.length+' player'+(keys.length>1?'s':'')+' · listed A–Z, not ranked · best score in each station':'';
+  }).join(''):'<div class="empty">'+L('none')+(school?L('at')+esc(school):'')+'.<br>'+L('noneHow')+'</div>';
+  $('count').innerHTML=keys.length?L('count')(keys.length):'';
   $('list').querySelectorAll('.row').forEach(function(b){b.onclick=function(){showPlayer(b.dataset.k)}});
 }
 
@@ -184,14 +223,14 @@ function showPlayer(k){
   var p=players[k]; if(!p)return; CUR=k;
   $('view').hidden=true; $('player').hidden=false; window.scrollTo(0,0);
   $('pname').textContent=p.name;
-  $('pcat').textContent=[info(p),school,'last played '+day(p.last)].filter(Boolean).join(' · ');
+  $('pcat').textContent=[info(p),school,L('lastDate')+day(p.last)].filter(Boolean).join(' · ');
   $('pbody').innerHTML=GAMES.map(function(g){
     var a=p.games[g[0]]||[];
-    if(!a.length)return '<div class="game"><div class="gname">'+g[1]+'</div><div class="chg">Not played yet</div></div>';
+    if(!a.length)return '<div class="game"><div class="gname">'+g[1]+'</div><div class="chg">'+L('notYet')+'</div></div>';
     var pts=a.slice(-40),first=a[0].v,last=a[a.length-1].v,b=best(a),d=last-first;
-    return '<div class="game"><div class="gname">'+g[1]+' · score</div>'+
-      '<div class="stats"><div class="cell"><b>'+first+'</b><i>First</i></div><div class="cell"><b>'+last+'</b><i>Latest</i></div><div class="cell"><b>'+b+'</b><i>Best</i></div></div>'+
-      '<div class="chg">'+(a.length<2?'One run so far':'<b>'+(d>0?'+':'')+d+'</b> since the first run · '+a.length+' runs')+'</div>'+chart(pts)+'</div>';
+    return '<div class="game"><div class="gname">'+g[1]+L('score')+'</div>'+
+      '<div class="stats"><div class="cell"><b>'+first+'</b><i>'+L('first')+'</i></div><div class="cell"><b>'+last+'</b><i>'+L('latest')+'</i></div><div class="cell"><b>'+b+'</b><i>'+L('best')+'</i></div></div>'+
+      '<div class="chg">'+(a.length<2?L('one'):L('since')(d,a.length))+'</div>'+chart(pts)+'</div>';
   }).join('');
 }
 $('backList').onclick=function(){$('player').hidden=true;$('view').hidden=false};
@@ -201,6 +240,7 @@ $('repBtn').onclick=function(){
   HM_REPORT.mount($('repOut'),DATA,players[CUR].name);   // Spanish first, EN switch, Share, Print / PDF
   $('player').hidden=true; $('report').hidden=false; window.scrollTo(0,0);
 };
+applyLang();
 $('repBack').onclick=function(){$('report').hidden=true;$('player').hidden=false};
 
 </script>
