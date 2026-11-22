@@ -688,6 +688,14 @@ html,body{background:var(--dark)}
   .court-slot{max-width:var(--court-d)}
   .court5x5{gap:8px;padding:34px}
 }
+/* ══ DESKTOP — DEMO SCREEN: scale the demo up to fill the screen height (phones untouched) ══ */
+@media (min-width:900px) and (min-height:560px){:root{--dz:1.1}}
+@media (min-width:900px) and (min-height:680px){:root{--dz:1.2}}
+@media (min-width:900px) and (min-height:760px){:root{--dz:1.35}}
+@media (min-width:900px) and (min-height:860px){:root{--dz:1.45}}
+@media (min-width:900px) and (min-height:960px){:root{--dz:1.6}}
+@media (min-width:900px) and (min-height:1040px){:root{--dz:1.7}}
+@media (min-width:900px) and (min-height:560px){#setupScreen > :not(.intro-nav-row){zoom:var(--dz)}}
 </style>
 </head>
 <body>

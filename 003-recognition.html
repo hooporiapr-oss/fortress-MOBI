@@ -419,6 +419,14 @@ body.warm .play-screen{padding-top:calc(var(--nav-height) + 46px + env(safe-area
   .play-stat-value{font-size:2.2rem}
   .play-message-text{font-size:1.2rem}
 }
+/* ══ DESKTOP — DEMO SCREEN: scale the demo up to fill the screen height (phones untouched) ══ */
+@media (min-width:900px) and (min-height:560px){:root{--dz:1.1}}
+@media (min-width:900px) and (min-height:680px){:root{--dz:1.2}}
+@media (min-width:900px) and (min-height:760px){:root{--dz:1.35}}
+@media (min-width:900px) and (min-height:860px){:root{--dz:1.45}}
+@media (min-width:900px) and (min-height:960px){:root{--dz:1.6}}
+@media (min-width:900px) and (min-height:1040px){:root{--dz:1.7}}
+@media (min-width:900px) and (min-height:560px){.demo-container{zoom:var(--dz)}.demo-court-wrap{margin-top:30px}}
 </style>
 </head>
 <body>
