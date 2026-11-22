@@ -85,13 +85,21 @@ svg.chart{width:100%;height:auto;display:block}
   <div class="count" id="count"></div>
 </div>
 
+<!-- a player's progress report (report.js — the same one the player sees), to print or save as PDF -->
+<div id="report" hidden style="width:100%;max-width:760px">
+  <div class="top" style="max-width:none"><button class="pill" id="repBack" type="button">← Back</button></div>
+  <div id="repOut"></div>
+</div>
+<style>@media print{.top,.t,.sub{display:none !important}html,body{background:#fff !important}}</style>
+
 <div id="player" hidden>
-  <div class="top" style="max-width:none"><button class="pill" id="backList" type="button">← All players</button></div>
+  <div class="top" style="max-width:none"><button class="pill" id="backList" type="button">← All players</button><button class="pill" id="repBtn" type="button" style="border-color:#FFD700;color:#FFD700">📄 Progress report</button></div>
   <div class="pname" id="pname"></div>
   <div class="pcat" id="pcat"></div>
   <div id="pbody"></div>
 </div>
 
+<script src="report.js"></script>
 <script>
 var SB_URL='https://sdaphocueugzfvjovuxd.supabase.co';
 var SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNkYXBob2N1ZXVnemZ2am92dXhkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM2MjQyMDgsImV4cCI6MjA5OTIwMDIwOH0.pDAzf4P6dD9eNEBlnP95SdF5BI-R84-Rdc0vKzYcn7M';
@@ -124,13 +132,13 @@ function openView(){
       $('code').value=''; $('err').textContent='';
       $('gate').hidden=true; $('view').hidden=false; $('lockBtn').hidden=false;
       $('sub').textContent='Coaches only'+(school?' · '+school:'');
-      build(d); render();
+      DATA=d; build(d); render();
     })
     .catch(function(){checking=false;$('err').style.color='#ff8888';$('err').textContent='Connection problem — please try again.'});
 }
 $('open').onclick=openView;
 $('code').addEventListener('keydown',function(e){if(e.key==='Enter')openView()});
-$('lockBtn').onclick=function(){school='';players={};
+$('lockBtn').onclick=function(){school='';players={};DATA=null;CUR=null;$('report').hidden=true;
   $('view').hidden=true;$('player').hidden=true;$('gate').hidden=false;$('lockBtn').hidden=true;
   $('sub').textContent='Coaches only';$('list').innerHTML='';$('count').textContent=''};
 
@@ -173,7 +181,7 @@ function chart(pts){
   return s+'</svg>';
 }
 function showPlayer(k){
-  var p=players[k]; if(!p)return;
+  var p=players[k]; if(!p)return; CUR=k;
   $('view').hidden=true; $('player').hidden=false; window.scrollTo(0,0);
   $('pname').textContent=p.name;
   $('pcat').textContent=[info(p),school,'last played '+day(p.last)].filter(Boolean).join(' · ');
@@ -187,6 +195,14 @@ function showPlayer(k){
   }).join('');
 }
 $('backList').onclick=function(){$('player').hidden=true;$('view').hidden=false};
+var DATA=null, CUR=null;
+$('repBtn').onclick=function(){
+  if(!DATA||!CUR)return;
+  HM_REPORT.mount($('repOut'),DATA,players[CUR].name);   // Spanish first, EN switch, Share, Print / PDF
+  $('player').hidden=true; $('report').hidden=false; window.scrollTo(0,0);
+};
+$('repBack').onclick=function(){$('report').hidden=true;$('player').hidden=false};
+
 </script>
 </body>
 </html>

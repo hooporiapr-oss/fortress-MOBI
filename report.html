@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script>
+/* Signed in, with player info on this device (jugador-hm.js) — otherwise back to the door */
+if ((function(){ try { return sessionStorage.getItem('fortress-mobile-gate-pass') } catch(e){ return null } })() !== '1') {
+  window.location.replace('index.html');
+}
+</script>
+<script src="jugador-hm.js"></script>
+<script src="report.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>My Progress | Cognitivo Gym</title>
+<!-- The player's own progress report: his info and every score he has made at his
+     program, by station, with a chart. Opened with his device's private key
+     (hooporia_my_report) — it shows nobody else. Print or save as PDF to share. -->
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{background:#0a0a0f;color:#fff;font-family:Arial,sans-serif}
+body{min-height:100vh;padding:20px 16px 40px}
+.top{max-width:760px;margin:0 auto 16px;display:flex;justify-content:space-between;gap:8px}
+.pill{padding:9px 16px;border:2px solid rgba(255,255,255,.25);background:rgba(0,0,0,.5);color:#fff;font:900 .78rem Arial,sans-serif;letter-spacing:.08em;text-transform:uppercase;border-radius:999px;text-decoration:none;cursor:pointer}
+.pill.gold{border-color:#FFD700;color:#FFD700}
+#msg{max-width:760px;margin:30px auto;text-align:center;color:#a7adba;line-height:1.5}
+@media print{.top,#msg{display:none}html,body{background:#fff}}
+</style>
+</head>
+<body>
+<div class="top">
+  <a class="pill" href="fortress-mobile-hub.html">← THE GYM</a>
+</div>
+<div id="msg">Cargando tu reporte… · Loading your report…</div>
+<div id="out"></div>
+<script>
+var SB='https://sdaphocueugzfvjovuxd.supabase.co';
+var KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNkYXBob2N1ZXVnemZ2am92dXhkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM2MjQyMDgsImV4cCI6MjA5OTIwMDIwOH0.pDAzf4P6dD9eNEBlnP95SdF5BI-R84-Rdc0vKzYcn7M';
+var me=HM_PLAYER.get();
+if(!me){ location.replace('fortress-mobile-hub.html') }
+else {
+  fetch(SB+'/rest/v1/rpc/hooporia_my_report',{method:'POST',headers:{apikey:KEY,Authorization:'Bearer '+KEY,'Content-Type':'application/json'},body:JSON.stringify({p_key:HM_PLAYER.key(me)})})
+    .then(function(r){if(!r.ok)throw 0;return r.json()})
+    .then(function(d){
+      // nothing saved yet under this key: an empty report with the player's own info
+      if(!d) d={school:me.school,players:[{name:me.name,age:me.age,grade:me.grade,at:new Date().toISOString()}],runs:[]};
+      HM_REPORT.mount(document.getElementById('out'),d,me.name);   // Spanish first, EN switch, Share, Print / PDF
+      document.getElementById('msg').textContent=(d.runs||[]).length?'':'Juega las estaciones y tu progreso aparece aquí · Play the stations and your progress shows up here.';
+    })
+    .catch(function(){document.getElementById('msg').textContent='Could not load your report — check your connection and try again.'});
+}
+</script>
+</body>
+</html>

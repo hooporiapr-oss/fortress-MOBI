@@ -58,7 +58,7 @@
           method: 'POST', keepalive: true,
           headers: { apikey: KEY, Authorization: 'Bearer ' + KEY, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
           body: JSON.stringify({ game: game, score: points, player_name: p.name, player_age: p.age, player_grade: p.grade,
-                                 school_name: p.school || null, device: device() })
+                                 school_name: p.school || null, device: device(), player_key: HM.key(p) })
         }).catch(function(){});
       } catch(e){}
     },
@@ -69,8 +69,23 @@
       if (p && !fresh){ done && done(p); return }
       if (p && fresh) confirmBox(p, done); else form(done);
     },
-    change: function(done){ form(done) }
+    change: function(done){ form(done) },
+
+    /* The player's private key: made on this device the first time he fills in his
+       info, kept with it, and sent with his scores. It is what opens HIS progress
+       report (report.html) — nobody else's. */
+    key: function(p){
+      p = p || HM.get(); if (!p) return null;
+      if (!p.key){ p.key = newKey(); set(LS, JSON.stringify(p)) }
+      return p.key;
+    }
   };
+  function newKey(){
+    var a = '';
+    try { var b = new Uint8Array(16); crypto.getRandomValues(b); for (var i = 0; i < b.length; i++) a += ('0' + b[i].toString(16)).slice(-2) }
+    catch(e){ a = Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2) + Date.now().toString(36) }
+    return 'k-' + a;
+  }
 
   /* ── the screens ─────────────────────────────────────────────── */
   var CSS = '#hm-capa{position:fixed;inset:0;z-index:100000;background:rgba(5,5,10,.96);display:flex;align-items:flex-start;justify-content:center;overflow-y:auto;padding:28px 16px;font-family:Outfit,Arial,sans-serif;color:#fff}'
@@ -133,13 +148,15 @@
       if (!g){ err.textContent = 'Pick your grade · Escoge tu grado'; return }
       var cap = function(s){ return s.split(' ').map(function(x){ return x.charAt(0).toUpperCase() + x.slice(1) }).join(' ') };
       var name = (cap(n.split(' ')[0]) + (l ? ' ' + cap(l) : '')).slice(0, 40);
-      var me = { name: name, age: age, grade: g, school: school() };
+      var prev = HM.get();
+      var me = { name: name, age: age, grade: g, school: school(),
+                 key: prev && prev.key && prev.name.toLowerCase() === name.toLowerCase() ? prev.key : newKey() };
       set(LS, JSON.stringify(me));
       try {
         fetch(SB + '/rest/v1/hooporia_mobi_players', {
           method: 'POST', keepalive: true,
           headers: { apikey: KEY, Authorization: 'Bearer ' + KEY, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
-          body: JSON.stringify({ player_name: me.name, player_age: me.age, player_grade: me.grade, school_name: me.school || null, device: device() })
+          body: JSON.stringify({ player_name: me.name, player_age: me.age, player_grade: me.grade, school_name: me.school || null, device: device(), player_key: me.key })
         }).catch(function(){});
       } catch(e){}
       close(); done && done(me);
