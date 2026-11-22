@@ -101,7 +101,8 @@
     + '#hm-box .alt{display:block;width:100%;margin-top:10px;padding:13px;border-radius:12px;border:2px solid rgba(255,255,255,.2);background:transparent;color:#fff;font:800 .95rem Outfit,Arial,sans-serif;cursor:pointer;touch-action:manipulation}'
     + '#hm-box .who{font-size:1.5rem;font-weight:900;text-align:center;margin:6px 0 2px}'
     + '#hm-box .whoi{font-size:.95rem;color:#c8ccd4;text-align:center}'
-    + '#hm-err{min-height:1.2em;color:#ff8888;font-size:.85rem;text-align:center;margin-top:10px}';
+    + '#hm-err{min-height:1.2em;color:#ff8888;font-size:.85rem;text-align:center;margin-top:10px}'
+    + '#hm-box .coach{display:block;text-align:center;margin-top:12px;padding:9px;border-radius:999px;border:1px solid rgba(255,255,255,.18);color:#a7adba;font:800 .82rem Outfit,Arial,sans-serif;text-decoration:none}';
 
   function capa(html){
     var old = document.getElementById('hm-capa'); if (old) old.remove();
@@ -131,7 +132,8 @@
       + '<label for="hm-a">Last name or initial · Apellido o inicial <small>(optional · opcional)</small></label><input id="hm-a" maxlength="18" autocomplete="off" autocapitalize="words" spellcheck="false">'
       + '<div class="two"><div><label for="hm-e">Age · Edad</label><select id="hm-e">' + ages + '</select></div>'
       + '<div><label for="hm-g">Grade · Grado</label><select id="hm-g">' + grades + '</select></div></div>'
-      + '<button class="go" id="hm-ok" type="button">Start training · A entrenar</button><div id="hm-err"></div>');
+      + '<button class="go" id="hm-ok" type="button">Start training · A entrenar</button><div id="hm-err"></div>'
+      + '<a class="coach" href="coach.html">🧑‍🏫 ¿Coach? Coach View →</a>');
     var w = String(p.name || '').split(' ');
     c.querySelector('#hm-n').value = p.name ? w[0] : '';
     c.querySelector('#hm-a').value = p.name ? w.slice(1).join(' ') : '';
