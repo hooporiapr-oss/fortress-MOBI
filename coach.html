@@ -53,6 +53,7 @@ body{min-height:100vh;padding:20px 16px 40px;display:flex;flex-direction:column;
 .cgrow{padding:12px;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);margin-bottom:7px}
 .cgrow .nm{font-weight:900}.cgrow .nm small{display:block;font-size:.68rem;font-weight:700;color:#00e5ff;margin-top:2px}
 .cgrow .v{font-weight:900;font-size:.92rem}.cgrow .v small{display:block;font-size:.6rem;font-weight:700;color:#a7adba}
+@media (max-width:560px){.cghead,.cgrow{grid-template-columns:minmax(0,1.15fr) repeat(var(--cn,4),minmax(0,1fr));gap:5px}.cghead{font-size:.5rem;letter-spacing:.03em;padding:0 10px 6px}.cghead span{overflow-wrap:anywhere}.cgrow{padding:11px 10px}.cgrow .v{font-size:.8rem}.cgrow .v small{font-size:.54rem}}
 .empty{color:#a7adba;text-align:center;padding:24px}
 .count{font-size:.7rem;color:#7d8696;text-align:center;margin-top:10px;line-height:1.5}
 #player{width:100%;max-width:640px}
@@ -101,12 +102,19 @@ svg.chart{width:100%;height:auto;display:block}
   <div id="list"></div>
   <div class="count" id="count"></div>
   </div>
-  <!-- the same school's cognogym.com games (Ritnome BPM, swipe test, Zona, Zona Roja, Encadena), from its own boards -->
+  <!-- the school's cognogym.com Ritnome games (Ritnome BPM, swipe test), from its own boards -->
   <div id="cgBlock" hidden style="margin-top:22px">
-    <div class="gtitle" data-cv="cgTitle">🧠 cognogym.com · último resultado de cada juego</div>
+    <div class="gtitle" data-cv="cgTitle">🧠 cognogym.com · Ritnome · último resultado</div>
     <div class="cghead" id="cgHead"></div>
     <div id="cgList"></div>
     <div class="count" id="cgCount"></div>
+  </div>
+  <!-- the school's five Reaction Velocity stations: Reaction Speed, Zona, Zona Roja, Encadena, Swipe It -->
+  <div id="rvBlock" hidden style="margin-top:22px">
+    <div class="gtitle" data-cv="rvTitle">⚡ Reaction Velocity · último resultado en cada estación</div>
+    <div class="cghead" id="rvHead"></div>
+    <div id="rvList"></div>
+    <div class="count" id="rvCount"></div>
   </div>
 </div>
 
@@ -146,14 +154,14 @@ var CV={
       checking:'Verificando…',bad:'No es un código de coach — o ya no está activo.',conn:'Problema de conexión — intenta otra vez.',
       none:'Todavía no hay jugadores',at:' en ',noneHow:'Los jugadores aparecen aquí cuando entran y llenan su nombre, edad y grado.',
       count:function(n){return n+' jugador'+(n>1?'es':'')+' · en orden A–Z, sin ranking · nivel = objetivos en la cadena más larga completada'},
-      schoolLbl:'Escuela',cgTitle:'🧠 cognogym.com · último resultado de cada juego',cgBest:'mejor',cgN:function(n){return n+(n===1?' sesión':' sesiones')},cgLatest:'último',cgCount:function(n){return n+' jugador'+(n>1?'es':'')+' en cognogym.com · en orden A–Z, sin ranking'},yrs:'años',lv:'Nv',pts:'pts',lastDate:'última fecha ',notYet:'Todavía no ha jugado',score:' · nivel',first:'Primera',latest:'Última',best:'Mejor',
+      schoolLbl:'Escuela',cgTitle:'🧠 cognogym.com · Ritnome · último resultado',rvTitle:'⚡ Reaction Velocity · último resultado en cada estación',rvCount:function(n){return n+' jugador'+(n>1?'es':'')+' en Reaction Velocity · en orden A–Z, sin ranking'},cgBest:'mejor',cgN:function(n){return n+(n===1?' sesión':' sesiones')},cgLatest:'último',cgCount:function(n){return n+' jugador'+(n>1?'es':'')+' en cognogym.com · en orden A–Z, sin ranking'},yrs:'años',lv:'Nv',pts:'pts',lastDate:'última fecha ',notYet:'Todavía no ha jugado',score:' · nivel',first:'Primera',latest:'Última',best:'Mejor',
       one:'Una sesión hasta ahora',since:function(d,n){return '<b>'+(d>0?'+':'')+d+' '+(Math.abs(d)===1?'nivel':'niveles')+'</b> desde la primera · '+n+' sesiones'}},
   en:{gym:'← THE GYM',lock:'🔒 Lock',only:'Coaches only',code:'Coach code',open:'Open',note:'A Coach code is made in License Admin → Coach. A game code does not open this view.',
       gtitle:'🏀 Players · best level in each station',hPlayer:'Player',hLast:'Last date',back:'← Back',all:'← All players',rep:'📄 Progress report',
       checking:'Checking…',bad:'Not a Coach code — or it is no longer active.',conn:'Connection problem — please try again.',
       none:'No players yet',at:' at ',noneHow:'Players show up here once they sign in and fill in their name, age and grade.',
       count:function(n){return n+' player'+(n>1?'s':'')+' · listed A–Z, not ranked · level = targets in the longest chain cleared'},
-      schoolLbl:'School',cgTitle:'🧠 cognogym.com · latest result in each game',cgBest:'best',cgN:function(n){return n+(n===1?' run':' runs')},cgLatest:'latest',cgCount:function(n){return n+' player'+(n>1?'s':'')+' on cognogym.com · listed A–Z, not ranked'},yrs:'yrs',lv:'Lv',pts:'pts',lastDate:'last date ',notYet:'Not played yet',score:' · level',first:'First',latest:'Latest',best:'Best',
+      schoolLbl:'School',cgTitle:'🧠 cognogym.com · Ritnome · latest result',rvTitle:'⚡ Reaction Velocity · latest result in each station',rvCount:function(n){return n+' player'+(n>1?'s':'')+' on Reaction Velocity · listed A–Z, not ranked'},cgBest:'best',cgN:function(n){return n+(n===1?' run':' runs')},cgLatest:'latest',cgCount:function(n){return n+' player'+(n>1?'s':'')+' on cognogym.com · listed A–Z, not ranked'},yrs:'yrs',lv:'Lv',pts:'pts',lastDate:'last date ',notYet:'Not played yet',score:' · level',first:'First',latest:'Latest',best:'Best',
       one:'One run so far',since:function(d,n){return '<b>'+(d>0?'+':'')+d+' '+(Math.abs(d)===1?'level':'levels')+'</b> since the first run · '+n+' runs'}}
 };
 function L(k){return CV[LANG][k]}
@@ -216,7 +224,7 @@ function openView(){
 }
 $('open').onclick=openView;
 $('code').addEventListener('keydown',function(e){if(e.key==='Enter')openView()});
-$('lockBtn').onclick=function(){CG=null;CGOK++;$('cgBlock').hidden=true;$('hmBlock').hidden=false;school='';CODE='';players={};DATA=null;CUR=null;$('report').hidden=true;$('schoolPick').hidden=true;$('schoolPick').style.display='none';
+$('lockBtn').onclick=function(){CG=null;CGOK++;$('cgBlock').hidden=true;$('rvBlock').hidden=true;$('hmBlock').hidden=false;school='';CODE='';players={};DATA=null;CUR=null;$('report').hidden=true;$('schoolPick').hidden=true;$('schoolPick').style.display='none';
   $('view').hidden=true;$('player').hidden=true;$('gate').hidden=false;$('lockBtn').hidden=true;
   $('sub').textContent=L('only');$('list').innerHTML='';$('count').textContent=''};
 
@@ -235,11 +243,14 @@ function best(a){var t=0;(a||[]).forEach(function(x){if(x.v>t)t=x.v});return t}
 function day(at){if(!at)return '—';var d=new Date(at);return isNaN(d)?'—':(d.getMonth()+1)+'/'+d.getDate()}
 // ── The school's cognogym.com games (read from their boards, like cognogym.com's Coach View) ──
 var CG=null, CGOK=0;
-var CGG=[['rs','Ritnome BPM'],['st','Swipe'],['zn','Zona'],['zr','Zona Roja'],['enc','Encadena']];
+var CGG=[['rs','Ritnome BPM'],['st','Swipe test'],['rv','Reaction Speed'],['zn','Zona'],['zr','Zona Roja'],['enc','Encadena'],['sw','Swipe It']];
+// two sections: cognogym.com's own (Ritnome), and the five Reaction Velocity stations — Zona, Zona Roja
+// and Encadena are the same games on both sites and save to the same board, so they show once, there
+var CG_SETS=[['cg',['rs','st'],'cgCount'],['rv',['rv','zn','zr','enc','sw'],'rvCount']];
 function cgGet(tbl,q){return fetch(SB_URL+'/rest/v1/'+tbl+'?'+q,{headers:{apikey:SB_KEY,Authorization:'Bearer '+SB_KEY}}).then(function(r){return r.ok?r.json():[]}).catch(function(){return []})}
 function loadCg(){
   var my=++CGOK, sc='school_name=eq.'+encodeURIComponent(school)+'&hidden=is.false&order=logged_at.asc&limit=5000';
-  CG=null; $('cgBlock').hidden=true;
+  CG=null; $('cgBlock').hidden=true; $('rvBlock').hidden=true;
   Promise.all([
     cgGet('vr_reaction_speed_standings',sc+'&speed=like.free-*&select=player_name,speed,category,logged_at'),
     cgGet('vr_mobile_standings',sc+'&select=player_name,game_key,bpm,hits,level,category,logged_at')
@@ -255,28 +266,35 @@ function loadCg(){
     (res[1]||[]).forEach(function(r){var k=r.game_key||'',m;
       if((m=/^swipe-test-(10|25)$/.exec(k)))add('st',r,+r.bpm||0);
       else if((m=/^zona-(roja-)?(10|25)$/.exec(k))){if(r.level!=null)add(m[1]?'zr':'zn',r,parseInt(r.level,10)||0,+m[2])}
-      else if(k==='encadena'||k==='encadena-facil')add('enc',r,parseInt(r.level,10)||0);});
+      else if(k==='encadena'||k==='encadena-facil')add('enc',r,parseInt(r.level,10)||0);
+      else if(k==='home-base')add('rv',r,+r.bpm||0);       // vreaction.com Reaction Speed
+      else if(k==='swipe-it')add('sw',r,+r.bpm||0);});     // vreaction.com Swipe It
     CG=ps; renderCg(); render();
   });
 }
 function renderCg(){
-  if(!CG){$('cgBlock').hidden=true;return}
-  var keys=Object.keys(CG).sort(function(a,b){return CG[a].name.localeCompare(CG[b].name,undefined,{sensitivity:'base'})});
-  if(!keys.length){$('cgBlock').hidden=true;return}
-  var cols=CGG.filter(function(g){return keys.some(function(k){return CG[k].g[g[0]]})});
-  $('cgBlock').style.setProperty('--cn',cols.length);
-  $('cgHead').innerHTML='<span>'+L('hPlayer')+'</span>'+cols.map(function(g){return '<span>'+g[1]+'</span>'}).join('');
-  $('cgList').innerHTML=keys.map(function(k){var p=CG[k];
+  CG_SETS.forEach(function(set){renderSet(set[0],set[1],set[2])});
+}
+function renderSet(id,gs,countKey){
+  var blk=$(id+'Block');
+  if(!CG){blk.hidden=true;return}
+  var keys=Object.keys(CG).filter(function(k){return gs.some(function(g){return CG[k].g[g]})})
+    .sort(function(a,b){return CG[a].name.localeCompare(CG[b].name,undefined,{sensitivity:'base'})});
+  if(!keys.length){blk.hidden=true;return}
+  var cols=CGG.filter(function(g){return gs.indexOf(g[0])>=0&&keys.some(function(k){return CG[k].g[g[0]]})});
+  blk.style.setProperty('--cn',cols.length);
+  $(id+'Head').innerHTML='<span>'+L('hPlayer')+'</span>'+cols.map(function(g){return '<span>'+g[1]+'</span>'}).join('');
+  $(id+'List').innerHTML=keys.map(function(k){var p=CG[k];
     return '<div class="cgrow"><span class="nm">'+esc(p.name)+(p.cat?'<small>'+esc(p.cat)+'</small>':'')+'</span>'+cols.map(function(g){
       var a=p.g[g[0]]; if(!a||!a.length)return '<span class="v">—</span>';
       var l=a[a.length-1];
-      if(g[0]==='rs'||g[0]==='st'){var top=0;a.forEach(function(x){if(x.v>top)top=x.v});return '<span class="v">'+l.v+' BPM<small>'+L('cgBest')+' '+top+' · '+L('cgN')(a.length)+'</small></span>'}
+      if(g[0]==='rs'||g[0]==='st'||g[0]==='rv'||g[0]==='sw'){var top=0;a.forEach(function(x){if(x.v>top)top=x.v});return '<span class="v">'+l.v+' BPM<small>'+L('cgBest')+' '+top+' · '+L('cgN')(a.length)+'</small></span>'}
       if(g[0]==='zn'||g[0]==='zr'){var same=a.filter(function(x){return x.of===l.of}),tz=0;same.forEach(function(x){if(x.v>tz)tz=x.v});return '<span class="v">'+l.v+'/'+l.of+'<small>'+L('cgBest')+' '+tz+'/'+l.of+' · '+L('cgN')(a.length)+'</small></span>'}
       var te=0;a.forEach(function(x){if(x.v>te)te=x.v});return '<span class="v">'+L('lv')+' '+te+'<small>'+L('cgLatest')+' '+l.v+' · '+L('cgN')(a.length)+'</small></span>';
     }).join('')+'</div>';
   }).join('');
-  $('cgCount').textContent=L('cgCount')(keys.length);
-  $('cgBlock').hidden=false;
+  $(id+'Count').textContent=L(countKey)(keys.length);
+  blk.hidden=false;
 }
 function render(){
   var keys=Object.keys(players).sort(function(a,b){return players[a].name.localeCompare(players[b].name,undefined,{sensitivity:'base'})});
