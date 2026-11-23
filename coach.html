@@ -55,6 +55,21 @@ body{min-height:100vh;padding:20px 16px 40px;display:flex;flex-direction:column;
 .cgrow .v{font-weight:900;font-size:.92rem}.cgrow .v small{display:block;font-size:.6rem;font-weight:700;color:#a7adba}
 @media (max-width:560px){.cghead,.cgrow{grid-template-columns:minmax(0,1.15fr) repeat(var(--cn,4),minmax(0,1fr));gap:5px}.cghead{font-size:.5rem;letter-spacing:.03em;padding:0 10px 6px}.cghead span{overflow-wrap:anywhere}.cgrow{padding:11px 10px}.cgrow .v{font-size:.8rem}.cgrow .v small{font-size:.54rem}}
 .empty{color:#a7adba;text-align:center;padding:24px}
+/* 📖 Game guide: what each game is, what it trains, what it means on the court, how to read the number */
+.gbtn{display:block;margin:-4px auto 12px;padding:6px 14px;border:1.5px solid rgba(168,85,247,.55);background:rgba(168,85,247,.08);color:#d6b4ff;font:900 .68rem Arial,sans-serif;letter-spacing:.1em;text-transform:uppercase;border-radius:999px;cursor:pointer}
+[data-g]{cursor:pointer;text-decoration:underline dotted rgba(255,255,255,.35);text-underline-offset:3px}
+#guide{position:fixed;inset:0;z-index:50;background:rgba(0,0,0,.78);display:flex;align-items:flex-start;justify-content:center;overflow-y:auto;padding:18px 14px 40px}
+#guide[hidden]{display:none}
+.gpanel{width:100%;max-width:640px;background:#12121a;border:1px solid rgba(255,255,255,.14);border-radius:18px;padding:16px}
+.gtop{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}
+.gtop b{font-size:.8rem;letter-spacing:.12em;text-transform:uppercase;color:#d6b4ff}
+.gcard{border-radius:14px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);padding:13px 14px;margin-bottom:9px}
+.gcard h4{font-size:1rem;font-weight:900;margin-bottom:7px}
+.gcard p{font-size:.84rem;line-height:1.42;color:#d8dbe2;margin-top:5px}
+.gcard p b{color:#fff}
+.gcard p.court{color:#FFD700}.gcard p.court b{color:#FFD700}
+.gcard p.read{color:#a7adba;font-size:.78rem}
+.gall{display:block;margin:4px auto 0;background:none;border:0;color:#a7adba;font:800 .75rem Arial,sans-serif;text-decoration:underline;cursor:pointer}
 .count{font-size:.7rem;color:#7d8696;text-align:center;margin-top:10px;line-height:1.5}
 #player{width:100%;max-width:640px}
 .pname{font-size:1.5rem;font-weight:900;text-align:center;margin-bottom:4px}
@@ -98,13 +113,15 @@ svg.chart{width:100%;height:auto;display:block}
   </div>
   <div id="hmBlock">
   <div class="gtitle" data-cv="gtitle">🏀 Jugadores · mejor nivel en cada estación</div>
-  <div class="head"><span data-cv="hPlayer">Jugador</span><span>Recall</span><span>Recog.</span><span>Replay</span><span>Fortress</span><span data-cv="hLast">Última fecha</span></div>
+  <button class="gbtn" type="button" data-guide="hm" data-cv="gBtn">📖 Guía de juegos</button>
+  <div class="head"><span data-cv="hPlayer">Jugador</span><span data-g="recall">Recall</span><span data-g="recognition">Recog.</span><span data-g="replay">Replay</span><span data-g="fortress">Fortress</span><span data-cv="hLast">Última fecha</span></div>
   <div id="list"></div>
   <div class="count" id="count"></div>
   </div>
   <!-- the school's cognogym.com Ritnome games (Ritnome BPM, swipe test), from its own boards -->
   <div id="cgBlock" hidden style="margin-top:22px">
     <div class="gtitle" data-cv="cgTitle">🧠 cognogym.com · Ritnome · último resultado</div>
+    <button class="gbtn" type="button" data-guide="cg" data-cv="gBtn">📖 Guía de juegos</button>
     <div class="cghead" id="cgHead"></div>
     <div id="cgList"></div>
     <div class="count" id="cgCount"></div>
@@ -112,11 +129,19 @@ svg.chart{width:100%;height:auto;display:block}
   <!-- the school's five Reaction Velocity stations: Reaction Speed, Zona, Zona Roja, Encadena, Swipe It -->
   <div id="rvBlock" hidden style="margin-top:22px">
     <div class="gtitle" data-cv="rvTitle">⚡ Reaction Velocity · último resultado en cada estación</div>
+    <button class="gbtn" type="button" data-guide="rv" data-cv="gBtn">📖 Guía de juegos</button>
     <div class="cghead" id="rvHead"></div>
     <div id="rvList"></div>
     <div class="count" id="rvCount"></div>
   </div>
 </div>
+
+<!-- 📖 the game guide (opens over the list) -->
+<div id="guide" hidden><div class="gpanel">
+  <div class="gtop"><b id="gHead"></b><button class="pill" id="gClose" type="button" data-cv="gClose">✕ Cerrar</button></div>
+  <div id="gCards"></div>
+  <button class="gall" id="gAll" type="button" data-cv="gAll" hidden>Ver todos los juegos de esta sección</button>
+</div></div>
 
 <!-- a player's progress report (report.js — the same one the player sees), to print or save as PDF -->
 <div id="report" hidden style="width:100%;max-width:760px">
@@ -149,14 +174,14 @@ var checking=false;
 // ── Spanish first, English with the switch (the same choice the progress report uses) ──
 var LANG=(function(){try{return localStorage.getItem('rp-lang')==='en'?'en':'es'}catch(e){return 'es'}})();
 var CV={
-  es:{gym:'← EL GYM',lock:'🔒 Bloquear',only:'Solo coaches',code:'Código de coach',open:'Abrir',note:'El código de coach se crea en License Admin → Coach. Un código de juego no abre esta vista.',
+  es:{gBtn:'📖 Guía de juegos',gClose:'✕ Cerrar',gAll:'Ver todos los juegos de esta sección',gHead:'📖 Guía de juegos',gDoes:'Qué hace',gTrains:'Qué entrena',gCourt:'🏀 En la cancha',gRead:'Cómo leer el número',gym:'← EL GYM',lock:'🔒 Bloquear',only:'Solo coaches',code:'Código de coach',open:'Abrir',note:'El código de coach se crea en License Admin → Coach. Un código de juego no abre esta vista.',
       gtitle:'🏀 Jugadores · mejor nivel en cada estación',hPlayer:'Jugador',hLast:'Última fecha',back:'← Atrás',all:'← Todos',rep:'📄 Reporte de progreso',
       checking:'Verificando…',bad:'No es un código de coach — o ya no está activo.',conn:'Problema de conexión — intenta otra vez.',
       none:'Todavía no hay jugadores',at:' en ',noneHow:'Los jugadores aparecen aquí cuando entran y llenan su nombre, edad y grado.',
       count:function(n){return n+' jugador'+(n>1?'es':'')+' · en orden A–Z, sin ranking · nivel = objetivos en la cadena más larga completada'},
       schoolLbl:'Escuela',cgTitle:'🧠 cognogym.com · Ritnome · último resultado',rvTitle:'⚡ Reaction Velocity · último resultado en cada estación',rvCount:function(n){return n+' jugador'+(n>1?'es':'')+' en Reaction Velocity · en orden A–Z, sin ranking'},cgBest:'mejor',cgN:function(n){return n+(n===1?' sesión':' sesiones')},cgLatest:'último',cgCount:function(n){return n+' jugador'+(n>1?'es':'')+' en cognogym.com · en orden A–Z, sin ranking'},yrs:'años',lv:'Nv',pts:'pts',lastDate:'última fecha ',notYet:'Todavía no ha jugado',score:' · nivel',first:'Primera',latest:'Última',best:'Mejor',
       one:'Una sesión hasta ahora',since:function(d,n){return '<b>'+(d>0?'+':'')+d+' '+(Math.abs(d)===1?'nivel':'niveles')+'</b> desde la primera · '+n+' sesiones'}},
-  en:{gym:'← THE GYM',lock:'🔒 Lock',only:'Coaches only',code:'Coach code',open:'Open',note:'A Coach code is made in License Admin → Coach. A game code does not open this view.',
+  en:{gBtn:'📖 Game guide',gClose:'✕ Close',gAll:'See every game in this section',gHead:'📖 Game guide',gDoes:'What it is',gTrains:'What it trains',gCourt:'🏀 On the court',gRead:'How to read the number',gym:'← THE GYM',lock:'🔒 Lock',only:'Coaches only',code:'Coach code',open:'Open',note:'A Coach code is made in License Admin → Coach. A game code does not open this view.',
       gtitle:'🏀 Players · best level in each station',hPlayer:'Player',hLast:'Last date',back:'← Back',all:'← All players',rep:'📄 Progress report',
       checking:'Checking…',bad:'Not a Coach code — or it is no longer active.',conn:'Connection problem — please try again.',
       none:'No players yet',at:' at ',noneHow:'Players show up here once they sign in and fill in their name, age and grade.',
@@ -176,6 +201,7 @@ document.querySelectorAll('#cvLang button').forEach(function(b){b.onclick=functi
   LANG=b.getAttribute('data-l'); try{localStorage.setItem('rp-lang',LANG)}catch(e){}
   applyLang();
   if(!$('view').hidden){render();renderCg();}
+  if(GOPEN)openGuide(GOPEN[0],GOPEN[1]);
   if(!$('player').hidden&&CUR)showPlayer(CUR);
   if(!$('report').hidden&&DATA&&CUR)$('repBtn').onclick();
 }});
@@ -224,7 +250,7 @@ function openView(){
 }
 $('open').onclick=openView;
 $('code').addEventListener('keydown',function(e){if(e.key==='Enter')openView()});
-$('lockBtn').onclick=function(){CG=null;CGOK++;$('cgBlock').hidden=true;$('rvBlock').hidden=true;$('hmBlock').hidden=false;school='';CODE='';players={};DATA=null;CUR=null;$('report').hidden=true;$('schoolPick').hidden=true;$('schoolPick').style.display='none';
+$('lockBtn').onclick=function(){closeGuide();CG=null;CGOK++;$('cgBlock').hidden=true;$('rvBlock').hidden=true;$('hmBlock').hidden=false;school='';CODE='';players={};DATA=null;CUR=null;$('report').hidden=true;$('schoolPick').hidden=true;$('schoolPick').style.display='none';
   $('view').hidden=true;$('player').hidden=true;$('gate').hidden=false;$('lockBtn').hidden=true;
   $('sub').textContent=L('only');$('list').innerHTML='';$('count').textContent=''};
 
@@ -283,7 +309,7 @@ function renderSet(id,gs,countKey){
   if(!keys.length){blk.hidden=true;return}
   var cols=CGG.filter(function(g){return gs.indexOf(g[0])>=0&&keys.some(function(k){return CG[k].g[g[0]]})});
   blk.style.setProperty('--cn',cols.length);
-  $(id+'Head').innerHTML='<span>'+L('hPlayer')+'</span>'+cols.map(function(g){return '<span>'+g[1]+'</span>'}).join('');
+  $(id+'Head').innerHTML='<span>'+L('hPlayer')+'</span>'+cols.map(function(g){return '<span data-g="'+g[0]+'">'+g[1]+'</span>'}).join('');
   $(id+'List').innerHTML=keys.map(function(k){var p=CG[k];
     return '<div class="cgrow"><span class="nm">'+esc(p.name)+(p.cat?'<small>'+esc(p.cat)+'</small>':'')+'</span>'+cols.map(function(g){
       var a=p.g[g[0]]; if(!a||!a.length)return '<span class="v">—</span>';
@@ -344,6 +370,68 @@ $('repBtn').onclick=function(){
   HM_REPORT.mount($('repOut'),DATA,players[CUR].name);   // Spanish first, EN switch, Share, Print / PDF
   $('player').hidden=true; $('report').hidden=false; window.scrollTo(0,0);
 };
+
+// ── 📖 Game guide: each game, what it trains, what it means on the court, how to read its number ──
+var GSET={hm:['recall','recognition','replay','fortress'],cg:['rs','st'],rv:['rv','zn','zr','enc','sw']};
+var GD={
+ recall:{n:'🧠 The Recall',
+  es:['Ve un patrón que se enciende todo a la vez y lo repite en orden.','Memoria visual inmediata: captar mucho de un vistazo.','Ver la jugada una vez y recordarla; leer la formación de un vistazo.','Nv = objetivos en la cadena más larga que completó (empieza en 3). Más alto = mejor.'],
+  en:['Watches a pattern flash all at once, then repeats it back in order.','Instant visual memory: taking in a lot at a glance.','See a play once and remember it; read the formation at a glance.','Lv = targets in the longest chain cleared (it starts at 3). Higher is better.']},
+ recognition:{n:'👁 The Recognition',
+  es:['Ve el original y luego encuentra qué cambió en el eco que sigue.','Detectar cambios y diferencias con rapidez.','Notar el cambio de la defensa, la ayuda o la rotación antes que nadie.','Nv = objetivos en la cadena más larga que completó (empieza en 3). Más alto = mejor.'],
+  en:['Watches the original, then spots what changed in the echo that follows.','Spotting changes and differences fast.','Catch the defensive switch, the help or the rotation before anyone else.','Lv = targets in the longest chain cleared (it starts at 3). Higher is better.']},
+ replay:{n:'🔁 The Replay',
+  es:['La cadena guarda todo lo aprendido y suma una celda más cada ronda, cada una con su nota.','Memoria de trabajo: sostener y repetir secuencias cada vez más largas.','Ejecutar jugadas de varios pasos y aplicar el scouting sin olvidar nada.','Nv = celdas en la cadena más larga que completó. Más alto = mejor.'],
+  en:['The chain keeps everything learned and adds one more cell every round, each with its own note.','Working memory: holding and repeating longer and longer sequences.','Run multi-step plays and carry out the scouting report without missing a thing.','Lv = cells in the longest chain cleared. Higher is better.']},
+ fortress:{n:'🏰 The Fortress',
+  es:['Ve una secuencia de objetivos y la repite exacta. Cada ronda suma uno más.','Memoria y concentración con presión que sube.','Decidir bien en el cierre del partido, cansado y con presión.','Nv = objetivos en la ronda más alta que completó. Más alto = mejor.'],
+  en:['Watches a sequence of targets light up and repeats it exactly. Every round adds one more.','Memory and focus as the pressure rises.','Make the right call late in the game, tired and under pressure.','Lv = targets in the highest round cleared. Higher is better.']},
+ rs:{n:'Ritnome BPM',
+  es:['Toca cada balón tan rápido como pueda; cada uno lo espera. 10 o 25 objetivos.','Velocidad de mano y de procesamiento: ver, decidir, tocar.','Manos rápidas: robos, desvíos, rebotes y pases que llegan a tiempo.','BPM = toques por minuto. Más alto = más rápido. Se muestra el último, el mejor y las sesiones.'],
+  en:['Taps each ball as fast as possible; each one waits for the player. 10 or 25 targets.','Hand and processing speed: see, decide, touch.','Quick hands: steals, deflections, rebounds and passes that arrive on time.','BPM = taps per minute. Higher is faster. Shows the latest, the best and the number of runs.']},
+ st:{n:'Swipe test',
+  es:['Como el Ritnome BPM, pero cada objetivo es una flecha: hay que deslizar hacia donde apunta.','Velocidad con decisión: leer la dirección y moverse bien.','Leer el ángulo y moverse hacia él a tiempo: cortes, ayudas y cierres.','BPM = deslizadas correctas por minuto; cada fallo cuesta velocidad. Más alto = mejor.'],
+  en:['Like Ritnome BPM, but every target is an arrow: swipe the way it points.','Speed with a decision: read the direction and move right.','Read the angle and move to it on time: cuts, help and closeouts.','BPM = correct swipes per minute; every miss costs speed. Higher is better.']},
+ rv:{n:'Reaction Speed',
+  es:['Mantiene el dedo en HOME; cuando la flecha se detiene, suelta y desliza hacia donde apunta.','Reacción pura: no hay ritmo que adivinar.','El primer paso: balón suelto, desvío o cierre al tirador.','BPM = velocidad de reacción. Más alto = más rápido. Soltar antes de tiempo cuenta como fallo; 3 fallos terminan la sesión.'],
+  en:['Holds a thumb on HOME; when the arrow stops, lifts and swipes the way it points.','Pure reaction: there is no rhythm to guess.','The first step: a loose ball, a deflection or a closeout.','BPM = reaction speed. Higher is faster. Lifting too early is a miss; 3 misses end the run.']},
+ zn:{n:'Zona',
+  es:['Un punto de la zona 2-1-2 se enciende en cada beat, al BPM de su Reaction Speed, y lo toca a tiempo.','Ubicación y tiempo: estar en el lugar correcto en el momento correcto.','Saber dónde va en la zona, a tiempo, en cada posesión.','Aciertos de 10 o de 25 (cada fallo resta 1). Más alto = mejor.'],
+  en:['One spot of the 2-1-2 zone lights up on every beat, at the player\'s Reaction Speed BPM, and they tap it in time.','Position and timing: the right place at the right moment.','Know where to be in the zone, on time, every possession.','Hits out of 10 or 25 (each miss takes 1 off). Higher is better.']},
+ zr:{n:'Zona Roja',
+  es:['Un punto se enciende en cada beat, rojo u otro color. Toca solo el rojo.','Control de impulsos: actuar solo con la señal correcta.','Disciplina: no morder fintas y reaccionar solo a la amenaza real.','Aciertos de 10 o de 25 (tocar otro color, fallar o llegar tarde resta 1). Más alto = mejor.'],
+  en:['A spot lights up on every beat, red or another color. Tap only the red.','Impulse control: act only on the right signal.','Discipline: don\'t bite on fakes; react only to the real threat.','Hits out of 10 or 25 (touching another color, missing or coming late takes 1 off). Higher is better.']},
+ enc:{n:'Encadena',
+  es:['La cadena se enciende en la zona 2-1-2 y la repite en orden, deslizando hacia donde apuntó cada flecha. Una más cada ronda.','Memoria de secuencia con dirección.','Rotaciones y ayudas en orden, sin romper la defensa.','Nv = la cadena más larga que completó. Se muestra el mejor y el último. Más alto = mejor.'],
+  en:['The chain lights up in the 2-1-2 zone and the player swipes it back in order, the way each arrow pointed. One more every round.','Sequence memory with direction.','Rotations and help in order, without breaking the defense.','Lv = the longest chain cleared. Shows the best and the latest. Higher is better.']},
+ sw:{n:'Swipe It',
+  es:['Una flecha aparece una vez, en un lugar nuevo, al BPM de su Reaction Speed; desliza donde estaba, hacia donde apuntó.','Lectura rápida y respuesta precisa.','Verlo una vez y reaccionar hacia donde fue: un pase, un corte, un cambio de dirección.','BPM = promedio de los aciertos. Más alto = más rápido.'],
+  en:['An arrow flashes once, in a new spot, at the player\'s Reaction Speed BPM; swipe where it was, the way it pointed.','A fast read and an accurate answer.','See it once and react to where it went: a pass, a cut, a change of direction.','BPM = the average of the hits. Higher is faster.']}
+};
+var GOPEN=null;   // [section, one game or null] while the guide is open
+function openGuide(set,one){
+  GOPEN=[set,one||null];
+  var ks=one?[one]:GSET[set];
+  $('gHead').textContent=one?GD[one].n:L('gHead');
+  $('gCards').innerHTML=ks.map(function(k){var d=GD[k],t=d[LANG];
+    return '<div class="gcard"><h4>'+esc(d.n)+'</h4>'+
+      '<p><b>'+L('gDoes')+':</b> '+esc(t[0])+'</p>'+
+      '<p><b>'+L('gTrains')+':</b> '+esc(t[1])+'</p>'+
+      '<p class="court"><b>'+L('gCourt')+':</b> '+esc(t[2])+'</p>'+
+      '<p class="read"><b>'+L('gRead')+':</b> '+esc(t[3])+'</p></div>';
+  }).join('');
+  $('gAll').hidden=!one;
+  $('guide').hidden=false; $('guide').scrollTop=0;
+}
+function closeGuide(){GOPEN=null;$('guide').hidden=true}
+$('gClose').onclick=closeGuide;
+$('guide').onclick=function(e){if(e.target===$('guide'))closeGuide()};
+$('gAll').onclick=function(){if(GOPEN)openGuide(GOPEN[0])};
+document.addEventListener('keydown',function(e){if(e.key==='Escape'&&!$('guide').hidden)closeGuide()});
+$('view').addEventListener('click',function(e){
+  var b=e.target.closest('[data-guide]'); if(b){openGuide(b.getAttribute('data-guide'));return}
+  var h=e.target.closest('[data-g]'); if(h){var k=h.getAttribute('data-g');for(var s in GSET)if(GSET[s].indexOf(k)>=0){openGuide(s,k);return}}
+});
 applyLang();
 $('repBack').onclick=function(){$('report').hidden=true;$('player').hidden=false};
 
