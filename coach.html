@@ -91,7 +91,7 @@ svg.chart{width:100%;height:auto;display:block}
 </head>
 <body>
 <div class="top">
-  <a class="pill" href="index.html" data-cv="gym">← EL GYM</a>
+  <a class="pill" id="gymBack" href="index.html" data-cv="gym">← EL GYM</a>
   <span style="display:inline-flex;gap:8px"><span class="cvlang" id="cvLang"><button type="button" data-l="es">ES</button><button type="button" data-l="en">EN</button></span>
   <button class="pill" id="lockBtn" type="button" hidden data-cv="lock">🔒 Bloquear</button></span>
 </div>
@@ -432,6 +432,12 @@ $('view').addEventListener('click',function(e){
   var b=e.target.closest('[data-guide]'); if(b){openGuide(b.getAttribute('data-guide'));return}
   var h=e.target.closest('[data-g]'); if(h){var k=h.getAttribute('data-g');for(var s in GSET)if(GSET[s].indexOf(k)>=0){openGuide(s,k);return}}
 });
+// ← back to the site the coach came from (cognogym.com and vreaction.com link here for Coach View)
+var FROM=(function(){var f=(new URLSearchParams(location.search).get('from')||'');
+  if(f!=='cognogym'&&f!=='vreaction'){try{f=sessionStorage.getItem('cv-from')||''}catch(e){f=''}}
+  if(f==='cognogym'||f==='vreaction'){try{sessionStorage.setItem('cv-from',f)}catch(e){}return f}return ''})();
+var BACK={cognogym:'https://cognogym.com/dynamic-hub.html',vreaction:'https://vreaction.com/reaction-velocity.html'};
+if(FROM)$('gymBack').href=BACK[FROM];
 applyLang();
 $('repBack').onclick=function(){$('report').hidden=true;$('player').hidden=false};
 
