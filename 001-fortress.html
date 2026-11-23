@@ -736,7 +736,7 @@ window.FT = (function(){
       outOfTime:'¡SE ACABÓ EL TIEMPO!', tapCenter:'TOCA EL CENTRO PARA EMPEZAR',
       roundWatch:'🧠 RONDA {n} · MIRA...', yourTurn:'🏀 ¡TU TURNO! ({n} toques)', roundDone:'¡BIEN! 🔥 Ronda {n} completa',
       soClose:'¡CASI! Era el balón {n}', gold:'¡MEMORIA DE ORO! 🧠', great:'¡GRAN TRABAJO! 🔥', goodTry:'¡BUEN INTENTO! 💪',
-      stats:'Nivel {l} · Puntos {p}',
+      stats:'Nivel {l}',
       perfect:'¡PERFECTO!', good:'¡BIEN!', early:'TEMPRANO', late:'TARDE', wrong:'¡NO!', miss:'¡FALLO!', start:'¡TOCA PARA EMPEZAR! ↓'
     },
     en: {
@@ -762,7 +762,7 @@ window.FT = (function(){
       outOfTime:'OUT OF TIME!', tapCenter:'TAP THE CENTER TO START',
       roundWatch:'🧠 ROUND {n} · WATCH...', yourTurn:'🏀 YOUR TURN! ({n} taps)', roundDone:'NICE! 🔥 Round {n} complete',
       soClose:'SO CLOSE! It was ball {n}', gold:'GOLDEN MEMORY! 🧠', great:'GREAT JOB! 🔥', goodTry:'GOOD TRY! 💪',
-      stats:'Level {l} · Points {p}',
+      stats:'Level {l}',
       perfect:'PERFECT!', good:'GOOD!', early:'EARLY', late:'LATE', wrong:'WRONG!', miss:'MISS!', start:'TAP TO START! ↓'
     }
   };
@@ -1115,7 +1115,7 @@ WARM.hostScore = function(){
   try {
     repShotLog.forEach(function(r){ if(r.hit && r.round > alto) alto = r.round });
   } catch(e){}
-  return pointsFor(alto);
+  return alto;   // the score is the level: targets in the longest chain cleared (round n has n targets)
 };
 WARM.hostRestart = function(){
   /* Straight back in, with no three-second countdown: the countdown
@@ -1905,7 +1905,7 @@ showFinalScore(finalLevel,finalTime);
 function showFinalScore(finalLevel,finalTime){
   challengeResult.textContent=finalLevel>=15?FT.t('gold'):finalLevel>=8?FT.t('great'):FT.t('goodTry');
   challengeResult.className='challenge-result '+(finalLevel>=8?'win':'lose');
-  challengeStats.textContent=FT.t('stats',{l:finalLevel,p:pointsFor(finalLevel)});   // level = rounds cleared, points = 1+2+…
+  challengeStats.textContent=FT.t('stats',{l:finalLevel});   // the level = targets in the longest chain cleared
 
   /* AND TO THE GYM, which is what the board reads. Only outside a
      warm-up run: inside one the station posts its own score when the

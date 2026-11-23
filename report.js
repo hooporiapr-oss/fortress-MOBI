@@ -20,11 +20,11 @@
   var TX = {
     es: { court: 'En la cancha:', title: 'Reporte de Progreso del Jugador', age: 'Edad', days: 'Días de entrenamiento', sessions: 'Sesiones', first: 'Primera', latest: 'Última', best: 'Mejor',
           gain: 'Primera → mejor', notYet: 'Todavía sin entrenar.', one: 'Una sesión hasta ahora — la gráfica empieza con la segunda.',
-          lv: 'Nv', pts: 'pts', lvls: 'niveles', foot: 'Nivel = rondas completadas en una partida (ronda 1 = nivel 1); puntos = 1+2+3+… hasta ese nivel. Generado el ',
+          lv: 'Nv', lvls: 'niveles', foot: 'Nivel = número de objetivos en la cadena más larga completada (un juego que empieza con 3 objetivos es nivel 3). Generado el ',
           print: '🖨 Imprimir / PDF', share: '📤 Compartir', making: 'Preparando…', saved: 'Imagen guardada — compártela desde tus fotos o descargas.', fail: 'No se pudo compartir — usa Imprimir / PDF.' },
     en: { court: 'On the court:', title: 'Player Progress Report', age: 'Age', days: 'Training days', sessions: 'Sessions', first: 'First', latest: 'Latest', best: 'Best',
           gain: 'First → best', notYet: 'Not trained yet.', one: 'One session so far — the chart starts with the second.',
-          lv: 'Lv', pts: 'pts', lvls: 'levels', foot: 'Level = rounds cleared in one game (round 1 = level 1); points = 1+2+3+… up to that level. Generated ',
+          lv: 'Lv', lvls: 'levels', foot: 'Level = the number of targets in the longest chain cleared (a game that starts with 3 targets is level 3). Generated ',
           print: '🖨 Print / Save PDF', share: '📤 Share', making: 'Preparing…', saved: 'Picture saved — share it from your photos or downloads.', fail: 'Could not share — use Print / Save PDF.' }
   };
   var LANG = (function(){ try { return localStorage.getItem('rp-lang') === 'en' ? 'en' : 'es' } catch(e){ return 'es' } })();
@@ -38,11 +38,8 @@
   function dstr(at, long){ var d = new Date(at); if (isNaN(d)) return '—'; return d.toLocaleDateString(LANG === 'es' ? 'es-PR' : 'en-US', long ? { month: 'long', day: 'numeric', year: 'numeric' } : { month: 'short', day: 'numeric' }) }
   function dayKey(at){ var d = new Date(at); return isNaN(d) ? '' : d.getFullYear() + '-' + (d.getMonth()+1) + '-' + d.getDate() }
 
-  /* Each station scores by round: level = rounds cleared in a game, points = 1+2+…+level.
-     A run is saved as its points; the level is read back from them. */
-  function lvlOf(p){ p = +p || 0; return p > 0 ? Math.round((Math.sqrt(8 * p + 1) - 1) / 2) : 0 }
-  function ptsOf(l){ return l > 0 ? l * (l + 1) / 2 : 0 }
-  function cell(l, label){ return '<div><b>' + tx('lv') + ' ' + l + '</b><small>' + ptsOf(l) + ' ' + tx('pts') + '</small><i>' + label + '</i></div>' }
+  /* Each station scores by LEVEL: the number of targets in the longest chain cleared. */
+  function cell(l, label){ return '<div><b>' + tx('lv') + ' ' + l + '</b><i>' + label + '</i></div>' }
   function chart(pts){
     if (pts.length < 2) return '<div class="rp-one">' + tx('one') + '</div>';
     var v = pts.map(function(p){ return p.v }), mn = Math.min.apply(null, v), mx = Math.max.apply(null, v), top = v.indexOf(mx);
@@ -75,7 +72,7 @@
       + '<div class="rp-sum"><div><b>' + Object.keys(days).filter(Boolean).length + '</b><i>' + tx('days') + '</i></div><div><b>' + runs.length + '</b><i>' + tx('sessions') + '</i></div>'
       + '<div><b>' + (first ? dstr(first) : '—') + '</b><i>' + tx('first') + '</i></div><div><b>' + (last ? dstr(last) : '—') + '</b><i>' + tx('latest') + '</i></div></div>';
     var body = GAMES.map(function(g){
-      var a = runs.filter(function(r){ return r.game === g.k }).map(function(r){ return { v: lvlOf(r.score), at: r.at } });   // the level, read back from the points saved
+      var a = runs.filter(function(r){ return r.game === g.k }).map(function(r){ return { v: +r.score || 0, at: r.at } });   // the score saved is the level
       var court = '<div class="rp-court">🏀 <b>' + tx('court') + '</b> ' + g.c[LANG] + '</div>';
       if (!a.length) return '<div class="rp-game"><div class="rp-gname">' + g.n + '</div><div class="rp-gdesc">' + g.d[LANG] + '</div>' + court + '<div class="rp-one">' + tx('notYet') + '</div></div>';
       var f = a[0].v, l = a[a.length - 1].v, best = Math.max.apply(null, a.map(function(x){ return x.v }));

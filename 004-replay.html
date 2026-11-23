@@ -1005,7 +1005,7 @@ var STR = {
     alreadyRun:'Your official run is already in: <b>sequence {L}, {P} points</b>. You can keep practising, but this score is final.',
     confirmOfficial:'This is your official run. Your sponsors pay on the points you score, and you only get one. Ready?',
     back:'← Back', backToChallenge:'← Back to my Challenge page', home:'← Home',
-    lblLevel:'Sequence', lblPoints:'Points', lblTime:'Time',
+    lblLevel:'Sequence', lblPoints:'Level', lblTime:'Time',
     getReady:'GET READY...', memorize:'MEMORIZE!', watchChain:'WATCH THE CHAIN', yourTurn:'REPLAY IT',
     nice:'✅ RECALLED', wrong:'WRONG ORDER',
     labelPractice:'Practice Run · Longest Sequence',
@@ -1051,7 +1051,7 @@ var STR = {
     alreadyRun:'Tu corrida oficial ya está hecha: <b>secuencia {L}, {P} puntos</b>. Puedes seguir practicando, pero esa puntuación es final.',
     confirmOfficial:'Esta es tu corrida oficial. Tus padrinos pagan por los puntos que anotes, y solo tienes una. ¿Listo?',
     back:'← Atrás', backToChallenge:'← Volver a mi página del Reto', home:'← Inicio',
-    lblLevel:'Secuencia', lblPoints:'Puntos', lblTime:'Tiempo',
+    lblLevel:'Secuencia', lblPoints:'Nivel', lblTime:'Tiempo',
     getReady:'PREPÁRATE...', memorize:'¡MEMORIZA!', watchChain:'OBSERVA LA CADENA', yourTurn:'REPÍTELA',
     nice:'✅ RECORDADO', wrong:'ORDEN INCORRECTO',
     labelPractice:'Práctica · Secuencia más larga',
@@ -2012,7 +2012,7 @@ function handleTap(idx){
       /* A chain finished: it is the level reached, and the score is
          what that level is worth. */
       repChains = Math.max(repChains, sequence.length);
-      repScore = pointsFor(repChains);
+      repScore = repChains;   // the score is the level: targets in the longest chain cleared
       $('hPoints').textContent = WARM.shown();
       paintPlayInfo();
       msg(T('nice'),'go');
@@ -2071,7 +2071,7 @@ function showFinal(finalLevel,finalTime){
   if (window.HM_FIN && !TRYOUT && !IS_OFFICIAL && !CHALLENGE_ID){
     var es = !HM_FIN.en();
     HM_FIN.show({ level: finalLevel,
-      stats: (es ? 'Nivel ' : 'Level ') + finalLevel + ' · ' + (es ? 'Puntos ' : 'Points ') + pointsFor(finalLevel),
+      stats: (es ? 'Nivel ' : 'Level ') + finalLevel,
       again: function(){ $('againBtn').click() } });
   } else {
     $('screen-game').style.display='none';
