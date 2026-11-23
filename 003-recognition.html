@@ -645,7 +645,7 @@ var translations = {
     tipTitle: 'TIP', tipText: 'Watch for the cell that appears in a NEW position during the echo!',
     playNow: '▶ START', poweredBy: 'Powered by', trophyTitle: 'COGNITIVO GYM', trophySubtitle: 'THE RECOGNITION Levels',
     selectSpeed: 'SELECT MODE', tierFree: '✓ FREE', selectLevel: 'SELECT LEVEL', cellsLabel: 'Cells in pattern:',
-    letsGo: "LET'S GO!", levelLabel: 'Level', roundLabel: 'Round', scoreLabel: 'Score', levelUp: 'LEVEL UP:',
+    letsGo: "LET'S GO!", levelLabel: 'Level', roundLabel: 'Round', scoreLabel: 'Points', levelUp: 'LEVEL UP:',
     tapToStart: 'TAP TO START!', tapLetsGo: "TAP LET'S GO!", getReady: 'GET READY...', watchOriginal: '👁️ WATCH ORIGINAL',
     nowEcho: '👂 NOW THE ECHO...', spotChange: '👂 SPOT THE CHANGE', tapChange: '🏀 TAP THE CHANGE!', timesUp: "⏰ TIME'S UP!",
     perfect: '✨ PERFECT!', wrong: '❌ WRONG!', levelUpTitle: 'LEVEL UP!', levelUpMsg: 'You are now Level {level}!<br>Cells: {cells}',
@@ -1295,8 +1295,9 @@ function updatePlayUI(){
   }else{
     $('playLevelLabel').textContent=t('patternLabel');
     $('playLevel').textContent=gameState.cellCount;
-    $('playRoundLabel').textContent=t('bestLabel');
-    $('playRound').textContent=gameState.best;
+    $('playRoundLabel').textContent=t('levelLabel');   // the level (rounds cleared)
+    $('playRound').textContent=gameState.lvl||0;
+    $('playScoreLabel').textContent=t('scoreLabel');   // Puntos · Points
   }
   var badge=gameMode==='training'?'L'+trainingLevel+' TRAINING':'GAME';
   $('playBadge').textContent=badge; $('playCells').textContent='CELLS: '+gameState.cellCount;
@@ -1500,7 +1501,10 @@ function roundSuccess(){
   /* The chain just finished is the level reached. The score is what
      that level is worth, not a running tally. */
   if(gameState.cellCount>gameState.best)gameState.best=gameState.cellCount;
-  gameState.sc=pointsFor(gameState.best);
+  /* Level = rounds cleared in this run (round 1 cleared = level 1, whatever the chain's length);
+     points = 1+2+…+level. The four stations all score this way. */
+  gameState.lvl=(gameState.lvl||0)+1;
+  gameState.sc=pointsFor(gameState.lvl);
   var intensity=gameState.streak>=5?'party':gameState.streak>=3?'big':'medium'; laughCelebration(intensity);
   $('playMessage').textContent=t('perfect'); $('playMessage').className='play-message-text perfect'; showCoach(t('sharpEar'));
 
@@ -1552,8 +1556,8 @@ function showEndScreen(){
   /* Ends the Fortress way: the message over the court, ¡OTRA VEZ!, ← Inicio, ← Atrás (fin-hm.js) */
   if (window.HM_FIN){
     var es = !HM_FIN.en();
-    HM_FIN.show({ level: gameState.best || 0,
-      stats: (es ? 'Secuencia más larga: ' : 'Longest sequence: ') + (gameState.best || 0) + ' · ' + (es ? 'Puntos: ' : 'Points: ') + (gameState.sc || 0),
+    HM_FIN.show({ level: gameState.lvl || 0,
+      stats: (es ? 'Nivel ' : 'Level ') + (gameState.lvl || 0) + ' · ' + (es ? 'Puntos ' : 'Points ') + (gameState.sc || 0),
       again: function(){ $('endAgainBtn').click() } });
   } else el.classList.add('show');
 

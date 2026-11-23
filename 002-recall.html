@@ -671,7 +671,7 @@ var translations = {
     cellsLabel: 'Cells to remember:',
     letsGo: "LET'S GO!",
     roundLabel: 'Round',
-    scoreLabel: 'Score',
+    scoreLabel: 'Points',
     tapToStart: 'TAP TO START!',
     tapLetsGo: "TAP LET'S GO!",
     getReady: 'GET READY...',
@@ -1387,8 +1387,9 @@ function updatePlayUI(){
     }else{
         $('playTierLabel').textContent=t('sequenceLabel');
         $('playTier').textContent=gameState.cellCount;
-        $('playRoundLabel').textContent=t('bestLabel');
-        $('playRound').textContent=gameState.best;
+        $('playRoundLabel').textContent=t('levelLabel');   // the level (rounds cleared)
+        $('playRound').textContent=gameState.lvl||0;
+        $('playScoreLabel').textContent=t('scoreLabel');   // Puntos · Points
     }
     var badge=gameMode==='training'?'L'+trainingLevel+' TRAINING':'GAME';
     $('playBadge').textContent=badge;
@@ -1551,7 +1552,10 @@ function roundComplete(success){
            what that level is worth, not a running tally — so a longer
            chain replaces a shorter one rather than adding to it. */
         if(gameState.cellCount>gameState.best)gameState.best=gameState.cellCount;
-        gameState.sc=pointsFor(gameState.best);
+        /* Level = rounds cleared in this run (round 1 cleared = level 1, whatever the chain's length);
+           points = 1+2+…+level. The four stations all score this way. */
+        gameState.lvl=(gameState.lvl||0)+1;
+        gameState.sc=pointsFor(gameState.lvl);
         gameState.streak++;
         var intensity=gameState.streak>=5?'party':gameState.streak>=3?'big':'medium';
         var msgs=gameState.streak>=5?['🏆 LEGEND!','🏆 WOW!']:gameState.streak>=3?['🔥 FIRE!','🤣 AMAZING!']:['😄 NICE!','😊 GREAT!'];
@@ -1605,8 +1609,8 @@ function showEndScreen(){
   /* Ends the Fortress way: the message over the court, ¡OTRA VEZ!, ← Inicio, ← Atrás (fin-hm.js) */
   if (window.HM_FIN){
     var es = !HM_FIN.en();
-    HM_FIN.show({ level: gameState.best || 0,
-      stats: (es ? 'Secuencia más larga: ' : 'Longest sequence: ') + (gameState.best || 0) + ' · ' + (es ? 'Puntos: ' : 'Points: ') + (gameState.sc || 0),
+    HM_FIN.show({ level: gameState.lvl || 0,
+      stats: (es ? 'Nivel ' : 'Level ') + (gameState.lvl || 0) + ' · ' + (es ? 'Puntos ' : 'Points ') + (gameState.sc || 0),
       again: function(){ $('endAgainBtn').click() } });
   } else el.classList.add('show');
 

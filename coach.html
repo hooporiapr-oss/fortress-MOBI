@@ -43,6 +43,7 @@ body{min-height:100vh;padding:20px 16px 40px;display:flex;flex-direction:column;
 .row:active{background:rgba(255,215,0,.1)}
 .nm{font-weight:900;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .v{font-weight:900;font-size:.95rem}
+.pt{display:block;font-size:.62rem;font-weight:700;color:#a7adba;letter-spacing:.02em}
 .v small{display:block;font-size:.58rem;color:#7d8696;font-weight:700;letter-spacing:.04em}
 .up{color:#3ddc84}.dn{color:#ff6b6b}.eq{color:#a7adba}
 .last{font-size:.72rem;color:#a7adba}
@@ -83,7 +84,7 @@ svg.chart{width:100%;height:auto;display:block}
 </div>
 
 <div id="view" hidden>
-  <div class="gtitle" data-cv="gtitle">🏀 Jugadores · mejor puntuación en cada estación</div>
+  <div class="gtitle" data-cv="gtitle">🏀 Jugadores · mejor nivel y puntos en cada estación</div>
   <div class="head"><span data-cv="hPlayer">Jugador</span><span>Recall</span><span>Recog.</span><span>Replay</span><span>Fortress</span><span data-cv="hLast">Última fecha</span></div>
   <div id="list"></div>
   <div class="count" id="count"></div>
@@ -121,19 +122,19 @@ var checking=false;
 var LANG=(function(){try{return localStorage.getItem('rp-lang')==='en'?'en':'es'}catch(e){return 'es'}})();
 var CV={
   es:{gym:'← EL GYM',lock:'🔒 Bloquear',only:'Solo coaches',code:'Código de coach',open:'Abrir',note:'El código de coach se crea en License Admin → Coach. Un código de juego no abre esta vista.',
-      gtitle:'🏀 Jugadores · mejor puntuación en cada estación',hPlayer:'Jugador',hLast:'Última fecha',back:'← Atrás',all:'← Todos',rep:'📄 Reporte de progreso',
+      gtitle:'🏀 Jugadores · mejor nivel y puntos en cada estación',hPlayer:'Jugador',hLast:'Última fecha',back:'← Atrás',all:'← Todos',rep:'📄 Reporte de progreso',
       checking:'Verificando…',bad:'No es un código de coach — o ya no está activo.',conn:'Problema de conexión — intenta otra vez.',
       none:'Todavía no hay jugadores',at:' en ',noneHow:'Los jugadores aparecen aquí cuando entran y llenan su nombre, edad y grado.',
-      count:function(n){return n+' jugador'+(n>1?'es':'')+' · en orden A–Z, sin ranking · mejor puntuación en cada estación'},
-      yrs:'años',lastDate:'última fecha ',notYet:'Todavía no ha jugado',score:' · puntuación',first:'Primera',latest:'Última',best:'Mejor',
-      one:'Una sesión hasta ahora',since:function(d,n){return '<b>'+(d>0?'+':'')+d+'</b> desde la primera · '+n+' sesiones'}},
+      count:function(n){return n+' jugador'+(n>1?'es':'')+' · en orden A–Z, sin ranking · nivel = rondas completadas, puntos = 1+2+3…'},
+      yrs:'años',lv:'Nv',pts:'pts',lastDate:'última fecha ',notYet:'Todavía no ha jugado',score:' · nivel y puntos',first:'Primera',latest:'Última',best:'Mejor',
+      one:'Una sesión hasta ahora',since:function(d,n){return '<b>'+(d>0?'+':'')+d+' '+(Math.abs(d)===1?'nivel':'niveles')+'</b> desde la primera · '+n+' sesiones'}},
   en:{gym:'← THE GYM',lock:'🔒 Lock',only:'Coaches only',code:'Coach code',open:'Open',note:'A Coach code is made in License Admin → Coach. A game code does not open this view.',
-      gtitle:'🏀 Players · best score in each station',hPlayer:'Player',hLast:'Last date',back:'← Back',all:'← All players',rep:'📄 Progress report',
+      gtitle:'🏀 Players · best level and points in each station',hPlayer:'Player',hLast:'Last date',back:'← Back',all:'← All players',rep:'📄 Progress report',
       checking:'Checking…',bad:'Not a Coach code — or it is no longer active.',conn:'Connection problem — please try again.',
       none:'No players yet',at:' at ',noneHow:'Players show up here once they sign in and fill in their name, age and grade.',
-      count:function(n){return n+' player'+(n>1?'s':'')+' · listed A–Z, not ranked · best score in each station'},
-      yrs:'yrs',lastDate:'last date ',notYet:'Not played yet',score:' · score',first:'First',latest:'Latest',best:'Best',
-      one:'One run so far',since:function(d,n){return '<b>'+(d>0?'+':'')+d+'</b> since the first run · '+n+' runs'}}
+      count:function(n){return n+' player'+(n>1?'s':'')+' · listed A–Z, not ranked · level = rounds cleared, points = 1+2+3…'},
+      yrs:'yrs',lv:'Lv',pts:'pts',lastDate:'last date ',notYet:'Not played yet',score:' · level and points',first:'First',latest:'Latest',best:'Best',
+      one:'One run so far',since:function(d,n){return '<b>'+(d>0?'+':'')+d+' '+(Math.abs(d)===1?'level':'levels')+'</b> since the first run · '+n+' runs'}}
 };
 function L(k){return CV[LANG][k]}
 function applyLang(){
@@ -189,15 +190,18 @@ function build(d){
     if(!p.at||r.at>=p.at){p.at=r.at; if(r.age)p.age=r.age; if(r.grade)p.grade=r.grade; p.name=String(r.name).trim()}
     if(r.at&&r.at>p.last)p.last=r.at; return p}
   (d.players||[]).forEach(who);
-  (d.runs||[]).forEach(function(r){var p=who(r); if(!p)return; (p.games[r.game]||(p.games[r.game]=[])).push({v:+r.score||0,at:r.at})});
+  (d.runs||[]).forEach(function(r){var p=who(r); if(!p)return; (p.games[r.game]||(p.games[r.game]=[])).push({v:lvlOf(r.score),p:+r.score||0,at:r.at})});
 }
 function best(a){var t=0;(a||[]).forEach(function(x){if(x.v>t)t=x.v});return t}
+// A score is saved as points (1+2+…+level); the level is read back from it.
+function lvlOf(p){p=+p||0;return p>0?Math.round((Math.sqrt(8*p+1)-1)/2):0}
+function ptsOf(l){return l>0?l*(l+1)/2:0}
 function day(at){if(!at)return '—';var d=new Date(at);return isNaN(d)?'—':(d.getMonth()+1)+'/'+d.getDate()}
 function render(){
   var keys=Object.keys(players).sort(function(a,b){return players[a].name.localeCompare(players[b].name,undefined,{sensitivity:'base'})});
   $('list').innerHTML=keys.length?keys.map(function(k){var p=players[k];
     return '<button class="row" type="button" data-k="'+esc(k)+'"><span class="nm">'+esc(p.name)+'<small>'+esc(infoShort(p))+'</small></span>'+
-      GAMES.map(function(g){var a=p.games[g[0]];return '<span class="v">'+(a&&a.length?best(a):'—')+'</span>'}).join('')+
+      GAMES.map(function(g){var a=p.games[g[0]];if(!a||!a.length)return '<span class="v">—</span>';var b=best(a);return '<span class="v">'+L('lv')+' '+b+'<small class="pt">'+ptsOf(b)+' '+L('pts')+'</small></span>'}).join('')+
       '<span class="last">'+day(p.last)+'</span></button>';
   }).join(''):'<div class="empty">'+L('none')+(school?L('at')+esc(school):'')+'.<br>'+L('noneHow')+'</div>';
   $('count').innerHTML=keys.length?L('count')(keys.length):'';
@@ -229,7 +233,7 @@ function showPlayer(k){
     if(!a.length)return '<div class="game"><div class="gname">'+g[1]+'</div><div class="chg">'+L('notYet')+'</div></div>';
     var pts=a.slice(-40),first=a[0].v,last=a[a.length-1].v,b=best(a),d=last-first;
     return '<div class="game"><div class="gname">'+g[1]+L('score')+'</div>'+
-      '<div class="stats"><div class="cell"><b>'+first+'</b><i>'+L('first')+'</i></div><div class="cell"><b>'+last+'</b><i>'+L('latest')+'</i></div><div class="cell"><b>'+b+'</b><i>'+L('best')+'</i></div></div>'+
+      '<div class="stats"><div class="cell"><b>'+L('lv')+' '+first+'</b><small class="pt">'+ptsOf(first)+' '+L('pts')+'</small><i>'+L('first')+'</i></div><div class="cell"><b>'+L('lv')+' '+last+'</b><small class="pt">'+ptsOf(last)+' '+L('pts')+'</small><i>'+L('latest')+'</i></div><div class="cell"><b>'+L('lv')+' '+b+'</b><small class="pt">'+ptsOf(b)+' '+L('pts')+'</small><i>'+L('best')+'</i></div></div>'+
       '<div class="chg">'+(a.length<2?L('one'):L('since')(d,a.length))+'</div>'+chart(pts)+'</div>';
   }).join('');
 }

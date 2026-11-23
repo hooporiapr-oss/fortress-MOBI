@@ -2071,7 +2071,7 @@ function showFinal(finalLevel,finalTime){
   if (window.HM_FIN && !TRYOUT && !IS_OFFICIAL && !CHALLENGE_ID){
     var es = !HM_FIN.en();
     HM_FIN.show({ level: finalLevel,
-      stats: (es ? 'Cadena más larga: ' : 'Longest chain: ') + finalLevel + ' · ' + (es ? 'Tiempo: ' : 'Time: ') + finalTime.toFixed(1) + 's',
+      stats: (es ? 'Nivel ' : 'Level ') + finalLevel + ' · ' + (es ? 'Puntos ' : 'Points ') + pointsFor(finalLevel),
       again: function(){ $('againBtn').click() } });
   } else {
     $('screen-game').style.display='none';
