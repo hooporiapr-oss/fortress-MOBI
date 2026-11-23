@@ -47,6 +47,12 @@ body{min-height:100vh;padding:20px 16px 40px;display:flex;flex-direction:column;
 .v small{display:block;font-size:.58rem;color:#7d8696;font-weight:700;letter-spacing:.04em}
 .up{color:#3ddc84}.dn{color:#ff6b6b}.eq{color:#a7adba}
 .last{font-size:.72rem;color:#a7adba}
+/* cognogym.com section: one column per game the school plays */
+.cghead,.cgrow{display:grid;grid-template-columns:minmax(0,1.5fr) repeat(var(--cn,4),minmax(0,1fr));gap:6px;align-items:center}
+.cghead{font-size:.6rem;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:#7d8696;padding:0 12px 6px}
+.cgrow{padding:12px;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);margin-bottom:7px}
+.cgrow .nm{font-weight:900}.cgrow .nm small{display:block;font-size:.68rem;font-weight:700;color:#00e5ff;margin-top:2px}
+.cgrow .v{font-weight:900;font-size:.92rem}.cgrow .v small{display:block;font-size:.6rem;font-weight:700;color:#a7adba}
 .empty{color:#a7adba;text-align:center;padding:24px}
 .count{font-size:.7rem;color:#7d8696;text-align:center;margin-top:10px;line-height:1.5}
 #player{width:100%;max-width:640px}
@@ -89,10 +95,19 @@ svg.chart{width:100%;height:auto;display:block}
     <span style="font-size:.72rem;font-weight:900;letter-spacing:.12em;text-transform:uppercase;color:#a7adba" data-cv="schoolLbl">Escuela</span>
     <select id="schoolSel" style="padding:9px 12px;border-radius:12px;border:2px solid #FFD700;background:#0a0a0f;color:#fff;font:800 .95rem Arial,sans-serif;max-width:100%"></select>
   </div>
+  <div id="hmBlock">
   <div class="gtitle" data-cv="gtitle">🏀 Jugadores · mejor nivel en cada estación</div>
   <div class="head"><span data-cv="hPlayer">Jugador</span><span>Recall</span><span>Recog.</span><span>Replay</span><span>Fortress</span><span data-cv="hLast">Última fecha</span></div>
   <div id="list"></div>
   <div class="count" id="count"></div>
+  </div>
+  <!-- the same school's cognogym.com games (Ritnome BPM, swipe test, Zona, Zona Roja, Encadena), from its own boards -->
+  <div id="cgBlock" hidden style="margin-top:22px">
+    <div class="gtitle" data-cv="cgTitle">🧠 cognogym.com · último resultado de cada juego</div>
+    <div class="cghead" id="cgHead"></div>
+    <div id="cgList"></div>
+    <div class="count" id="cgCount"></div>
+  </div>
 </div>
 
 <!-- a player's progress report (report.js — the same one the player sees), to print or save as PDF -->
@@ -131,14 +146,14 @@ var CV={
       checking:'Verificando…',bad:'No es un código de coach — o ya no está activo.',conn:'Problema de conexión — intenta otra vez.',
       none:'Todavía no hay jugadores',at:' en ',noneHow:'Los jugadores aparecen aquí cuando entran y llenan su nombre, edad y grado.',
       count:function(n){return n+' jugador'+(n>1?'es':'')+' · en orden A–Z, sin ranking · nivel = objetivos en la cadena más larga completada'},
-      schoolLbl:'Escuela',yrs:'años',lv:'Nv',pts:'pts',lastDate:'última fecha ',notYet:'Todavía no ha jugado',score:' · nivel',first:'Primera',latest:'Última',best:'Mejor',
+      schoolLbl:'Escuela',cgTitle:'🧠 cognogym.com · último resultado de cada juego',cgBest:'mejor',cgN:function(n){return n+(n===1?' sesión':' sesiones')},cgLatest:'último',cgCount:function(n){return n+' jugador'+(n>1?'es':'')+' en cognogym.com · en orden A–Z, sin ranking'},yrs:'años',lv:'Nv',pts:'pts',lastDate:'última fecha ',notYet:'Todavía no ha jugado',score:' · nivel',first:'Primera',latest:'Última',best:'Mejor',
       one:'Una sesión hasta ahora',since:function(d,n){return '<b>'+(d>0?'+':'')+d+' '+(Math.abs(d)===1?'nivel':'niveles')+'</b> desde la primera · '+n+' sesiones'}},
   en:{gym:'← THE GYM',lock:'🔒 Lock',only:'Coaches only',code:'Coach code',open:'Open',note:'A Coach code is made in License Admin → Coach. A game code does not open this view.',
       gtitle:'🏀 Players · best level in each station',hPlayer:'Player',hLast:'Last date',back:'← Back',all:'← All players',rep:'📄 Progress report',
       checking:'Checking…',bad:'Not a Coach code — or it is no longer active.',conn:'Connection problem — please try again.',
       none:'No players yet',at:' at ',noneHow:'Players show up here once they sign in and fill in their name, age and grade.',
       count:function(n){return n+' player'+(n>1?'s':'')+' · listed A–Z, not ranked · level = targets in the longest chain cleared'},
-      schoolLbl:'School',yrs:'yrs',lv:'Lv',pts:'pts',lastDate:'last date ',notYet:'Not played yet',score:' · level',first:'First',latest:'Latest',best:'Best',
+      schoolLbl:'School',cgTitle:'🧠 cognogym.com · latest result in each game',cgBest:'best',cgN:function(n){return n+(n===1?' run':' runs')},cgLatest:'latest',cgCount:function(n){return n+' player'+(n>1?'s':'')+' on cognogym.com · listed A–Z, not ranked'},yrs:'yrs',lv:'Lv',pts:'pts',lastDate:'last date ',notYet:'Not played yet',score:' · level',first:'First',latest:'Latest',best:'Best',
       one:'One run so far',since:function(d,n){return '<b>'+(d>0?'+':'')+d+' '+(Math.abs(d)===1?'level':'levels')+'</b> since the first run · '+n+' runs'}}
 };
 function L(k){return CV[LANG][k]}
@@ -152,7 +167,7 @@ function applyLang(){
 document.querySelectorAll('#cvLang button').forEach(function(b){b.onclick=function(){
   LANG=b.getAttribute('data-l'); try{localStorage.setItem('rp-lang',LANG)}catch(e){}
   applyLang();
-  if(!$('view').hidden)render();
+  if(!$('view').hidden){render();renderCg();}
   if(!$('player').hidden&&CUR)showPlayer(CUR);
   if(!$('report').hidden&&DATA&&CUR)$('repBtn').onclick();
 }});
@@ -170,7 +185,7 @@ $('schoolSel').onchange=function(){
     .then(function(r){if(!r.ok)throw 0;return r.json()})
     .then(function(d){ if(!d){$('lockBtn').onclick();return}
       school=d.school||''; $('sub').textContent=L('only')+(school?' · '+school:'');
-      DATA=d; CUR=null; build(d); render(); pickers(d);
+      DATA=d; CUR=null; build(d); render(); pickers(d); loadCg();
       $('player').hidden=true; $('report').hidden=true; $('view').hidden=false; })
     .catch(function(){$('count').textContent=L('conn')});
 };
@@ -195,13 +210,13 @@ function openView(){
       $('code').value=''; $('err').textContent='';
       $('gate').hidden=true; $('view').hidden=false; $('lockBtn').hidden=false;
       $('sub').textContent=L('only')+(school?' · '+school:'');
-      DATA=d; build(d); render(); pickers(d);
+      DATA=d; build(d); render(); pickers(d); loadCg();
     })
     .catch(function(){checking=false;$('err').style.color='#ff8888';$('err').textContent=L('conn')});
 }
 $('open').onclick=openView;
 $('code').addEventListener('keydown',function(e){if(e.key==='Enter')openView()});
-$('lockBtn').onclick=function(){school='';CODE='';players={};DATA=null;CUR=null;$('report').hidden=true;$('schoolPick').hidden=true;$('schoolPick').style.display='none';
+$('lockBtn').onclick=function(){CG=null;CGOK++;$('cgBlock').hidden=true;$('hmBlock').hidden=false;school='';CODE='';players={};DATA=null;CUR=null;$('report').hidden=true;$('schoolPick').hidden=true;$('schoolPick').style.display='none';
   $('view').hidden=true;$('player').hidden=true;$('gate').hidden=false;$('lockBtn').hidden=true;
   $('sub').textContent=L('only');$('list').innerHTML='';$('count').textContent=''};
 
@@ -218,6 +233,51 @@ function build(d){
 function best(a){var t=0;(a||[]).forEach(function(x){if(x.v>t)t=x.v});return t}
 
 function day(at){if(!at)return '—';var d=new Date(at);return isNaN(d)?'—':(d.getMonth()+1)+'/'+d.getDate()}
+// ── The school's cognogym.com games (read from their boards, like cognogym.com's Coach View) ──
+var CG=null, CGOK=0;
+var CGG=[['rs','Ritnome BPM'],['st','Swipe'],['zn','Zona'],['zr','Zona Roja'],['enc','Encadena']];
+function cgGet(tbl,q){return fetch(SB_URL+'/rest/v1/'+tbl+'?'+q,{headers:{apikey:SB_KEY,Authorization:'Bearer '+SB_KEY}}).then(function(r){return r.ok?r.json():[]}).catch(function(){return []})}
+function loadCg(){
+  var my=++CGOK, sc='school_name=eq.'+encodeURIComponent(school)+'&hidden=is.false&order=logged_at.asc&limit=5000';
+  CG=null; $('cgBlock').hidden=true;
+  Promise.all([
+    cgGet('vr_reaction_speed_standings',sc+'&speed=like.free-*&select=player_name,speed,category,logged_at'),
+    cgGet('vr_mobile_standings',sc+'&select=player_name,game_key,bpm,hits,level,category,logged_at')
+  ]).then(function(res){
+    if(my!==CGOK)return;   // the coach switched school meanwhile
+    var ps={};
+    function add(g,r,v,of){var k=String(r.player_name||'').trim().toLowerCase();if(!k)return;
+      var p=ps[k]||(ps[k]={name:String(r.player_name).trim(),cat:'',g:{},last:''});
+      if(r.category)p.cat=String(r.category).trim();
+      (p.g[g]||(p.g[g]=[])).push({v:v,of:of,at:r.logged_at||''});
+      if((r.logged_at||'')>p.last)p.last=r.logged_at;}
+    (res[0]||[]).forEach(function(r){var m=/^free-(\d+)$/.exec(String(r.speed||''));if(m)add('rs',r,+m[1])});
+    (res[1]||[]).forEach(function(r){var k=r.game_key||'',m;
+      if((m=/^swipe-test-(10|25)$/.exec(k)))add('st',r,+r.bpm||0);
+      else if((m=/^zona-(roja-)?(10|25)$/.exec(k))){if(r.level!=null)add(m[1]?'zr':'zn',r,parseInt(r.level,10)||0,+m[2])}
+      else if(k==='encadena'||k==='encadena-facil')add('enc',r,parseInt(r.level,10)||0);});
+    CG=ps; renderCg(); render();
+  });
+}
+function renderCg(){
+  if(!CG){$('cgBlock').hidden=true;return}
+  var keys=Object.keys(CG).sort(function(a,b){return CG[a].name.localeCompare(CG[b].name,undefined,{sensitivity:'base'})});
+  if(!keys.length){$('cgBlock').hidden=true;return}
+  var cols=CGG.filter(function(g){return keys.some(function(k){return CG[k].g[g[0]]})});
+  $('cgBlock').style.setProperty('--cn',cols.length);
+  $('cgHead').innerHTML='<span>'+L('hPlayer')+'</span>'+cols.map(function(g){return '<span>'+g[1]+'</span>'}).join('');
+  $('cgList').innerHTML=keys.map(function(k){var p=CG[k];
+    return '<div class="cgrow"><span class="nm">'+esc(p.name)+(p.cat?'<small>'+esc(p.cat)+'</small>':'')+'</span>'+cols.map(function(g){
+      var a=p.g[g[0]]; if(!a||!a.length)return '<span class="v">—</span>';
+      var l=a[a.length-1];
+      if(g[0]==='rs'||g[0]==='st'){var top=0;a.forEach(function(x){if(x.v>top)top=x.v});return '<span class="v">'+l.v+' BPM<small>'+L('cgBest')+' '+top+' · '+L('cgN')(a.length)+'</small></span>'}
+      if(g[0]==='zn'||g[0]==='zr'){var same=a.filter(function(x){return x.of===l.of}),tz=0;same.forEach(function(x){if(x.v>tz)tz=x.v});return '<span class="v">'+l.v+'/'+l.of+'<small>'+L('cgBest')+' '+tz+'/'+l.of+' · '+L('cgN')(a.length)+'</small></span>'}
+      var te=0;a.forEach(function(x){if(x.v>te)te=x.v});return '<span class="v">'+L('lv')+' '+te+'<small>'+L('cgLatest')+' '+l.v+' · '+L('cgN')(a.length)+'</small></span>';
+    }).join('')+'</div>';
+  }).join('');
+  $('cgCount').textContent=L('cgCount')(keys.length);
+  $('cgBlock').hidden=false;
+}
 function render(){
   var keys=Object.keys(players).sort(function(a,b){return players[a].name.localeCompare(players[b].name,undefined,{sensitivity:'base'})});
   $('list').innerHTML=keys.length?keys.map(function(k){var p=players[k];
@@ -226,6 +286,7 @@ function render(){
       '<span class="last">'+day(p.last)+'</span></button>';
   }).join(''):'<div class="empty">'+L('none')+(school?L('at')+esc(school):'')+'.<br>'+L('noneHow')+'</div>';
   $('count').innerHTML=keys.length?L('count')(keys.length):'';
+  $('hmBlock').hidden=!keys.length&&CG&&Object.keys(CG).length>0;
   $('list').querySelectorAll('.row').forEach(function(b){b.onclick=function(){showPlayer(b.dataset.k)}});
 }
 
