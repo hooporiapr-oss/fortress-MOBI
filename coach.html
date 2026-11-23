@@ -84,6 +84,11 @@ svg.chart{width:100%;height:auto;display:block}
 </div>
 
 <div id="view" hidden>
+  <!-- a coach code with more than one school: pick which one to see -->
+  <div id="schoolPick" hidden style="margin:0 0 14px;display:flex;gap:8px;align-items:center;justify-content:center;flex-wrap:wrap">
+    <span style="font-size:.72rem;font-weight:900;letter-spacing:.12em;text-transform:uppercase;color:#a7adba" data-cv="schoolLbl">Escuela</span>
+    <select id="schoolSel" style="padding:9px 12px;border-radius:12px;border:2px solid #FFD700;background:#0a0a0f;color:#fff;font:800 .95rem Arial,sans-serif;max-width:100%"></select>
+  </div>
   <div class="gtitle" data-cv="gtitle">🏀 Jugadores · mejor nivel en cada estación</div>
   <div class="head"><span data-cv="hPlayer">Jugador</span><span>Recall</span><span>Recog.</span><span>Replay</span><span>Fortress</span><span data-cv="hLast">Última fecha</span></div>
   <div id="list"></div>
@@ -126,14 +131,14 @@ var CV={
       checking:'Verificando…',bad:'No es un código de coach — o ya no está activo.',conn:'Problema de conexión — intenta otra vez.',
       none:'Todavía no hay jugadores',at:' en ',noneHow:'Los jugadores aparecen aquí cuando entran y llenan su nombre, edad y grado.',
       count:function(n){return n+' jugador'+(n>1?'es':'')+' · en orden A–Z, sin ranking · nivel = objetivos en la cadena más larga completada'},
-      yrs:'años',lv:'Nv',pts:'pts',lastDate:'última fecha ',notYet:'Todavía no ha jugado',score:' · nivel',first:'Primera',latest:'Última',best:'Mejor',
+      schoolLbl:'Escuela',yrs:'años',lv:'Nv',pts:'pts',lastDate:'última fecha ',notYet:'Todavía no ha jugado',score:' · nivel',first:'Primera',latest:'Última',best:'Mejor',
       one:'Una sesión hasta ahora',since:function(d,n){return '<b>'+(d>0?'+':'')+d+' '+(Math.abs(d)===1?'nivel':'niveles')+'</b> desde la primera · '+n+' sesiones'}},
   en:{gym:'← THE GYM',lock:'🔒 Lock',only:'Coaches only',code:'Coach code',open:'Open',note:'A Coach code is made in License Admin → Coach. A game code does not open this view.',
       gtitle:'🏀 Players · best level in each station',hPlayer:'Player',hLast:'Last date',back:'← Back',all:'← All players',rep:'📄 Progress report',
       checking:'Checking…',bad:'Not a Coach code — or it is no longer active.',conn:'Connection problem — please try again.',
       none:'No players yet',at:' at ',noneHow:'Players show up here once they sign in and fill in their name, age and grade.',
       count:function(n){return n+' player'+(n>1?'s':'')+' · listed A–Z, not ranked · level = targets in the longest chain cleared'},
-      yrs:'yrs',lv:'Lv',pts:'pts',lastDate:'last date ',notYet:'Not played yet',score:' · level',first:'First',latest:'Latest',best:'Best',
+      schoolLbl:'School',yrs:'yrs',lv:'Lv',pts:'pts',lastDate:'last date ',notYet:'Not played yet',score:' · level',first:'First',latest:'Latest',best:'Best',
       one:'One run so far',since:function(d,n){return '<b>'+(d>0?'+':'')+d+' '+(Math.abs(d)===1?'level':'levels')+'</b> since the first run · '+n+' runs'}}
 };
 function L(k){return CV[LANG][k]}
@@ -151,6 +156,24 @@ document.querySelectorAll('#cvLang button').forEach(function(b){b.onclick=functi
   if(!$('player').hidden&&CUR)showPlayer(CUR);
   if(!$('report').hidden&&DATA&&CUR)$('repBtn').onclick();
 }});
+// ── More than one school on the code: the switcher (hooporia_coach gives the list) ──
+var CODE='';
+function pickers(d){
+  var list=(d&&d.schools)||[]; var box=$('schoolPick');
+  if(list.length<2){box.hidden=true;box.style.display='none';return}
+  $('schoolSel').innerHTML=list.map(function(s){return '<option value="'+esc(s)+'"'+(s===school?' selected':'')+'>'+esc(s||'—')+'</option>'}).join('');
+  box.hidden=false; box.style.display='flex';
+}
+$('schoolSel').onchange=function(){
+  var want=this.value; $('count').textContent=L('checking');
+  rpc('hooporia_coach',{p_code:CODE,p_school:want})
+    .then(function(r){if(!r.ok)throw 0;return r.json()})
+    .then(function(d){ if(!d){$('lockBtn').onclick();return}
+      school=d.school||''; $('sub').textContent=L('only')+(school?' · '+school:'');
+      DATA=d; CUR=null; build(d); render(); pickers(d);
+      $('player').hidden=true; $('report').hidden=true; $('view').hidden=false; })
+    .catch(function(){$('count').textContent=L('conn')});
+};
 var GAMES=[['recall','🧠 The Recall'],['recognition','👁 The Recognition'],['replay','🔁 The Replay'],['fortress','🏰 The Fortress']];
 function gradeLabel(g){if(!g)return '';var n=+g;
   if(LANG==='es'){if(g==='K')return 'Kínder';if(g==='College')return 'Universidad';if(!n)return String(g);return n+({1:'ro',2:'do',3:'ro',4:'to',5:'to',6:'to',7:'mo',8:'vo',9:'no',10:'mo',11:'mo',12:'mo'}[n]||'')+' grado'}
@@ -168,17 +191,17 @@ function openView(){
       if(!d||!d.school&&d.school!==''){
         $('err').style.color='#ff8888';$('err').textContent=L('bad');$('code').value='';return;
       }
-      school=d.school||'';
+      school=d.school||''; CODE=code;
       $('code').value=''; $('err').textContent='';
       $('gate').hidden=true; $('view').hidden=false; $('lockBtn').hidden=false;
       $('sub').textContent=L('only')+(school?' · '+school:'');
-      DATA=d; build(d); render();
+      DATA=d; build(d); render(); pickers(d);
     })
     .catch(function(){checking=false;$('err').style.color='#ff8888';$('err').textContent=L('conn')});
 }
 $('open').onclick=openView;
 $('code').addEventListener('keydown',function(e){if(e.key==='Enter')openView()});
-$('lockBtn').onclick=function(){school='';players={};DATA=null;CUR=null;$('report').hidden=true;
+$('lockBtn').onclick=function(){school='';CODE='';players={};DATA=null;CUR=null;$('report').hidden=true;$('schoolPick').hidden=true;$('schoolPick').style.display='none';
   $('view').hidden=true;$('player').hidden=true;$('gate').hidden=false;$('lockBtn').hidden=true;
   $('sub').textContent=L('only');$('list').innerHTML='';$('count').textContent=''};
 
