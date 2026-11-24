@@ -106,6 +106,10 @@ svg.chart{width:100%;height:auto;display:block}
 </div>
 
 <div id="view" hidden>
+  <!-- 📸 coach tool: branded player graphics (Photo Day, share to parents) — its own site, opens in its own tab -->
+  <div style="display:flex;justify-content:center;margin:0 0 14px">
+    <a id="spotLink" class="pill" href="https://player-spotlight.onrender.com/" target="_blank" rel="noopener" style="border-color:#FF7A18;color:#FF7A18;text-decoration:none" data-cv="spot">📸 Player Spotlight Studio</a>
+  </div>
   <!-- a coach code with more than one school: pick which one to see -->
   <div id="schoolPick" hidden style="margin:0 0 14px;display:flex;gap:8px;align-items:center;justify-content:center;flex-wrap:wrap">
     <span style="font-size:.72rem;font-weight:900;letter-spacing:.12em;text-transform:uppercase;color:#a7adba" data-cv="schoolLbl">Escuela</span>
@@ -174,14 +178,14 @@ var checking=false;
 // ── Spanish first, English with the switch (the same choice the progress report uses) ──
 var LANG=(function(){try{return localStorage.getItem('rp-lang')==='en'?'en':'es'}catch(e){return 'es'}})();
 var CV={
-  es:{gBtn:'📖 Guía de juegos',gClose:'✕ Cerrar',gAll:'Ver todos los juegos de esta sección',gHead:'📖 Guía de juegos',gDoes:'Qué hace',gTrains:'Qué entrena',gCourt:'🏀 En la cancha',gRead:'Cómo leer el número',gym:'← EL GYM',lock:'🔒 Bloquear',only:'Solo coaches',code:'Código de coach',open:'Abrir',note:'El código de coach se crea en License Admin → Coach. Un código de juego no abre esta vista.',
+  es:{spot:'📸 Player Spotlight Studio',gBtn:'📖 Guía de juegos',gClose:'✕ Cerrar',gAll:'Ver todos los juegos de esta sección',gHead:'📖 Guía de juegos',gDoes:'Qué hace',gTrains:'Qué entrena',gCourt:'🏀 En la cancha',gRead:'Cómo leer el número',gym:'← EL GYM',lock:'🔒 Bloquear',only:'Solo coaches',code:'Código de coach',open:'Abrir',note:'El código de coach se crea en License Admin → Coach. Un código de juego no abre esta vista.',
       gtitle:'🏀 Jugadores · mejor nivel en cada estación',hPlayer:'Jugador',hLast:'Última fecha',back:'← Atrás',all:'← Todos',rep:'📄 Reporte de progreso',
       checking:'Verificando…',bad:'No es un código de coach — o ya no está activo.',conn:'Problema de conexión — intenta otra vez.',
       none:'Todavía no hay jugadores',at:' en ',noneHow:'Los jugadores aparecen aquí cuando entran y llenan su nombre, edad y grado.',
       count:function(n){return n+' jugador'+(n>1?'es':'')+' · en orden A–Z, sin ranking · nivel = objetivos en la cadena más larga completada'},
       schoolLbl:'Escuela',cgTitle:'🧠 cognogym.com · Ritnome · último resultado',rvTitle:'⚡ Reaction Velocity · último resultado en cada estación',rvCount:function(n){return n+' jugador'+(n>1?'es':'')+' en Reaction Velocity · en orden A–Z, sin ranking'},cgBest:'mejor',cgN:function(n){return n+(n===1?' sesión':' sesiones')},cgLatest:'último',cgCount:function(n){return n+' jugador'+(n>1?'es':'')+' en cognogym.com · en orden A–Z, sin ranking'},yrs:'años',lv:'Nv',pts:'pts',lastDate:'última fecha ',notYet:'Todavía no ha jugado',score:' · nivel',first:'Primera',latest:'Última',best:'Mejor',
       one:'Una sesión hasta ahora',since:function(d,n){return '<b>'+(d>0?'+':'')+d+' '+(Math.abs(d)===1?'nivel':'niveles')+'</b> desde la primera · '+n+' sesiones'}},
-  en:{gBtn:'📖 Game guide',gClose:'✕ Close',gAll:'See every game in this section',gHead:'📖 Game guide',gDoes:'What it is',gTrains:'What it trains',gCourt:'🏀 On the court',gRead:'How to read the number',gym:'← THE GYM',lock:'🔒 Lock',only:'Coaches only',code:'Coach code',open:'Open',note:'A Coach code is made in License Admin → Coach. A game code does not open this view.',
+  en:{spot:'📸 Player Spotlight Studio',gBtn:'📖 Game guide',gClose:'✕ Close',gAll:'See every game in this section',gHead:'📖 Game guide',gDoes:'What it is',gTrains:'What it trains',gCourt:'🏀 On the court',gRead:'How to read the number',gym:'← THE GYM',lock:'🔒 Lock',only:'Coaches only',code:'Coach code',open:'Open',note:'A Coach code is made in License Admin → Coach. A game code does not open this view.',
       gtitle:'🏀 Players · best level in each station',hPlayer:'Player',hLast:'Last date',back:'← Back',all:'← All players',rep:'📄 Progress report',
       checking:'Checking…',bad:'Not a Coach code — or it is no longer active.',conn:'Connection problem — please try again.',
       none:'No players yet',at:' at ',noneHow:'Players show up here once they sign in and fill in their name, age and grade.',
