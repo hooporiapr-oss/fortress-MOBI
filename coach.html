@@ -90,6 +90,9 @@ svg.chart{width:100%;height:auto;display:block}
 /* 📸 player cards published from Player Spotlight Studio */
 .sptog{display:block;margin:0 auto 14px;padding:10px 18px;border:2px solid #FF7A18;background:rgba(0,0,0,.5);color:#FF7A18;font:900 .8rem Arial,sans-serif;letter-spacing:.08em;text-transform:uppercase;border-radius:999px;cursor:pointer}
 .sptog[hidden]{display:none}
+#teamBar{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:0 0 14px}#teamBar[hidden]{display:none}
+#teamBar button{padding:7px 13px;border-radius:999px;border:2px solid rgba(255,255,255,.22);background:rgba(0,0,0,.5);color:#cfd3dc;font:900 .74rem Arial,sans-serif;letter-spacing:.04em;cursor:pointer}
+#teamBar button.on{border-color:#FFD700;color:#FFD700;background:#1a1606}
 #spBlock{margin:0 0 22px}
 .spgrp{font-size:.72rem;font-weight:900;letter-spacing:.12em;text-transform:uppercase;color:#FFD700;margin:14px 2px 8px}
 .spgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px}
@@ -127,6 +130,8 @@ svg.chart{width:100%;height:auto;display:block}
     <span style="font-size:.72rem;font-weight:900;letter-spacing:.12em;text-transform:uppercase;color:#a7adba" data-cv="schoolLbl">Escuela</span>
     <select id="schoolSel" style="padding:9px 12px;border-radius:12px;border:2px solid #FFD700;background:#0a0a0f;color:#fff;font:800 .95rem Arial,sans-serif;max-width:100%"></select>
   </div>
+  <!-- 🏀 the program's teams (Team 5 … Team 18): what this code may see, set in License Admin -->
+  <div id="teamBar" hidden></div>
   <!-- 📸 the school's player cards, published from Player Spotlight Studio -->
   <button id="spTog" class="sptog" type="button" hidden></button>
   <div id="spBlock" hidden>
@@ -197,14 +202,14 @@ var checking=false;
 // ── Spanish first, English with the switch (the same choice the progress report uses) ──
 var LANG=(function(){try{return localStorage.getItem('rp-lang')==='en'?'en':'es'}catch(e){return 'es'}})();
 var CV={
-  es:{spot:'📸 Player Spotlight Studio',spTitle:'📸 Tarjetas de jugadores',spShow:function(n){return '📸 Tarjetas de jugadores ('+n+')'},spHide:'📸 Ocultar tarjetas',spShare:'Compartir',spSave:'Descargar',spCount:function(n){return n+' tarjeta'+(n>1?'s':'')+' · toca una para verla completa'},spLoad:'Cargando…',spNone:'Todavía no hay tarjetas. Publícalas desde el estudio en dynamicbball.com → Jugadores → Publicar tarjetas en la Vista del Coach.',gBtn:'📖 Guía de juegos',gClose:'✕ Cerrar',gAll:'Ver todos los juegos de esta sección',gHead:'📖 Guía de juegos',gDoes:'Qué hace',gTrains:'Qué entrena',gCourt:'🏀 En la cancha',gRead:'Cómo leer el número',gym:'← EL GYM',lock:'🔒 Bloquear',only:'Solo coaches',code:'Código de coach',open:'Abrir',note:'El código de coach se crea en License Admin → Coach. Un código de juego no abre esta vista.',
+  es:{spot:'📸 Player Spotlight Studio',spTitle:'📸 Tarjetas de jugadores',spShow:function(n){return '📸 Tarjetas de jugadores ('+n+')'},spHide:'📸 Ocultar tarjetas',spShare:'Compartir',spSave:'Descargar',spCount:function(n){return n+' tarjeta'+(n>1?'s':'')+' · toca una para verla completa'},spLoad:'Cargando…',allTeams:'Todos los equipos',spNone:'Todavía no hay tarjetas. Publícalas desde el estudio en dynamicbball.com → Jugadores → Publicar tarjetas en la Vista del Coach.',gBtn:'📖 Guía de juegos',gClose:'✕ Cerrar',gAll:'Ver todos los juegos de esta sección',gHead:'📖 Guía de juegos',gDoes:'Qué hace',gTrains:'Qué entrena',gCourt:'🏀 En la cancha',gRead:'Cómo leer el número',gym:'← EL GYM',lock:'🔒 Bloquear',only:'Solo coaches',code:'Código de coach',open:'Abrir',note:'El código de coach se crea en License Admin → Coach. Un código de juego no abre esta vista.',
       gtitle:'🏀 Jugadores · mejor nivel en cada estación',hPlayer:'Jugador',hLast:'Última fecha',back:'← Atrás',all:'← Todos',rep:'📄 Reporte de progreso',
       checking:'Verificando…',bad:'No es un código de coach — o ya no está activo.',conn:'Problema de conexión — intenta otra vez.',
       none:'Todavía no hay jugadores',at:' en ',noneHow:'Los jugadores aparecen aquí cuando entran y llenan su nombre, edad y grado.',
       count:function(n){return n+' jugador'+(n>1?'es':'')+' · en orden A–Z, sin ranking · nivel = objetivos en la cadena más larga completada'},
       schoolLbl:'Escuela',cgTitle:'🧠 cognogym.com · Ritnome · último resultado',rvTitle:'⚡ Reaction Velocity · último resultado en cada estación',rvCount:function(n){return n+' jugador'+(n>1?'es':'')+' en Reaction Velocity · en orden A–Z, sin ranking'},cgBest:'mejor',cgN:function(n){return n+(n===1?' sesión':' sesiones')},cgLatest:'último',cgCount:function(n){return n+' jugador'+(n>1?'es':'')+' en cognogym.com · en orden A–Z, sin ranking'},yrs:'años',lv:'Nv',pts:'pts',lastDate:'última fecha ',notYet:'Todavía no ha jugado',score:' · nivel',first:'Primera',latest:'Última',best:'Mejor',
       one:'Una sesión hasta ahora',since:function(d,n){return '<b>'+(d>0?'+':'')+d+' '+(Math.abs(d)===1?'nivel':'niveles')+'</b> desde la primera · '+n+' sesiones'}},
-  en:{spot:'📸 Player Spotlight Studio',spTitle:'📸 Player cards',spShow:function(n){return '📸 Player cards ('+n+')'},spHide:'📸 Hide cards',spShare:'Share',spSave:'Download',spCount:function(n){return n+' card'+(n>1?'s':'')+' · tap one to see it full size'},spLoad:'Loading…',spNone:'No cards yet. Publish them from the studio at dynamicbball.com → Players → Publish cards to Coach View.',gBtn:'📖 Game guide',gClose:'✕ Close',gAll:'See every game in this section',gHead:'📖 Game guide',gDoes:'What it is',gTrains:'What it trains',gCourt:'🏀 On the court',gRead:'How to read the number',gym:'← THE GYM',lock:'🔒 Lock',only:'Coaches only',code:'Coach code',open:'Open',note:'A Coach code is made in License Admin → Coach. A game code does not open this view.',
+  en:{spot:'📸 Player Spotlight Studio',spTitle:'📸 Player cards',spShow:function(n){return '📸 Player cards ('+n+')'},spHide:'📸 Hide cards',spShare:'Share',spSave:'Download',spCount:function(n){return n+' card'+(n>1?'s':'')+' · tap one to see it full size'},spLoad:'Loading…',allTeams:'All teams',spNone:'No cards yet. Publish them from the studio at dynamicbball.com → Players → Publish cards to Coach View.',gBtn:'📖 Game guide',gClose:'✕ Close',gAll:'See every game in this section',gHead:'📖 Game guide',gDoes:'What it is',gTrains:'What it trains',gCourt:'🏀 On the court',gRead:'How to read the number',gym:'← THE GYM',lock:'🔒 Lock',only:'Coaches only',code:'Coach code',open:'Open',note:'A Coach code is made in License Admin → Coach. A game code does not open this view.',
       gtitle:'🏀 Players · best level in each station',hPlayer:'Player',hLast:'Last date',back:'← Back',all:'← All players',rep:'📄 Progress report',
       checking:'Checking…',bad:'Not a Coach code — or it is no longer active.',conn:'Connection problem — please try again.',
       none:'No players yet',at:' at ',noneHow:'Players show up here once they sign in and fill in their name, age and grade.',
@@ -273,12 +278,23 @@ function openView(){
 }
 $('open').onclick=openView;
 $('code').addEventListener('keydown',function(e){if(e.key==='Enter')openView()});
-$('lockBtn').onclick=function(){closeGuide();SP=null;SPOK++;$('spTog').hidden=true;$('spBlock').hidden=true;$('spList').innerHTML='';$('spBox').classList.remove('on');CG=null;CGOK++;$('cgBlock').hidden=true;$('rvBlock').hidden=true;$('hmBlock').hidden=false;school='';CODE='';players={};DATA=null;CUR=null;$('report').hidden=true;$('schoolPick').hidden=true;$('schoolPick').style.display='none';
+$('lockBtn').onclick=function(){closeGuide();SP=null;TEAMOF={};TEAMSOK=null;TEAM='';$('teamBar').hidden=true;SPOK++;$('spTog').hidden=true;$('spBlock').hidden=true;$('spList').innerHTML='';$('spBox').classList.remove('on');CG=null;CGOK++;$('cgBlock').hidden=true;$('rvBlock').hidden=true;$('hmBlock').hidden=false;school='';CODE='';players={};DATA=null;CUR=null;$('report').hidden=true;$('schoolPick').hidden=true;$('schoolPick').style.display='none';
   $('view').hidden=true;$('player').hidden=true;$('gate').hidden=false;$('lockBtn').hidden=true;
   $('sub').textContent=L('only');$('list').innerHTML='';$('count').textContent=''};
 
 // ── The players: their info (the newest one they gave) and their scores per station ──
+// ── 🏀 teams: each player's team (License Admin) and the team picked in the bar ('' = every team this code sees) ──
+var TEAMOF={},TEAMSOK=null,TEAM='';
+function teamOf(name){return TEAMOF[String(name||'').trim().toLowerCase()]||''}
+function inTeam(name){var t=teamOf(name);if(TEAMSOK&&!t)return false;return !TEAM||t===TEAM}
+function teamNum(t){return parseInt(String(t).replace(/\D/g,''),10)||99}
+function renderTeams(){var have={};Object.keys(TEAMOF).forEach(function(k){have[TEAMOF[k]]=1});(SP||[]).forEach(function(c){if(c.team&&(!TEAMSOK||TEAMSOK.indexOf(c.team)>=0))have[c.team]=1});
+  var list=Object.keys(have).sort(function(a,b){return teamNum(a)-teamNum(b)});if(TEAM&&list.indexOf(TEAM)<0)TEAM='';
+  var bar=$('teamBar');if(!list.length||(list.length===1&&TEAMSOK)){bar.hidden=true;bar.innerHTML='';return}
+  bar.innerHTML='<button type="button" data-t=""'+(TEAM?'':' class="on"')+'>'+esc(L('allTeams'))+'</button>'+list.map(function(t){return '<button type="button" data-t="'+esc(t)+'"'+(t===TEAM?' class="on"':'')+'>'+esc(t)+'</button>'}).join('');
+  bar.hidden=false;Array.prototype.forEach.call(bar.querySelectorAll('button'),function(b){b.onclick=function(){TEAM=b.getAttribute('data-t');render();renderCg();renderSp()}})}
 function build(d){
+  TEAMOF=(d&&d.team_of)||{};TEAMSOK=(d&&d.teams)||null;TEAM='';
   players={};
   function who(r){var k=String(r.name||'').trim().toLowerCase(); if(!k)return null;
     var p=players[k]||(players[k]={name:String(r.name).trim(),age:null,grade:'',games:{},last:''});
@@ -301,14 +317,15 @@ function cgGet(tbl,q){return fetch(SB_URL+'/rest/v1/'+tbl+'?'+q,{headers:{apikey
 var SP=null,SPOK=0,SPOPEN=false,SPCUR=null;
 function loadSp(){var my=++SPOK;SP=null;$('spTog').hidden=true;$('spBlock').hidden=true;
   rpc('spotlight_list',{p_code:CODE,p_school:school}).then(function(r){if(!r.ok)throw 0;return r.json()})
-    .then(function(d){if(my!==SPOK)return;SP=(d&&d.cards)||[];renderSp()}).catch(function(){})}
+    .then(function(d){if(my!==SPOK)return;SP=(d&&d.cards)||[];renderSp();renderTeams()}).catch(function(){})}
 function renderSp(){if(!SP){$('spTog').hidden=true;$('spBlock').hidden=true;return}
   $('spTog').hidden=false;$('spTog').textContent=SPOPEN?L('spHide'):L('spShow')(SP.length);$('spBlock').hidden=!SPOPEN;
-  if(!SP.length){$('spList').innerHTML='<div class="count">'+esc(L('spNone'))+'</div>';$('spCount').textContent='';return}
-  var html='',grp=null;SP.forEach(function(c,i){var g=[c.team,c.category].filter(Boolean).join(' · ');
+  var shown=SP.filter(function(c){return !TEAM||c.team===TEAM});$('spTog').textContent=SPOPEN?L('spHide'):L('spShow')(shown.length);
+  if(!shown.length){$('spList').innerHTML='<div class="count">'+esc(L('spNone'))+'</div>';$('spCount').textContent='';return}
+  var html='',grp=null;shown.forEach(function(c){var g=[c.team,c.category].filter(Boolean).join(' · ');
     if(g!==grp){if(grp!==null)html+='</div>';html+='<div class="spgrp">'+esc(g||'—')+'</div><div class="spgrid">';grp=g}
-    html+='<button type="button" class="spcard" data-i="'+i+'"><img alt="" loading="lazy" src="'+esc(c.thumb)+'"><span>'+esc(c.name)+'</span></button>'});
-  $('spList').innerHTML=html+'</div>';$('spCount').textContent=L('spCount')(SP.length);
+    html+='<button type="button" class="spcard" data-i="'+SP.indexOf(c)+'"><img alt="" loading="lazy" src="'+esc(c.thumb)+'"><span>'+esc(c.name)+'</span></button>'});
+  $('spList').innerHTML=html+'</div>';$('spCount').textContent=L('spCount')(shown.length);
   Array.prototype.forEach.call($('spList').querySelectorAll('.spcard'),function(b){b.onclick=function(){openSp(SP[+b.getAttribute('data-i')])}})}
 $('spTog').onclick=function(){SPOPEN=!SPOPEN;renderSp()};
 function openSp(c){SPCUR=null;var im=$('spBox').querySelector('img');im.src=c.thumb;im.alt=c.name;$('spBox').classList.add('on');
@@ -350,7 +367,7 @@ function renderCg(){
 function renderSet(id,gs,countKey){
   var blk=$(id+'Block');
   if(!CG){blk.hidden=true;return}
-  var keys=Object.keys(CG).filter(function(k){return gs.some(function(g){return CG[k].g[g]})})
+  var keys=Object.keys(CG).filter(function(k){return inTeam(CG[k].name)&&gs.some(function(g){return CG[k].g[g]})})
     .sort(function(a,b){return CG[a].name.localeCompare(CG[b].name,undefined,{sensitivity:'base'})});
   if(!keys.length){blk.hidden=true;return}
   var cols=CGG.filter(function(g){return gs.indexOf(g[0])>=0&&keys.some(function(k){return CG[k].g[g[0]]})});
@@ -369,9 +386,10 @@ function renderSet(id,gs,countKey){
   blk.hidden=false;
 }
 function render(){
-  var keys=Object.keys(players).sort(function(a,b){return players[a].name.localeCompare(players[b].name,undefined,{sensitivity:'base'})});
+  renderTeams();
+  var keys=Object.keys(players).filter(function(k){return inTeam(players[k].name)}).sort(function(a,b){return players[a].name.localeCompare(players[b].name,undefined,{sensitivity:'base'})});
   $('list').innerHTML=keys.length?keys.map(function(k){var p=players[k];
-    return '<button class="row" type="button" data-k="'+esc(k)+'"><span class="nm">'+esc(p.name)+'<small>'+esc(infoShort(p))+'</small></span>'+
+    return '<button class="row" type="button" data-k="'+esc(k)+'"><span class="nm">'+esc(p.name)+'<small>'+esc([teamOf(p.name),infoShort(p)].filter(Boolean).join(' · '))+'</small></span>'+
       GAMES.map(function(g){var a=p.games[g[0]];if(!a||!a.length)return '<span class="v">—</span>';var b=best(a);return '<span class="v">'+L('lv')+' '+b+'</span>'}).join('')+
       '<span class="last">'+day(p.last)+'</span></button>';
   }).join(''):'<div class="empty">'+L('none')+(school?L('at')+esc(school):'')+'.<br>'+L('noneHow')+'</div>';
