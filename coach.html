@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
@@ -106,6 +106,11 @@ svg.chart{width:100%;height:auto;display:block}
 #spBox button{padding:10px 18px;border-radius:999px;border:2px solid rgba(255,255,255,.3);background:#111;color:#fff;font:900 .8rem Arial,sans-serif;cursor:pointer}
 #spBox button.pri{border-color:#FF7A18;color:#FF7A18}
 </style>
+<style>
+#po{margin:12px 0 20px;border:1px solid #554b24;border-radius:16px;background:#13141e;overflow:hidden;color:#fff}
+#po summary{cursor:pointer;padding:15px;font-weight:900;color:#FFD700;font-size:1rem}
+#poBody{padding:0 14px 16px}#po .po-controls{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:12px 0}#po label{font-size:.72rem;color:#c5c7d1;display:flex;flex-direction:column;gap:6px}#po select{width:100%;min-height:44px;border:1px solid #6c6c7f;border-radius:9px;background:#202130;color:white;padding:8px;font:inherit;font-size:.86rem}#po .po-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:12px 0}#po .po-kpi{background:#202130;padding:12px;border-radius:10px;min-width:0}#po .po-kpi b{display:block;font-size:1.7rem;color:#FFD700;font-variant-numeric:tabular-nums}#po .po-kpi span{font-size:.78rem;color:#c5c7d1}#po .po-row{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,2fr) auto;gap:8px;align-items:center;margin:9px 0;font-size:.78rem}#po .po-bar{height:8px;background:#303244;border-radius:99px;overflow:hidden}#po .po-bar i{display:block;height:100%;background:#FFD700;border-radius:99px}#po h3{font-size:.9rem;margin:16px 0 8px}#po .po-note{font-size:.74rem;line-height:1.5;color:#c5c7d1;margin:8px 0}#po table{width:100%;border-collapse:collapse;font-size:.78rem;text-align:left}#po th,#po td{padding:8px 4px;border-bottom:1px solid #383849;vertical-align:top}#po th{color:#c5c7d1}#po button{min-height:44px;margin-top:12px;border:1px solid #FFD700;background:transparent;color:#FFD700;border-radius:10px;padding:8px 15px;font-weight:bold;cursor:pointer}#po .po-scroll{overflow:auto} @media(max-width:400px){#po .po-controls{grid-template-columns:1fr 1fr}#po .po-controls label:last-child{grid-column:1/-1}} @media print{body.po-print *{visibility:hidden!important}body.po-print #po,body.po-print #po *{visibility:visible!important}body.po-print #po{position:absolute;top:0;left:0;width:100%;color:#000;background:#fff;border:0;margin:0}body.po-print #po .po-controls,body.po-print #po button{display:none!important}body.po-print #po summary,body.po-print #po .po-kpi b{color:#000}body.po-print #po .po-kpi{background:#eee}body.po-print #po .po-note,body.po-print #po .po-kpi span,body.po-print #po th{color:#333}body.po-print #po .po-bar i{background:#555;print-color-adjust:exact}}
+</style>
 </head>
 <body>
 <div class="top">
@@ -132,6 +137,7 @@ svg.chart{width:100%;height:auto;display:block}
   </div>
   <!-- 🏀 the program's teams (Team 5 … Team 18): what this code may see, set in License Admin -->
   <div id="teamBar" hidden></div>
+  <details id="po"><summary id="poTitle">Resumen del programa</summary><div id="poBody"><div class="po-note" id="poScope"></div><div class="po-controls"><label><span id="poPeriodL">Período</span><select id="poPeriod"><option value="7">7 días</option><option value="30" selected>30 días</option><option value="90">90 días</option></select></label><label><span id="poPlatformL">Plataforma</span><select id="poPlatform"><option value="all">Todas</option><option value="hm">Hooporia.mobi</option><option value="rv">Reaction Velocity</option><option value="cg">Cognitivo Gym</option><option value="shared">Estaciones compartidas</option></select></label><label><span id="poCategoryL">Categoría</span><select id="poCategory"><option value="">Todas</option></select></label></div><div id="poResult" aria-live="polite"></div><button id="poPrint" type="button">Imprimir / PDF</button></div></details>
   <!-- 📸 the school's player cards, published from Player Spotlight Studio -->
   <button id="spTog" class="sptog" type="button" hidden></button>
   <div id="spBlock" hidden>
@@ -227,7 +233,7 @@ function applyLang(){
 }
 document.querySelectorAll('#cvLang button').forEach(function(b){b.onclick=function(){
   LANG=b.getAttribute('data-l'); try{localStorage.setItem('rp-lang',LANG)}catch(e){}
-  applyLang();
+  applyLang();poRender();
   if(!$('view').hidden){render();renderCg();renderSp();}
   if(GOPEN)openGuide(GOPEN[0],GOPEN[1]);
   if(!$('player').hidden&&CUR)showPlayer(CUR);
@@ -247,7 +253,7 @@ $('schoolSel').onchange=function(){
     .then(function(r){if(!r.ok)throw 0;return r.json()})
     .then(function(d){ if(!d){$('lockBtn').onclick();return}
       school=d.school||''; $('sub').textContent=L('only')+(school?' · '+school:'');
-      DATA=d; CUR=null; build(d); render(); pickers(d); loadCg(); loadSp();
+      DATA=d; CUR=null; CG=null; CGOK++; poReset(); build(d); render(); pickers(d); loadCg(); loadSp();
       $('player').hidden=true; $('report').hidden=true; $('view').hidden=false; })
     .catch(function(){$('count').textContent=L('conn')});
 };
@@ -272,13 +278,13 @@ function openView(){
       $('code').value=''; $('err').textContent='';
       $('gate').hidden=true; $('view').hidden=false; $('lockBtn').hidden=false;
       $('sub').textContent=L('only')+(school?' · '+school:'');
-      DATA=d; build(d); render(); pickers(d); loadCg(); loadSp();
+      DATA=d; CG=null; CGOK++; poReset(); build(d); render(); pickers(d); loadCg(); loadSp();
     })
     .catch(function(){checking=false;$('err').style.color='#ff8888';$('err').textContent=L('conn')});
 }
 $('open').onclick=openView;
 $('code').addEventListener('keydown',function(e){if(e.key==='Enter')openView()});
-$('lockBtn').onclick=function(){closeGuide();SP=null;TEAMOF={};TEAMSOK=null;TEAM='';$('teamBar').hidden=true;SPOK++;$('spTog').hidden=true;$('spBlock').hidden=true;$('spList').innerHTML='';$('spBox').classList.remove('on');CG=null;CGOK++;$('cgBlock').hidden=true;$('rvBlock').hidden=true;$('hmBlock').hidden=false;school='';CODE='';players={};DATA=null;CUR=null;$('report').hidden=true;$('schoolPick').hidden=true;$('schoolPick').style.display='none';
+$('lockBtn').onclick=function(){closeGuide();SP=null;TEAMOF={};TEAMSOK=null;TEAM='';$('teamBar').hidden=true;SPOK++;$('spTog').hidden=true;$('spBlock').hidden=true;$('spList').innerHTML='';$('spBox').classList.remove('on');CG=null;CGOK++;$('cgBlock').hidden=true;$('rvBlock').hidden=true;$('hmBlock').hidden=false;school='';CODE='';players={};DATA=null;CUR=null;poReset();$('report').hidden=true;$('schoolPick').hidden=true;$('schoolPick').style.display='none';
   $('view').hidden=true;$('player').hidden=true;$('gate').hidden=false;$('lockBtn').hidden=true;
   $('sub').textContent=L('only');$('list').innerHTML='';$('count').textContent=''};
 
@@ -312,7 +318,7 @@ var CGG=[['rs','Ritnome BPM'],['st','Swipe test'],['rv','Reaction Speed'],['zn',
 // two sections: cognogym.com's own (Ritnome), and the five Reaction Velocity stations — Zona, Zona Roja
 // and Encadena are the same games on both sites and save to the same board, so they show once, there
 var CG_SETS=[['cg',['rs','st'],'cgCount'],['rv',['rv','zn','zr','enc','sw'],'rvCount']];
-function cgGet(tbl,q){return fetch(SB_URL+'/rest/v1/'+tbl+'?'+q,{headers:{apikey:SB_KEY,Authorization:'Bearer '+SB_KEY}}).then(function(r){return r.ok?r.json():[]}).catch(function(){return []})}
+function cgGet(tbl,q){return fetch(SB_URL+'/rest/v1/'+tbl+'?'+q,{headers:{apikey:SB_KEY,Authorization:'Bearer '+SB_KEY,Prefer:'count=exact'}}).then(async function(r){if(!r.ok)return {rows:[],complete:false};var a=await r.json();var range=r.headers.get('Content-Range')||'',m=/\/(\d+)$/.exec(range);return {rows:Array.isArray(a)?a:[],complete:Array.isArray(a)&&!!m&&+m[1]===a.length}}).catch(function(){return {rows:[],complete:false}})}
 // ── 📸 player cards (Player Spotlight Studio publishes them; read with the coach code) ──
 var SP=null,SPOK=0,SPOPEN=false,SPCUR=null;
 function loadSp(){var my=++SPOK;SP=null;$('spTog').hidden=true;$('spBlock').hidden=true;
@@ -339,12 +345,13 @@ $('spClose').onclick=function(){$('spBox').classList.remove('on')};
 $('spBox').onclick=function(e){if(e.target===this)this.classList.remove('on')};
 function loadCg(){
   var my=++CGOK, sc='school_name=eq.'+encodeURIComponent(school)+'&hidden=is.false&order=logged_at.asc&limit=5000';
-  CG=null; $('cgBlock').hidden=true; $('rvBlock').hidden=true;
+  CG=null; poSource='loading'; poRender(); $('cgBlock').hidden=true; $('rvBlock').hidden=true;
   Promise.all([
     cgGet('vr_reaction_speed_standings',sc+'&speed=like.free-*&select=player_name,speed,category,logged_at'),
     cgGet('vr_mobile_standings',sc+'&select=player_name,game_key,bpm,hits,level,category,logged_at')
   ]).then(function(res){
     if(my!==CGOK)return;   // the coach switched school meanwhile
+    poSource=res.every(function(x){return x.complete})?'complete':'partial';res=res.map(function(x){return x.rows});
     var ps={};
     function add(g,r,v,of){var k=String(r.player_name||'').trim().toLowerCase();if(!k)return;
       var p=ps[k]||(ps[k]={name:String(r.player_name).trim(),cat:'',g:{},last:''});
@@ -386,7 +393,7 @@ function renderSet(id,gs,countKey){
   blk.hidden=false;
 }
 function render(){
-  renderTeams();
+  renderTeams();poRender();
   var keys=Object.keys(players).filter(function(k){return inTeam(players[k].name)}).sort(function(a,b){return players[a].name.localeCompare(players[b].name,undefined,{sensitivity:'base'})});
   $('list').innerHTML=keys.length?keys.map(function(k){var p=players[k];
     return '<button class="row" type="button" data-k="'+esc(k)+'"><span class="nm">'+esc(p.name)+'<small>'+esc([teamOf(p.name),infoShort(p)].filter(Boolean).join(' · '))+'</small></span>'+
@@ -497,12 +504,69 @@ $('view').addEventListener('click',function(e){
   var h=e.target.closest('[data-g]'); if(h){var k=h.getAttribute('data-g');for(var s in GSET)if(GSET[s].indexOf(k)>=0){openGuide(s,k);return}}
 });
 // ← back to the site the coach came from (cognogym.com and vreaction.com link here for Coach View)
+
+// Program Overview: read-only aggregation of the already-authorized Coach View records.
+var poSource='loading';
+var PO_TEXT={es:{title:'Resumen del programa',period:'Período',platform:'Plataforma',category:'Categoría',all:'Todas',days:'días',shared:'Estaciones compartidas',active:'Atletas activos',attempts:'Intentos registrados',trainingDays:'Días con actividad',repeat:'Atletas recurrentes',avg:'Intentos por atleta',activity:'Actividad diaria',teams:'Participación por equipo',station:'Rendimiento por estación',athletes:'Atletas',change:'Cambio promedio',pairs:'Atletas comparables',no:'No hay actividad en este período.',loading:'Cargando datos de las otras plataformas…',partial:'Datos de plataformas adicionales incompletos o no disponibles; los totales mostrados pueden ser parciales.',note:'Intentos, no sesiones completas. Identidad estimada por nombre normalizado dentro del programa. Recurrentes: actividad en dos o más días. Días según hora de Puerto Rico. Las estaciones compartidas no se atribuyen dos veces. Cambio: último menos primero, solo atletas con dos o más intentos comparables dentro del período.',unassigned:'Sin equipo',print:'Imprimir / PDF',scope:'Programa',team:'Equipo',allTeams:'Equipos autorizados',level:'niveles',bpm:'BPM',hits:'objetivos',noPair:'—'},en:{title:'Program Overview',period:'Period',platform:'Platform',category:'Category',all:'All',days:'days',shared:'Shared stations',active:'Active athletes',attempts:'Recorded attempts',trainingDays:'Active training days',repeat:'Returning athletes',avg:'Attempts per athlete',activity:'Daily activity',teams:'Participation by team',station:'Performance by station',athletes:'Athletes',change:'Average change',pairs:'Comparable athletes',no:'No activity in this period.',loading:'Loading additional platform data…',partial:'Additional platform data is incomplete or unavailable; displayed totals may be partial.',note:'Attempts, not complete sessions. Identity estimated by normalized name within the program. Returning: activity on two or more days. Days use Puerto Rico time. Shared stations are not attributed twice. Change: last minus first, only athletes with two or more comparable attempts within the period.',unassigned:'Unassigned',print:'Print / PDF',scope:'Program',team:'Team',allTeams:'Authorized teams',level:'levels',bpm:'BPM',hits:'targets',noPair:'—'}};
+function poT(k){return PO_TEXT[LANG][k]}
+function poDay(at){var d=new Date(at);return isNaN(+d)?'':new Date(+d-4*3600000).toISOString().slice(0,10)}
+function poRecords(){
+ var rows=[];
+ function add(name,platform,station,unit,mode,at,value,category){
+  var key=String(name||'').trim().toLowerCase(),day=poDay(at),team=teamOf(name);
+  if(!key||!day||!inTeam(name)||(TEAMSOK&&(!team||!TEAMSOK.includes(team)))||!Number.isFinite(+value)||value==null)return;
+  rows.push({key:key,platform:platform,station:station,unit:unit,mode:mode,at:at,day:day,value:+value,team:team,category:String(category||'').trim()});
+ }
+ Object.keys(players||{}).forEach(function(k){var p=players[k];Object.keys(p.games||{}).forEach(function(g){(p.games[g]||[]).forEach(function(x){add(p.name,'hm',g,'level','',x.at,x.v,p.grade)})})});
+ Object.keys(CG||{}).forEach(function(k){var p=CG[k];Object.keys(p.g||{}).forEach(function(g){(p.g[g]||[]).forEach(function(x){
+ var platform=['zn','zr','enc'].includes(g)?'shared':['rs','st'].includes(g)?'cg':'rv',unit=['rs','st','rv','sw'].includes(g)?'bpm':['zn','zr'].includes(g)?'hits':'level';
+ add(p.name,platform,g,unit,x.of||'',x.at,x.v,p.cat);
+ })})});
+ return rows;
+}
+function poStats(rows,days,platform,category,now){
+ var end=poDay(now),start=poDay(new Date(new Date(now).getTime()-(days-1)*86400000));
+ var a=rows.filter(function(r){return r.day>=start&&r.day<=end&&new Date(r.at)<=new Date(now)&&(platform==='all'||r.platform===platform||((platform==='rv'||platform==='cg')&&r.platform==='shared'))&&(!category||r.category===category)});
+ var athletes=new Map(),byDay=new Map(),byTeam=new Map(),stations=new Map();
+ a.forEach(function(r){
+ if(!athletes.has(r.key))athletes.set(r.key,new Set());athletes.get(r.key).add(r.day);
+ byDay.set(r.day,(byDay.get(r.day)||0)+1);
+ if(!byTeam.has(r.team))byTeam.set(r.team,new Set());byTeam.get(r.team).add(r.key);
+ var sk=JSON.stringify([r.platform,r.station,r.unit,r.mode]);if(!stations.has(sk))stations.set(sk,new Map());var p=stations.get(sk);if(!p.has(r.key))p.set(r.key,[]);p.get(r.key).push(r);
+ });
+ var stationRows=Array.from(stations,function(pair){var parts=JSON.parse(pair[0]),p=pair[1],delta=[];p.forEach(function(x){x.sort(function(a,b){return new Date(a.at)-new Date(b.at)});if(x.length>1)delta.push(x[x.length-1].value-x[0].value)});return {platform:parts[0],station:parts[1],unit:parts[2],mode:parts[3],athletes:p.size,pairs:delta.length,change:delta.length?delta.reduce(function(x,y){return x+y},0)/delta.length:null}});
+ return {attempts:a.length,active:athletes.size,days:byDay.size,repeat:Array.from(athletes.values()).filter(function(d){return d.size>=2}).length,byDay:Array.from(byDay).sort(),byTeam:Array.from(byTeam,function(x){return [x[0],x[1].size]}).sort(),stations:stationRows};
+}
+function poReset(){poSource='loading';$('po').open=false;$('poResult').textContent='';$('poCategory').innerHTML='<option value=""></option>';$('poCategory').value='';$('poPlatform').value='all';}
+function poRender(){
+ var el=$('poResult');if(!el)return;
+ $('poTitle').textContent=poT('title');$('poPeriodL').textContent=poT('period');$('poPlatformL').textContent=poT('platform');$('poCategoryL').textContent=poT('category');$('poPrint').textContent=poT('print');
+ Array.from($('poPeriod').options).forEach(function(o){o.textContent=o.value+' '+poT('days')});$('poPlatform').options[0].textContent=poT('all');$('poPlatform').options[4].textContent=poT('shared');
+ if(!CODE||!DATA){el.textContent='';return}
+ $('poScope').textContent=poT('scope')+': '+school+' · '+poT('team')+': '+(TEAM||poT('allTeams'));
+ var rows=poRecords(),category=$('poCategory').value,cats=Array.from(new Set(rows.map(function(r){return r.category}).filter(Boolean))).sort();
+ $('poCategory').innerHTML='<option value="">'+poT('all')+'</option>'+cats.map(function(c){return '<option value="'+esc(c)+'">'+esc(c)+'</option>'}).join('');
+ $('poCategory').value=cats.includes(category)?category:'';
+ var x=poStats(rows,+$('poPeriod').value,$('poPlatform').value,$('poCategory').value,new Date());
+ var fmt=function(v){return new Intl.NumberFormat(LANG,{maximumFractionDigits:1}).format(v)};
+ var status=poSource==='loading'?poT('loading'):poSource==='partial'?poT('partial'):'';
+ function bars(data,heading,labels){var max=Math.max(1,...data.map(function(d){return d[1]}));return '<h3>'+heading+'</h3>'+data.map(function(d){return '<div class="po-row"><span>'+esc(labels(d[0]))+'</span><span class="po-bar"><i style="width:'+(d[1]/max*100)+'%"></i></span><b>'+fmt(d[1])+'</b></div>'}).join('')}
+ var kpis=[[x.active,'active'],[x.attempts,'attempts'],[x.days,'trainingDays'],[x.repeat,'repeat'],[x.active?x.attempts/x.active:0,'avg']];
+ var names={recall:'Recall',recognition:'Recognition',replay:'Replay',fortress:'Fortress',rs:'Ritnome BPM',st:'Swipe Test',rv:'Reaction Speed',sw:'Swipe It',zn:'Zona',zr:'Zona Roja',enc:'Encadena'};
+ el.innerHTML=(status?'<p class="po-note" role="status">'+esc(status)+'</p>':'')+'<div class="po-grid">'+kpis.map(function(k){return '<div class="po-kpi"><b>'+fmt(k[0])+'</b><span>'+poT(k[1])+'</span></div>'}).join('')+'</div>'+
+ (x.attempts?bars(x.byDay,poT('activity'),function(d){return d.slice(5)})+bars(x.byTeam,poT('teams'),function(t){return t||poT('unassigned')})+
+ '<h3>'+poT('station')+'</h3><div class="po-scroll"><table><thead><tr><th>'+poT('station')+'</th><th>'+poT('athletes')+'</th><th>'+poT('change')+'</th><th>'+poT('pairs')+'</th></tr></thead><tbody>'+x.stations.map(function(st){return '<tr><td>'+esc(names[st.station]||st.station)+(st.mode?' · '+esc(st.mode):'')+'</td><td>'+fmt(st.athletes)+'</td><td>'+(st.change===null?'—':(st.change>0?'+':'')+fmt(st.change)+' '+poT(st.unit))+'</td><td>'+fmt(st.pairs)+'</td></tr>'}).join('')+'</tbody></table></div>':'<p class="po-note">'+poT('no')+'</p>')+'<p class="po-note">'+poT('note')+'</p>';
+}
+['poPeriod','poPlatform','poCategory'].forEach(function(id){$(id).addEventListener('change',poRender)});
+$('poPrint').onclick=function(){document.body.classList.add('po-print');try{window.print()}finally{document.body.classList.remove('po-print')}};
+window.addEventListener('afterprint',function(){document.body.classList.remove('po-print')});
+
 var FROM=(function(){var f=(new URLSearchParams(location.search).get('from')||'');
   if(f!=='cognogym'&&f!=='vreaction'){try{f=sessionStorage.getItem('cv-from')||''}catch(e){f=''}}
   if(f==='cognogym'||f==='vreaction'){try{sessionStorage.setItem('cv-from',f)}catch(e){}return f}return ''})();
 var BACK={cognogym:'https://cognogym.com/dynamic-hub.html',vreaction:'https://vreaction.com/reaction-velocity.html'};
 if(FROM)$('gymBack').href=BACK[FROM];
-applyLang();
+applyLang();poRender();
 $('repBack').onclick=function(){$('report').hidden=true;$('player').hidden=false};
 
 </script>
