@@ -7,7 +7,7 @@ create table coach_memory_private.bpm_measurement (
  request_id uuid not null unique,
  bpm integer not null check (bpm between 1 and 1000),
  measured_at timestamptz not null,
- received_at timestamptz not null default now(),
+ received_at timestamptz not null default clock_timestamp(),
  source text not null check(source = 'reaction_speed'),
  provenance text not null check(provenance in ('coach_observed','authenticated_client')),
  check(measured_at <= received_at),
