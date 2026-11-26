@@ -9,9 +9,9 @@ function createAuthCoachMemory({auth,endpoint,enabled=false,fetchImpl,onChange=(
  function emit(){try{onChange(state())}catch{}}
  function state(){return Object.freeze({authenticated:!!(session&&session.expiry>Date.now()),membershipId:membership,enabled:enabled&&!closed})}
  function clear(){epoch++;revision++;session=null;membership=null;clearTimeout(timer);client.invalidate();emit()}
- const client=createCoachMemoryClient({endpoint,enabled,fetchImpl,getContext:async()=>{
+ const client=createCoachMemoryClient({endpoint,enabled,fetchImpl,getContext:async(action)=>{
   const s=session,m=membership,g=revision;
-  if(closed||!s||!m||s.expiry<=Date.now())return null;
+  if(closed||!s||(!m&&action!=='list_enrollments')||s.expiry<=Date.now())return null;
   try{const {data,error}=await auth.getUser(s.token);
    if(error||data?.user?.id!==s.id||data?.user?.is_anonymous!==false){if(session===s)clear();return null}
    if(closed||session!==s||membership!==m||g!==revision||s.expiry<=Date.now())return null;
@@ -35,11 +35,14 @@ function createAuthCoachMemory({auth,endpoint,enabled=false,fetchImpl,onChange=(
  function saveGoal({requestId,effectiveOn,metric,baseline,target}={}){
   return client.request('save_goal',{request_id:requestId,effective_on:effectiveOn,goal:{metric,baseline,target}});
  }
+ function listEnrollments({pageSize=25,afterId}={}){
+  return client.request('list_enrollments',{page_size:pageSize,...(afterId!=null?{after_id:afterId}:{})});
+ }
  function history({pageSize=25,beforeTime,beforeId}={}){
   if(!Number.isInteger(pageSize)||pageSize<1||pageSize>100||(beforeTime==null)!==(beforeId==null)||(beforeId!=null&&(!uuid(beforeId)||typeof beforeTime!=='string'||!Number.isFinite(Date.parse(beforeTime)))))return Promise.reject(fail('invalid_request'));
   return client.request('read',{page_size:pageSize,...(beforeId!=null?{before_time:beforeTime,before_id:beforeId}:{})});
  }
  function dispose(){if(closed)return;closed=true;clear();subscription.unsubscribe()}
- return Object.freeze({state,select,savePlan,saveGoal,history,dispose});
+ return Object.freeze({state,select,savePlan,saveGoal,listEnrollments,history,dispose});
 }
 module.exports={createAuthCoachMemory};
