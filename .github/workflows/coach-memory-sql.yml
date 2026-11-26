@@ -49,3 +49,10 @@ jobs:
 
       - name: Test server installation and transaction rollback
         run: node development/coach-memory-install.test.cjs
+
+      - name: Apply and test private personal BPM drafts
+        run: |
+          set -eu
+          for f in bpm-verification-draft bpm-transactions-draft bpm-transactions-tests; do
+            psql -X -v ON_ERROR_STOP=1 -f "development/$f.sql"
+          done
