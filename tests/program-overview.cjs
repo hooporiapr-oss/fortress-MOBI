@@ -91,6 +91,7 @@ assert.ok(weekly.milestones.some(x=>x.key==='c'));assert.ok(!weekly.milestones.s
 assert.match(html,/id="wkPrintRoot"/);assert.match(html,/id="wkOut"/);
 console.log('PASS: weekly completed days, participation, comparable improvement, milestones and scope');
 
+loadPart('var STAGE_TEXT=','$(\'stageSelect\').onchange');
 loadPart('var RX_TEXT=','var TP_TEXT=');
 loadPart('var CY_TEXT=','$(\'cyStart\').onchange');
 const rxProfile={current:120,days:2,stations:[{station:'recall',mode:'',unit:'level',stability:{index:50}},{station:'recognition',mode:'',unit:'level',stability:{index:95}},{station:'zn',mode:10,unit:'hits',stability:{index:null}}]};
@@ -117,7 +118,7 @@ assert.equal(c.cyStats([],'2026-10-27',30,now).pending,false);
 assert.match(html,/id="tpPrescription"/);assert.match(html,/id="cyOut"/);assert.match(html,/id="cyNext"/);
 console.log('PASS: prescription prioritization, BPM confirmation, cycle boundaries, incomplete dates, and follow-up plan safeguards');
 
-loadPart('var STAGE_TEXT=','$(\'stageSelect\').onchange');
+
 assert.equal(c.stageAge(5),'5-6');assert.equal(c.stageAge(8),'7-8');assert.equal(c.stageAge(17),'15-17');assert.equal(c.stageAge(18),'');
 assert.equal(c.stageSuggest([{cat:'5-6 años'}]).value,'5-6');
 assert.equal(c.stageSuggest([{age:6},{cat:'5–6 years'}]).value,'5-6');
