@@ -98,3 +98,6 @@ jobs:
 
       - name: Test bilingual Recognition practice preview
         run: node development/recognition-practice-preview.test.cjs
+
+      - name: Test authenticated Recognition launch lifecycle
+        run: node development/authenticated-recognition.test.cjs
