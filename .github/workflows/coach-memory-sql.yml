@@ -87,3 +87,8 @@ jobs:
 
       - name: Test authenticated Recall launch lifecycle
         run: node development/authenticated-recall.test.cjs
+
+      - name: Test exact restricted BPM prescription lookup
+        run: |
+          psql -X -v ON_ERROR_STOP=1 -f development/bpm-prescription-lookup-draft.sql
+          psql -X -v ON_ERROR_STOP=1 -f development/bpm-prescription-lookup-tests.sql
