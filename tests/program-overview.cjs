@@ -55,3 +55,16 @@ const mpCtx={localStorage:{getItem(){return null}},document:{getElementById(){re
 const mp=mpCtx.window.MI_PASAPORTE.stats({runs:[{name:'Test',game:'recall',score:2,at:'2026-11-22T12:00:00Z'},{name:'Test',game:'recall',score:5,at:'2026-11-23T12:00:00Z'},{name:'Test',game:'recall',score:7,at:'2026-11-23T13:00:00Z'},{name:'Other',game:'recall',score:100,at:'2026-11-25T12:00:00Z'}]},'Test',now);
 assert.equal(mp.attempts,3);assert.equal(mp.timeline.events.filter(e=>e.type==='record').length,1);assert.equal(mp.timeline.events.find(e=>e.type==='record').value,7);assert.ok(mp.milestones.some(e=>e.kind==='level'&&e.value===5));assert.ok(!mp.milestones.some(e=>e.value===10));
 console.log('PASS: milestones, dated timeline, daily best consolidation and private passport record isolation');
+
+const readyBase={current:120,days:4,stations:[{station:'recall',mode:'',unit:'level',best:10,stability:{median:9,max:10,index:80}}]};
+assert.equal(c.readinessStats(readyBase,true).stations[0].code,'review');
+assert.equal(c.readinessStats(readyBase,false).stations[0].code,'maintain');
+assert.equal(c.readinessStats({...readyBase,current:null},true).stations[0].code,'measure');
+assert.equal(c.readinessStats({...readyBase,days:3},true).stations[0].code,'regular');
+const readyWith=(patch,stability)=>({...readyBase,stations:[{...readyBase.stations[0],...patch,stability:{...readyBase.stations[0].stability,...stability}}]});
+assert.equal(c.readinessStats(readyWith({}, {index:null}),true).stations[0].code,'insufficient');
+assert.equal(c.readinessStats(readyWith({}, {index:79}),true).stations[0].code,'reinforce');
+assert.equal(c.readinessStats(readyWith({}, {median:8}),true).stations[0].code,'maintain');
+assert.equal(c.readinessStats(readyWith({unit:'bpm'}, {}),true).stations[0].code,'maintain');
+assert.equal(c.readinessStats(readyWith({best:0},{median:0,index:100}),true).stations[0].code,'maintain');
+console.log('PASS: readiness criteria, missing BPM, participation, insufficient samples, incomplete records, and unit isolation');
