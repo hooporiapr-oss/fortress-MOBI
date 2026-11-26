@@ -35,3 +35,13 @@ assert.equal(c.gcProgress({start:100,target:130},null).status,'unknown');
 let passport=c.passStats(samples,now);assert.equal(passport.months.length,12);assert.equal(passport.attempts,6);assert.equal(passport.first,'2026-11-13');assert.equal(passport.last,'2026-11-26');assert.equal(passport.months[11].bpm,900);assert.equal(passport.profile.baseline,90);assert.equal(c.passStats([],now).first,null);assert.equal(c.passStats([],now).months.length,12);
 assert.match(html,/id="passName" type="checkbox"/);assert.ok(!/id="passName"[^>]*checked/.test(html));
 console.log('PASS: goal calculations, passport history, calendar months and anonymous export default');
+
+const stableRows=[row('a','hm','recall','level','','2026-11-24T12:00:00Z',5),row('a','hm','recall','level','','2026-11-24T13:00:00Z',5),row('a','hm','recall','level','','2026-11-25T12:00:00Z',5),row('a','hm','recall','level','','2026-11-25T13:00:00Z',5),row('a','hm','recall','level','','2026-11-26T12:00:00Z',0)];
+let stability=c.stabilityStats(stableRows,now);assert.equal(stability.median,5);assert.equal(stability.index,75);assert.equal(stability.min,0);assert.equal(stability.max,5);assert.equal(stability.days,3);
+assert.equal(c.stabilityStats(stableRows.slice(0,4),now).index,null);
+assert.equal(c.stabilityStats(stableRows.map(r=>({...r,value:0})),now).index,null);
+assert.equal(c.stabilityStats(stableRows.map(r=>({...r,value:5})),now).index,100);
+assert.equal(c.stabilityStats(stableRows.map(r=>({...r,day:'2026-11-25',at:'2026-11-25T12:00:00Z'})),now).index,null);
+assert.equal(c.stabilityStats(stableRows.concat([row('a','hm','recall','level','','2026-11-26T18:00:00Z',999)]),now).max,5);
+assert.equal(c.apStats(stableRows.concat([row('a','rv','zn','hits',25,'2026-11-25T12:00:00Z',25)]),now).stations.find(s=>s.station==='recall').stability.index,75);
+console.log('PASS: recent performance consistency, minimum sample and days, zeros, future exclusion and station isolation');
