@@ -46,3 +46,6 @@ jobs:
 
       - name: Test restricted backend database role
         run: psql -X -v ON_ERROR_STOP=1 -f development/backend-role-tests.sql
+
+      - name: Test server installation and transaction rollback
+        run: node development/coach-memory-install.test.cjs
