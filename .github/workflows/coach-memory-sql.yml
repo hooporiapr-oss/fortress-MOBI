@@ -56,3 +56,8 @@ jobs:
           for f in bpm-verification-draft bpm-transactions-draft bpm-transactions-tests; do
             psql -X -v ON_ERROR_STOP=1 -f "development/$f.sql"
           done
+
+      - name: Test confirmed BPM prescription binding
+        run: |
+          psql -X -v ON_ERROR_STOP=1 -f development/bpm-plan-binding-draft.sql
+          psql -X -v ON_ERROR_STOP=1 -f development/bpm-plan-binding-tests.sql
