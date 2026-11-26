@@ -27,15 +27,13 @@ function createMemoryService({supabaseUrl,publishableKey,withTransaction,fetchIm
   const size=input.page_size??25;
   if(read&&(!Number.isInteger(size)||size<1||size>100||(input.before_time==null)!==(input.before_id==null)||(input.before_id!=null&&(!validUuid(input.before_id)||typeof input.before_time!=='string'||!Number.isFinite(Date.parse(input.before_time))))))throw fail(400);
   try{return await withTransaction(async db=>{
-   // Session and user check must occur inside same transaction; SQL function is private.
-   const s=await db.query('select coach_memory_private.active_session($1::uuid,$2::uuid,$3::bigint) as allowed',[principal.actor,principal.session,principal.expires]);
-   if(s.rows[0]?.allowed!==true)throw fail(401);
+   // Only restricted private wrappers are accessible to the future server login.
    if(save){
-    const q=await db.query('select coach_memory_private.append_memory($1::uuid,$2::uuid,\'training_plan\',$3::date,$4::uuid,$5::jsonb) as id',[principal.actor,input.membership_id,input.effective_on,input.request_id,JSON.stringify(input.plan)]);
+    const q=await db.query('select coach_memory_private.server_save_plan($1::uuid,$2::uuid,$3::bigint,$4::uuid,$5::date,$6::uuid,$7::jsonb) as id',[principal.actor,principal.session,principal.expires,input.membership_id,input.effective_on,input.request_id,JSON.stringify(input.plan)]);
     if(!validUuid(q.rows[0]?.id))throw fail(503);return {id:q.rows[0].id};
    }
-   const q=await db.query('select * from coach_memory_private.read_memory($1::uuid,$2::uuid,$3::integer,$4::timestamptz,$5::uuid)',[principal.actor,input.membership_id,size,input.before_time??null,input.before_id??null]);return {records:q.rows};
-  })}catch(e){if(e.status)throw e;if(e.code==='42501')throw fail(403);if(e.code==='22023'||e.code==='22007'||e.code==='22008')throw fail(400);throw fail(503)}
+   const q=await db.query('select * from coach_memory_private.server_read_memory($1::uuid,$2::uuid,$3::bigint,$4::uuid,$5::integer,$6::timestamptz,$7::uuid)',[principal.actor,principal.session,principal.expires,input.membership_id,size,input.before_time??null,input.before_id??null]);return {records:q.rows};
+  })}catch(e){if(e.status)throw e;if(e.code==='28000')throw fail(401);if(e.code==='42501')throw fail(403);if(e.code==='22023'||e.code==='22007'||e.code==='22008')throw fail(400);throw fail(503)}
  }
  return {run};
 }
