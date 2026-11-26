@@ -68,3 +68,14 @@ assert.equal(c.readinessStats(readyWith({}, {median:8}),true).stations[0].code,'
 assert.equal(c.readinessStats(readyWith({unit:'bpm'}, {}),true).stations[0].code,'maintain');
 assert.equal(c.readinessStats(readyWith({best:0},{median:0,index:100}),true).stations[0].code,'maintain');
 console.log('PASS: readiness criteria, missing BPM, participation, insufficient samples, incomplete records, and unit isolation');
+
+loadPart('var ACT_TEXT=','$(\'actOut\').onclick');
+let actions=c.actStats(stableRows.concat(history),['a','b'],now,true);
+assert.equal(actions.measure.filter(x=>x.key==='b').length,1);
+assert.equal(actions.insufficient.filter(x=>x.key==='b').length,1);
+assert.equal(actions.regular.filter(x=>x.key==='b').length,1);
+assert.ok(Object.values(actions).every(g=>new Set(g.map(x=>x.key)).size===g.length));
+assert.ok(Object.values(c.actStats(history,['b'],now,true)).every(g=>g.every(x=>x.key==='b')));
+assert.equal(c.actStats(history,['a'],now,false).review.length,0);
+assert.match(html,/id="act"/);assert.match(html,/id="actOut"/);
+console.log('PASS: action groups, per-category uniqueness, authorized athlete scope and incomplete-data advancement safeguard');
