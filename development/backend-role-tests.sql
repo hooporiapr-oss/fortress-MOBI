@@ -17,6 +17,10 @@ begin
  begin perform coach_memory_private.server_read_memory(a,s,0,m,25,null,null);raise exception 'expired session accepted';exception when invalid_authorization_specification then null;end;
  begin perform 1 from coach_memory_private.event;raise exception 'raw event read allowed';exception when insufficient_privilege then null;end;
  reset role;
+ set local role coach_memory_executor;
+ begin update public.athlete_identity_membership set ends_at=now() where id=m;raise exception 'executor modified membership';exception when insufficient_privilege then null;end;
+ begin update coach_memory_private.coach_grant set revoked_at=now() where membership_id=m;raise exception 'executor modified coach grant';exception when insufficient_privilege then null;end;
+ reset role;
  if has_function_privilege('authenticated','coach_memory_private.server_save_plan(uuid,uuid,bigint,uuid,date,uuid,jsonb)','EXECUTE') then raise exception 'browser wrapper exposed';end if;
  if has_table_privilege('coach_memory_backend','coach_memory_private.event','DELETE') then raise exception 'backend delete allowed';end if;
  raise notice 'PASS: restricted backend wrapper, session enforcement, no direct event access, unverified BPM blocked';
