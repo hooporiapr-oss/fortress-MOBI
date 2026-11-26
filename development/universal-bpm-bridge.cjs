@@ -15,19 +15,17 @@ function createBpmBridge({client,getSelection,programs={},enabled=false}={}){
  function same(a,b){return a.membershipId===b.membershipId&&a.planId===b.planId&&a.sessionEpoch===b.sessionEpoch}
  async function launch(key){
   if(!enabled)throw fail('disabled');
-  const p=registry.get(key);if(!p)throw fail('unsupported_program');
+  const p=registry.get(key);if(!p){invalidate();throw fail('unsupported_program')}
   invalidate();const g=generation,s=selection();
-  const {records}=await client.request('read',{page_size:100});
+  const {prescription}=await client.request('get_bpm_plan',{plan_id:s.planId,station:p.station});
   if(g!==generation||!same(s,selection()))throw fail('selection_changed');
-  const matches=records.filter(r=>r.id===s.planId&&r.kind==='training_plan');
-  if(matches.length!==1)throw fail('prescription_unavailable');
-  const record=matches[0],payload=record.payload;
+  if(!prescription||prescription.plan_id!==s.planId||prescription.membership_id!==s.membershipId||!uuid(prescription.confirmation_id))throw fail('prescription_unavailable');
   const day=new Intl.DateTimeFormat('en-CA',{timeZone:'America/Puerto_Rico',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date());
   const part=k=>day.find(x=>x.type===k).value;
   const today=part('year')+'-'+part('month')+'-'+part('day');
-  if(typeof record.effective_on!=='string'||record.effective_on>today||records.some(r=>r.supersedes_id===record.id))throw fail('prescription_unavailable');
-  if(!payload||!Number.isInteger(payload.bpm)||payload.bpm<p.min||payload.bpm>p.max||!Array.isArray(payload.stations)||!payload.stations.includes(p.station))throw fail('incompatible_prescription');
-  const config=Object.freeze({bpm:payload.bpm,planId:s.planId});
+  if(typeof prescription.effective_on!=='string'||!/^\d{4}-\d{2}-\d{2}$/.test(prescription.effective_on)||prescription.effective_on>today)throw fail('prescription_unavailable');
+  if(!Number.isInteger(prescription.bpm)||prescription.bpm<p.min||prescription.bpm>p.max||prescription.station!==p.station)throw fail('incompatible_prescription');
+  const config=Object.freeze({bpm:prescription.bpm,planId:s.planId});
   try{p.apply(config)}catch{invalidate();throw fail('program_failed')}
   if(g!==generation||!same(s,selection())){invalidate();throw fail('selection_changed')}
   active={key,...config};return Object.freeze({...active});
