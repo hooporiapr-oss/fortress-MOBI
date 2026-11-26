@@ -19,5 +19,13 @@ const options={endpoint:'https://example.invalid/v1/coach-memory',getContext:asy
  let resolve;const slow=createCoachMemoryClient({...options,enabled:true,fetchImpl:()=>new Promise(r=>{resolve=r})});
  const pending=slow.request('submit_bpm',input);await Promise.resolve();slow.invalidate();resolve({ok:true,json:async()=>({id:r})});
  await assert.rejects(pending,e=>e.code==='selection_changed');
+ const prescription={membership_id:id,plan_id:r,confirmation_id:id,station:'recall',bpm:84,effective_on:'2026-11-25',stage:'11-12'};
+ const exact=createCoachMemoryClient({...options,enabled:true,fetchImpl:async(url,o)=>{assert.deepEqual(JSON.parse(o.body),{action:'get_bpm_plan',membership_id:id,plan_id:r,station:'recall'});return {ok:true,json:async()=>({prescription})}}});
+ assert.deepEqual(await exact.request('get_bpm_plan',{plan_id:r,station:'recall'}),{prescription});
+ await assert.rejects(exact.request('get_bpm_plan',{plan_id:r,station:'recall',bpm:99}),{code:'invalid_request'});
+ for(const patch of [{membership_id:r},{plan_id:id},{station:'replay'},{confirmation_id:null},{bpm:'84'}]){
+ const bad=createCoachMemoryClient({...options,enabled:true,fetchImpl:async()=>({ok:true,json:async()=>({prescription:{...prescription,...patch}})})});
+ await assert.rejects(bad.request('get_bpm_plan',{plan_id:r,station:'recall'}),{code:'unavailable'});
+ }
  console.log('PASS: disabled frontend gate, scoped request, token transport, override rejection and stale response suppression');
 })().catch(e=>{console.error(e);process.exitCode=1});
