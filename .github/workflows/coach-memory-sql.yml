@@ -84,3 +84,6 @@ jobs:
 
       - name: Test bilingual Recall practice preview
         run: node development/recall-practice-preview.test.cjs
+
+      - name: Test authenticated Recall launch lifecycle
+        run: node development/authenticated-recall.test.cjs
