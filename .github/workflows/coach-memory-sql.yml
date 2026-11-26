@@ -113,3 +113,9 @@ jobs:
 
       - name: Test personalized Fortress adapter and practice engine
         run: node development/fortress-practice-engine.test.cjs
+
+      - name: Test bilingual Fortress practice preview
+        run: node development/fortress-practice-preview.test.cjs
+
+      - name: Test authenticated Fortress launch lifecycle
+        run: node development/authenticated-fortress.test.cjs
