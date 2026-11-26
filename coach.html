@@ -219,7 +219,7 @@ function applyLang(){
 }
 document.querySelectorAll('#cvLang button').forEach(function(b){b.onclick=function(){
   LANG=b.getAttribute('data-l'); try{localStorage.setItem('rp-lang',LANG)}catch(e){}
-  applyLang();poRender();apRender();ciRender();
+  applyLang();cmPreviewRender();poRender();apRender();ciRender();
   if(!$('view').hidden){render();renderCg();}
   if(GOPEN)openGuide(GOPEN[0],GOPEN[1]);
   if(!$('player').hidden&&CUR)showPlayer(CUR);
