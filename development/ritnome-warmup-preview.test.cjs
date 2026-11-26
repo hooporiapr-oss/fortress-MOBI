@@ -45,6 +45,6 @@ function select(mode){$('mode').value=mode;$('mode').fire('change')}
  select('personal');assert.equal($('start').disabled,true);select('manual');await $('start').click();advance(300);contexts[0].state='suspended';contexts[0].fire('statechange');assert.equal(jobs.size,0);
  let release;resumeGate=new Promise(r=>release=r);const pending=$('start').click();assert.equal($('stop').disabled,false);$('stop').click();release();await pending;resumeGate=null;assert.equal(jobs.size,0);assert.equal($('stop').disabled,true);
  await $('start').click();window.fire('pagehide');assert.equal(jobs.size,0);assert.equal(contexts[0].state,'closed');await $('start').click();assert.equal(contexts.length,2);$('language').click();assert.equal($('stop').textContent,'Detener');$('stop').click();
- assert.match(html,/name="viewport"/);assert.match(html,/aria-live="polite"/);assert.equal([...html.matchAll(/<script src=/g)].length,3);
+ assert.match(html,/name="viewport"/);assert.match(html,/aria-live="polite"/);assert.equal([...html.matchAll(/<script src=/g)].length,4);
  console.log('PASS: Ritnome bilingual controls, manual/tap tempo, timed/free warm-up, cancellation, resume race and no persistence');
 })().catch(e=>{console.error(e);process.exitCode=1});
