@@ -743,6 +743,20 @@ $('gcCopy').onclick=async function(){if(!GC_KEY||!CODE||!DATA||$('apSelect').val
 
 
 var ACH_TEXT={es:{title:'Reconocimiento de logros',intro:'Logros individuales basados en registros disponibles. No son clasificaciones ni certificaciones deportivas.',record:'Récord personal',goal:'Meta alcanzada',consistency:'Constancia',progress:'Superación personal',none:'Aún no hay logros que cumplan los criterios. Cada práctica cuenta.',period:'Últimos 14 días completos',weeks:'4 semanas consecutivas con al menos 2 días activos por semana',copy:'Copiar logros',copied:'Logros copiados.',fail:'No se pudo copiar; seleccione el texto.',note:'Récord: supera una marca previa al período reciente. Superación: mediana mayor con al menos dos intentos por período y modalidad. Las metas corresponden a esta sesión. No se publican ni guardan reconocimientos automáticamente.',partial:'Registros incompletos o en carga: los logros pueden cambiar.',privacy:'Resumen sin nombre del atleta.',initial:'Anterior',latest:'Actual'},en:{title:'Achievement Recognition',intro:'Individual achievements based on available records. These are not rankings or athletic certifications.',record:'Personal record',goal:'Goal achieved',consistency:'Consistency',progress:'Personal improvement',none:'No achievements meet the criteria yet. Every practice counts.',period:'Last 14 complete days',weeks:'4 consecutive weeks with at least 2 active days per week',copy:'Copy achievements',copied:'Achievements copied.',fail:'Could not copy; select the text.',note:'Record: exceeds a mark before the recent period. Improvement: higher median with at least two attempts per period and mode. Goals belong to this session. Recognition is not automatically published or saved.',partial:'Records incomplete or loading: achievements may change.',privacy:'Summary excludes athlete name.',initial:'Previous',latest:'Current'}};
+
+var MILE_TEXT={es:{title:'Hitos del atleta',first:'Primera práctica registrada',bpm:'Mi primer BPM registrado',level:'Primer nivel registrado de',attempts:'Intentos registrados',days:'Días activos registrados',note:'Hitos según el historial disponible, no certificaciones ni metas obligatorias. La fecha indica el primer registro disponible que cumple el criterio.',none:'Los hitos aparecerán con tus primeros registros.'},en:{title:'Athlete milestones',first:'First recorded practice',bpm:'My first recorded BPM',level:'First recorded level of',attempts:'Recorded attempts',days:'Recorded active days',note:'Milestones based on available history, not certifications or required targets. Dates indicate the earliest available qualifying record.',none:'Milestones appear with your first records.'}};
+function mileStats(rows,now){
+ var a=rows.filter(function(r){return typeof r.at==='string'&&Number.isFinite(+new Date(r.at))&&+new Date(r.at)<=+new Date(now)&&r.day&&Number.isFinite(r.value)&&r.value>=0&&(r.unit!=='bpm'||r.value>0)}).slice().sort(function(x,y){return +new Date(x.at)-+new Date(y.at)}),out=[],seen=new Set();
+ if(a.length)out.push({kind:'first',day:a[0].day});
+ var bpm=a.find(function(r){return r.station==='rv'&&r.unit==='bpm'&&r.value>0});if(bpm)out.push({kind:'bpm',value:bpm.value,day:bpm.day});
+ [5,10].forEach(function(n){var groups=new Map();a.forEach(function(r){if(r.unit!=='level'||r.value<n)return;var k=JSON.stringify([r.station,r.mode,r.unit]);if(!groups.has(k))groups.set(k,r)});groups.forEach(function(r){out.push({kind:'level',value:n,station:r.station,mode:r.mode,unit:r.unit,day:r.day})})});
+ [25,50,100,250,500,1000].forEach(function(n){if(a.length>=n)out.push({kind:'attempts',value:n,day:a[n-1].day})});
+ var days=[];a.forEach(function(r){if(!seen.has(r.day)){seen.add(r.day);days.push(r.day)}});[5,10,25,50,100].forEach(function(n){if(days.length>=n)out.push({kind:'days',value:n,day:days[n-1]})});
+ return out;
+}
+function mileLabel(x){var t=MILE_TEXT[LANG];return x.kind==='first'?t.first:x.kind==='bpm'?t.bpm+' · '+x.value+' BPM':x.kind==='level'?gcName(x)+' · '+t.level+' '+x.value:x.value+' '+t[x.kind]}
+function mileHtml(items,summary){var t=MILE_TEXT[LANG];summary.push(t.title);items.forEach(function(x){summary.push(mileLabel(x)+' · '+x.day)});summary.push(t.note);return '<h3>'+t.title+'</h3>'+(items.length?'<div class="ach-grid">'+items.map(function(x){return '<div class="ach-card"><div class="ach-icon" aria-hidden="true">★</div><b>'+esc(mileLabel(x))+'</b><p>'+esc(x.day)+'</p></div>'}).join('')+'</div>':'<p>'+t.none+'</p>')+'<p>'+t.note+'</p>'}
+
 function achT(k){return ACH_TEXT[LANG][k]}
 function achHide(){passHide();var el=$('ach');if(!el)return;el.hidden=true;$('achOut').textContent='';$('achOut').removeAttribute('data-summary');$('achCopy').hidden=true;$('achStatus').textContent=''}
 function achStats(rows,key,goals,metrics,now){
@@ -760,12 +774,12 @@ function achRender(){
  if(!GC_KEY||!CODE||!DATA||$('apSelect').value!==GC_KEY){achHide();return}
  $('ach').hidden=false;$('achTitle').textContent=achT('title');$('achIntro').textContent=achT('intro');$('achCopy').textContent=achT('copy');
  var items=achStats(poRecords(),GC_KEY,GC_GOALS.get(GC_KEY)||[],GC_METRICS,new Date()),out=$('achOut'),summary=[achT('title'),achT('period')],icons={record:'🏆',goal:'🎯',consistency:'🔥',progress:'📈'},fmt=function(v){return v===null?'—':new Intl.NumberFormat(LANG,{maximumFractionDigits:1}).format(v)};
- if(poSource!=='complete')summary.push(achT('partial'));
+ var milestones=mileStats(poRecords().filter(function(r){return r.key===GC_KEY}),new Date());if(poSource!=='complete')summary.push(achT('partial'));
  out.innerHTML=(poSource!=='complete'?'<p>'+achT('partial')+'</p>':'')+(items.length?'<div class="ach-grid">'+items.map(function(x){
  var detail=x.kind==='consistency'?achT('weeks'):x.kind==='goal'?gcName(x.metric)+' · '+fmt(x.after)+' / '+fmt(x.target):gcName(x)+' · '+fmt(x.before)+' → '+fmt(x.after);
  summary.push(achT(x.kind)+': '+detail);return '<div class="ach-card"><div class="ach-icon" aria-hidden="true">'+icons[x.kind]+'</div><b>'+achT(x.kind)+'</b><p>'+esc(detail)+'</p></div>'
  }).join('')+'</div>':'<p>'+achT('none')+'</p>')+'<p>'+achT('note')+'</p>';
- summary.push(achT('note'),achT('privacy'));out.dataset.summary=summary.join('\n');$('achCopy').hidden=!items.length;passBind(GC_KEY);
+ out.innerHTML+=mileHtml(milestones,summary);summary.push(achT('note'),achT('privacy'));out.dataset.summary=summary.join('\n');$('achCopy').hidden=!(items.length||milestones.length);passBind(GC_KEY);
 }
 $('achCopy').onclick=async function(){if(!GC_KEY||!CODE||!DATA||$('apSelect').value!==GC_KEY)return;try{await navigator.clipboard.writeText($('achOut').dataset.summary||'');$('achStatus').textContent=achT('copied')}catch(e){$('achStatus').textContent=achT('fail')}};
 
@@ -796,7 +810,7 @@ function passRender(){
  function block(title,content){lines.push(title,content);return '<div class="pass-block"><h3>'+esc(title)+'</h3><pre>'+esc(content)+'</pre></div>'}
  html+=block(passT('goals'),goals.length?goals.map(function(g){var m=metrics.find(function(v){return v.id===g.id}),v=m?m.current:null;return gcName(m||g.metric)+': '+fmt(v)+' / '+fmt(g.target)+' — '+gcT(gcProgress(g,v).status)}).join('\n'):passT('noGoals'));
  html+=block(passT('achievements'),items.length?items.map(function(x){return achT(x.kind)+': '+(x.kind==='consistency'?achT('weeks'):x.kind==='goal'?gcName(x.metric)+' '+fmt(x.after)+' / '+fmt(x.target):gcName(x)+' '+fmt(x.before)+' → '+fmt(x.after))}).join('\n'):passT('noAch'));
- html+=block(passT('plan'),TP_KEY===PASS_KEY&&TP_PLAN?TP_PLAN.days.map(function(d,i){return tpT('day')+' '+(i+1)+'\n'+tpLines(d,TP_PLAN).join('\n')}).join('\n\n'):passT('noPlan'));
+ var milestones=mileStats(rows,now);html+=block(MILE_TEXT[LANG].title,(milestones.length?milestones.map(function(x){return mileLabel(x)+' · '+x.day}).join('\n'):MILE_TEXT[LANG].none)+'\n'+MILE_TEXT[LANG].note);html+=block(passT('plan'),TP_KEY===PASS_KEY&&TP_PLAN?TP_PLAN.days.map(function(d,i){return tpT('day')+' '+(i+1)+'\n'+tpLines(d,TP_PLAN).join('\n')}).join('\n\n'):passT('noPlan'));
  lines.push(passT('note'),passT('privacy'));html+='<p class="pass-note">'+passT('note')+'</p><p class="pass-note">'+passT('privacy')+'</p>';
  $('passOut').innerHTML=html;$('passOut').dataset.summary=lines.join('\n');$('passStatus').textContent='';
 }
