@@ -1,0 +1,42 @@
+name: Coach Memory isolated SQL
+on:
+  push:
+    branches: [feature/coach-memory-developmental-stage]
+  pull_request:
+    paths: ['development/**', '.github/workflows/coach-memory-sql.yml']
+permissions:
+  contents: read
+jobs:
+  isolated-postgres:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: synthetic_test_only
+          POSTGRES_DB: coach_memory_test
+        ports: ['5432:5432']
+        options: --health-cmd "pg_isready -U postgres -d coach_memory_test" --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      PGHOST: localhost
+      PGPORT: '5432'
+      PGUSER: postgres
+      PGPASSWORD: synthetic_test_only
+      PGDATABASE: coach_memory_test
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply draft SQL to disposable database
+        run: |
+          set -eu
+          for f in development/sql-test-bootstrap.sql development/athlete-identity-draft.sql development/coach-memory-draft.sql development/access-control-draft.sql development/enrollment-transaction-draft.sql development/coach-memory-engine-draft.sql development/session-authorization-draft.sql; do
+            psql -X -v ON_ERROR_STOP=1 -f "$f"
+          done
+      - name: Validate payloads and private privileges
+        run: psql -X -v ON_ERROR_STOP=1 -f development/coach-memory-engine-tests.sql
+      - name: Test synthetic enrollment and memory access
+        run: psql -X -v ON_ERROR_STOP=1 -f development/sql-integration-tests.sql
+
+      - name: Test synthetic session authorization
+        run: psql -X -v ON_ERROR_STOP=1 -f development/session-authorization-tests.sql
+      - name: Test authenticated adapter and disabled interface
+        run: node development/coach-memory-service.test.cjs
