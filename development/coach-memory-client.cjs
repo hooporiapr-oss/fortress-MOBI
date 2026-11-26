@@ -16,7 +16,7 @@ function createCoachMemoryClient({endpoint,enabled=false,getContext,fetchImpl=gl
   const keys={submit_bpm:['request_id','bpm','measured_at'],confirm_bpm:['request_id','measurement_id'],save_bpm_plan:['request_id','confirmation_id','effective_on','plan'],save_plan:['request_id','effective_on','plan'],read:['page_size','before_time','before_id'],get_bpm_plan:['plan_id','station']}[action];
   if(!Array.isArray(keys)||Object.keys(fields).some(k=>!keys.includes(k)))throw fail('invalid_request');
   if(action!=='read'&&action!=='get_bpm_plan'&&!uuid(fields.request_id))throw fail('invalid_request');
-  if(action==='get_bpm_plan'&&(!uuid(fields.plan_id)||!['recall','recognition','replay','fortress','zn','zr','enc'].includes(fields.station)))throw fail('invalid_request');
+  if(action==='get_bpm_plan'&&(!uuid(fields.plan_id)||!['recall','recognition','replay','fortress','zn','zr','enc','ritnome'].includes(fields.station)))throw fail('invalid_request');
   if(action==='submit_bpm'&&(!Number.isInteger(fields.bpm)||fields.bpm<1||fields.bpm>1000||typeof fields.measured_at!=='string'||!Number.isFinite(Date.parse(fields.measured_at))))throw fail('invalid_request');
   if(action==='confirm_bpm'&&!uuid(fields.measurement_id))throw fail('invalid_request');
   if(action==='save_bpm_plan'&&(!uuid(fields.confirmation_id)||!fields.plan||Object.hasOwn(fields.plan,'bpm')))throw fail('invalid_request');
