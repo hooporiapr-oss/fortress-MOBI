@@ -92,3 +92,6 @@ jobs:
         run: |
           psql -X -v ON_ERROR_STOP=1 -f development/bpm-prescription-lookup-draft.sql
           psql -X -v ON_ERROR_STOP=1 -f development/bpm-prescription-lookup-tests.sql
+
+      - name: Test personalized Recognition adapter and practice engine
+        run: node development/recognition-practice-engine.test.cjs
