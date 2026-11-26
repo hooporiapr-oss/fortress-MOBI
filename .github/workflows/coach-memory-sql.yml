@@ -72,3 +72,6 @@ jobs:
 
       - name: Test scoped Coach Memory frontend transport
         run: node development/coach-memory-client.test.cjs
+
+      - name: Test Universal BPM Bridge safeguards
+        run: node development/universal-bpm-bridge.test.cjs
