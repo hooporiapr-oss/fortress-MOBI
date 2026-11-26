@@ -9,7 +9,7 @@ const SERVER=process.env.COACH_MEMORY_SERVER_DIR||path.join(__dirname,'..','..',
 const {start}=require(path.join(SERVER,'coach-memory','local-harness.cjs'));
 const psql=q=>execFileSync('psql',[process.env.COACH_MEMORY_TEST_ADMIN_URL||DB,'-X','-qAt','-v','ON_ERROR_STOP=1','-c',q]).toString().trim();
 const asAdmin=(uid,q)=>psql(`begin; set local role authenticated; set local request.jwt.claim.sub='${uid}'; ${q}; commit;`);
-const SITE='https://hooporia.mobi',SB='https://sdaphocueugzfvjovuxd.supabase.co',API='https://cognitivo-gym-server.onrender.com';
+const SITE='https://hooporia.mobi',SB='https://sdaphocueugzfvjovuxd.supabase.co',API='https://hooporia-server.onrender.com';
 const ROOT=path.join(__dirname,'..');
 let pass=0,fail=0;const ok=(n,v)=>{v?pass++:fail++;console.log((v?'✔ ':'✘ ')+n)};
 const wait=async(f,ms=15000)=>{for(let t=0;t<ms;t+=250){if(await f())return true;await new Promise(r=>setTimeout(r,250))}return false};
