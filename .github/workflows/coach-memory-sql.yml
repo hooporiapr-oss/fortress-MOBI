@@ -28,7 +28,7 @@ jobs:
       - name: Apply draft SQL to disposable database
         run: |
           set -eu
-          for f in development/sql-test-bootstrap.sql development/athlete-identity-draft.sql development/coach-memory-draft.sql development/access-control-draft.sql development/enrollment-transaction-draft.sql development/coach-memory-engine-draft.sql development/session-authorization-draft.sql; do
+          for f in development/sql-test-bootstrap.sql development/athlete-identity-draft.sql development/coach-memory-draft.sql development/access-control-draft.sql development/enrollment-transaction-draft.sql development/coach-memory-engine-draft.sql development/session-authorization-draft.sql development/backend-role-draft.sql; do
             psql -X -v ON_ERROR_STOP=1 -f "$f"
           done
       - name: Validate payloads and private privileges
@@ -43,3 +43,6 @@ jobs:
 
       - name: Test private HTTP transport
         run: node development/coach-memory-http.test.cjs
+
+      - name: Test restricted backend database role
+        run: psql -X -v ON_ERROR_STOP=1 -f development/backend-role-tests.sql
