@@ -32,11 +32,14 @@ function createAuthCoachMemory({auth,endpoint,enabled=false,fetchImpl,onChange=(
   if(!uuid(requestId)||typeof effectiveOn!=='string'||!/^\d{4}-\d{2}-\d{2}$/.test(effectiveOn)||!['5-6','7-8','9-10','11-12','13-14','15-17','other'].includes(stage)||!Number.isInteger(days)||days<2||days>5||!Array.isArray(stations)||!stations.length||new Set(stations).size!==stations.length||stations.some(s=>!['recall','recognition','replay','fortress','zn','zr','enc','ritnome'].includes(s)))return Promise.reject(fail('invalid_request'));
   return client.request('save_plan',{request_id:requestId,effective_on:effectiveOn,plan:{stage,days,stations:[...stations],bpm:null}});
  }
+ function saveGoal({requestId,effectiveOn,metric,baseline,target}={}){
+  return client.request('save_goal',{request_id:requestId,effective_on:effectiveOn,goal:{metric,baseline,target}});
+ }
  function history({pageSize=25,beforeTime,beforeId}={}){
   if(!Number.isInteger(pageSize)||pageSize<1||pageSize>100||(beforeTime==null)!==(beforeId==null)||(beforeId!=null&&(!uuid(beforeId)||typeof beforeTime!=='string'||!Number.isFinite(Date.parse(beforeTime)))))return Promise.reject(fail('invalid_request'));
   return client.request('read',{page_size:pageSize,...(beforeId!=null?{before_time:beforeTime,before_id:beforeId}:{})});
  }
  function dispose(){if(closed)return;closed=true;clear();subscription.unsubscribe()}
- return Object.freeze({state,select,savePlan,history,dispose});
+ return Object.freeze({state,select,savePlan,saveGoal,history,dispose});
 }
 module.exports={createAuthCoachMemory};
