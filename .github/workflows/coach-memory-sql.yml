@@ -81,3 +81,6 @@ jobs:
 
       - name: Test personalized Recall gameplay engine
         run: node development/recall-practice-engine.test.cjs
+
+      - name: Test bilingual Recall practice preview
+        run: node development/recall-practice-preview.test.cjs
