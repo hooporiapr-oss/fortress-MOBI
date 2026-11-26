@@ -1,0 +1,20 @@
+'use strict';
+const test=require('node:test'),assert=require('node:assert/strict');
+const {createPersonalBpmHost}=require('./personal-bpm-host.cjs');
+const id=n=>'00000000-0000-4000-8000-'+String(n).padStart(12,'0');
+const a={membershipId:id(1),planId:id(2)},b={membershipId:id(3),planId:id(4)};
+function fixture(enabled=true){
+ let session={userId:id(5),sessionEpoch:'session-1'},notify,invalidations=0,requests=0,unsubscribed=false,resolve;
+ let reply={prescription:{membership_id:a.membershipId,plan_id:a.planId,station:'ritnome',bpm:84}};
+ const host=createPersonalBpmHost({enabled,getSession:()=>session,subscribeSession:fn=>{notify=fn;return ()=>{unsubscribed=true}},client:{invalidate(){invalidations++},request(){requests++;return new Promise(r=>{resolve=r})}}});
+ return {host,setSession(s,emit=true){session=s;if(emit)notify()},reply(v=reply){resolve(v)},counts:()=>({invalidations,requests,unsubscribed})};
+}
+const request=(host,plan=a.planId)=>host.client.request('get_bpm_plan',{plan_id:plan,station:'ritnome'});
+test('disabled by default, no implicit selection',async()=>{const f=fixture(false);assert.equal(f.host.getSelection(),null);assert.throws(()=>f.host.select(a));await assert.rejects(request(f.host));assert.equal(f.counts().requests,0);f.host.dispose()});
+test('explicit selection exposes only selected ids and epoch',async()=>{const f=fixture();assert.deepEqual(f.host.select(a),{...a,sessionEpoch:'session-1'});assert.ok(Object.isFrozen(f.host.getSelection()));const p=request(f.host);f.reply();assert.equal((await p).prescription.bpm,84);f.host.dispose()});
+test('blocks wrong plan, action, station and extra fields before transport',async()=>{const f=fixture();f.host.select(a);await assert.rejects(request(f.host,b.planId));await assert.rejects(f.host.client.request('read',{}));await assert.rejects(f.host.client.request('get_bpm_plan',{plan_id:a.planId,station:'recall'}));await assert.rejects(f.host.client.request('get_bpm_plan',{plan_id:a.planId,station:'ritnome',membership_id:b.membershipId}));assert.equal(f.counts().requests,0);f.host.dispose()});
+test('rejects mismatched response identity and station',async()=>{const f=fixture();f.host.select(a);for(const patch of [{membership_id:b.membershipId},{plan_id:b.planId},{station:'recall'}]){const p=request(f.host);f.reply({prescription:{membership_id:a.membershipId,plan_id:a.planId,station:'ritnome',...patch}});await assert.rejects(p)}f.host.dispose()});
+test('athlete switching rejects pending response including switch back',async()=>{const f=fixture();f.host.select(a);const p=request(f.host);let changes=0;const unsub=f.host.subscribeSelection(()=>changes++);f.host.select(b);f.host.select(a);f.reply();await assert.rejects(p);assert.equal(changes,2);unsub();f.host.dispose()});
+test('logout and session change invalidate selection and pending requests',async()=>{const f=fixture();f.host.select(a);let changes=0;f.host.subscribeSelection(()=>changes++);const p=request(f.host);f.setSession(null);f.reply();await assert.rejects(p);assert.equal(f.host.getSelection(),null);assert.equal(changes,1);assert.throws(()=>f.host.select(a));f.setSession({userId:id(5),sessionEpoch:'session-2'});assert.equal(f.host.getSelection(),null);f.host.select(a);assert.equal(f.host.getSelection().sessionEpoch,'session-2');f.host.dispose()});
+test('silent session changes fail closed on subsequent requests',async()=>{const f=fixture();f.host.select(a);const p=request(f.host);f.setSession({userId:id(6),sessionEpoch:'session-1'},false);f.reply();await assert.rejects(p);assert.equal(f.host.getSelection(),null);await assert.rejects(request(f.host));f.host.dispose()});
+test('dispose cancels outstanding result, notifies subscribers and unsubscribes',async()=>{const f=fixture();f.host.select(a);const p=request(f.host);let changes=0;f.host.subscribeSelection(()=>changes++);f.host.dispose();f.host.dispose();f.reply();await assert.rejects(p);assert.equal(changes,1);assert.equal(f.counts().unsubscribed,true);assert.equal(f.host.getSelection(),null);assert.throws(()=>f.host.select(a));});
