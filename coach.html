@@ -110,6 +110,7 @@ svg.chart{width:100%;height:auto;display:block}
 #po{margin:12px 0 20px;border:1px solid #554b24;border-radius:16px;background:#13141e;overflow:hidden;color:#fff}
 #po summary{cursor:pointer;padding:15px;font-weight:900;color:#FFD700;font-size:1rem}
 #poBody{padding:0 14px 16px}#po .po-controls{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:12px 0}#po label{font-size:.72rem;color:#c5c7d1;display:flex;flex-direction:column;gap:6px}#po select{width:100%;min-height:44px;border:1px solid #6c6c7f;border-radius:9px;background:#202130;color:white;padding:8px;font:inherit;font-size:.86rem}#po .po-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:12px 0}#po .po-kpi{background:#202130;padding:12px;border-radius:10px;min-width:0}#po .po-kpi b{display:block;font-size:1.7rem;color:#FFD700;font-variant-numeric:tabular-nums}#po .po-kpi span{font-size:.78rem;color:#c5c7d1}#po .po-row{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,2fr) auto;gap:8px;align-items:center;margin:9px 0;font-size:.78rem}#po .po-bar{height:8px;background:#303244;border-radius:99px;overflow:hidden}#po .po-bar i{display:block;height:100%;background:#FFD700;border-radius:99px}#po h3{font-size:.9rem;margin:16px 0 8px}#po .po-note{font-size:.74rem;line-height:1.5;color:#c5c7d1;margin:8px 0}#po table{width:100%;border-collapse:collapse;font-size:.78rem;text-align:left}#po th,#po td{padding:8px 4px;border-bottom:1px solid #383849;vertical-align:top}#po th{color:#c5c7d1}#po button{min-height:44px;margin-top:12px;border:1px solid #FFD700;background:transparent;color:#FFD700;border-radius:10px;padding:8px 15px;font-weight:bold;cursor:pointer}#po .po-scroll{overflow:auto} @media(max-width:400px){#po .po-controls{grid-template-columns:1fr 1fr}#po .po-controls label:last-child{grid-column:1/-1}} @media print{body.po-print *{visibility:hidden!important}body.po-print #po,body.po-print #po *{visibility:visible!important}body.po-print #po{position:absolute;top:0;left:0;width:100%;color:#000;background:#fff;border:0;margin:0}body.po-print #po .po-controls,body.po-print #po button{display:none!important}body.po-print #po summary,body.po-print #po .po-kpi b{color:#000}body.po-print #po .po-kpi{background:#eee}body.po-print #po .po-note,body.po-print #po .po-kpi span,body.po-print #po th{color:#333}body.po-print #po .po-bar i{background:#555;print-color-adjust:exact}}
+#po #poMonthly{margin-top:14px;padding-top:12px;border-top:1px solid #554b24}#po #poMonth{width:100%;min-height:44px;border:1px solid #6c6c7f;border-radius:9px;background:#202130;color:white;padding:8px;font:inherit;color-scheme:dark}#po #poMonthToggle,#po #poMonthShare{margin-left:8px}#po .po-month-table td:nth-child(n+2),#po .po-month-table th:nth-child(n+2){text-align:right}#po .po-month-table tr{break-inside:avoid}#po .po-month-table{font-variant-numeric:tabular-nums}@media print{body.po-month-print #po>*{display:none!important}body.po-month-print #po #poBody{display:block!important}body.po-month-print #poBody>*{display:none!important}body.po-month-print #poBody #poMonthly{display:block!important}body.po-month-print #poMonthly label,body.po-month-print #poMonthStatus{display:none!important}body.po-month-print #poMonthly{border:0;margin:0;padding:0}body.po-month-print #poMonthly h3{color:#000}body.po-month-print #poMonthly table{color:#000}body.po-month-print #poMonthly .po-note{color:#333}}
 </style>
 </head>
 <body>
@@ -137,7 +138,7 @@ svg.chart{width:100%;height:auto;display:block}
   </div>
   <!-- 🏀 the program's teams (Team 5 … Team 18): what this code may see, set in License Admin -->
   <div id="teamBar" hidden></div>
-  <details id="po"><summary id="poTitle">Resumen del programa</summary><div id="poBody"><div class="po-note" id="poScope"></div><div class="po-controls"><label><span id="poPeriodL">Período</span><select id="poPeriod"><option value="7">7 días</option><option value="30" selected>30 días</option><option value="90">90 días</option></select></label><label><span id="poPlatformL">Plataforma</span><select id="poPlatform"><option value="all">Todas</option><option value="hm">Hooporia.mobi</option><option value="rv">Reaction Velocity</option><option value="cg">Cognitivo Gym</option><option value="shared">Estaciones compartidas</option></select></label><label><span id="poCategoryL">Categoría</span><select id="poCategory"><option value="">Todas</option></select></label></div><div id="poResult" aria-live="polite"></div><button id="poPrint" type="button">Imprimir / PDF</button></div></details>
+  <details id="po"><summary id="poTitle">Resumen del programa</summary><div id="poBody"><div class="po-note" id="poScope"></div><div class="po-controls"><label><span id="poPeriodL">Período</span><select id="poPeriod"><option value="7">7 días</option><option value="30" selected>30 días</option><option value="90">90 días</option></select></label><label><span id="poPlatformL">Plataforma</span><select id="poPlatform"><option value="all">Todas</option><option value="hm">Hooporia.mobi</option><option value="rv">Reaction Velocity</option><option value="cg">Cognitivo Gym</option><option value="shared">Estaciones compartidas</option></select></label><label><span id="poCategoryL">Categoría</span><select id="poCategory"><option value="">Todas</option></select></label></div><div id="poResult" aria-live="polite"></div><button id="poPrint" type="button">Imprimir / PDF</button><button id="poMonthToggle" type="button" aria-expanded="false" aria-controls="poMonthly">Informe mensual</button><section id="poMonthly" hidden><h3 id="poMonthTitle">Informe mensual del programa</h3><label><span id="poMonthLabel">Mes</span><input type="month" id="poMonth"></label><div id="poMonthOut" aria-live="polite"></div><button id="poMonthPrint" type="button">Imprimir informe mensual / PDF</button><button id="poMonthShare" type="button">Compartir resumen</button><p id="poMonthStatus" class="po-note" role="status"></p></section></div></details>
   <!-- 📸 the school's player cards, published from Player Spotlight Studio -->
   <button id="spTog" class="sptog" type="button" hidden></button>
   <div id="spBlock" hidden>
@@ -356,7 +357,7 @@ function loadCg(){
     function add(g,r,v,of){var k=String(r.player_name||'').trim().toLowerCase();if(!k)return;
       var p=ps[k]||(ps[k]={name:String(r.player_name).trim(),cat:'',g:{},last:''});
       if(r.category)p.cat=String(r.category).trim();
-      (p.g[g]||(p.g[g]=[])).push({v:v,of:of,at:r.logged_at||''});
+      (p.g[g]||(p.g[g]=[])).push({v:v,of:of,mode:r.game_key||'',category:String(r.category||'').trim(),at:r.logged_at||''});
       if((r.logged_at||'')>p.last)p.last=r.logged_at;}
     (res[0]||[]).forEach(function(r){var m=/^free-(\d+)$/.exec(String(r.speed||''));if(m)add('rs',r,+m[1])});
     (res[1]||[]).forEach(function(r){var k=r.game_key||'',m;
@@ -519,13 +520,16 @@ function poRecords(){
  }
  Object.keys(players||{}).forEach(function(k){var p=players[k];Object.keys(p.games||{}).forEach(function(g){(p.games[g]||[]).forEach(function(x){add(p.name,'hm',g,'level','',x.at,x.v,p.grade)})})});
  Object.keys(CG||{}).forEach(function(k){var p=CG[k];Object.keys(p.g||{}).forEach(function(g){(p.g[g]||[]).forEach(function(x){
- var platform=['zn','zr','enc'].includes(g)?'shared':['rs','st'].includes(g)?'cg':'rv',unit=['rs','st','rv','sw'].includes(g)?'bpm':['zn','zr'].includes(g)?'hits':'level';
- add(p.name,platform,g,unit,x.of||'',x.at,x.v,p.cat);
+ var platform=['zn','zr','enc'].includes(g)?'shared':['rs','st'].includes(g)?'cg':'rv',unit=['rs','st','rv','sw'].includes(g)?'bpm':'level';
+ add(p.name,platform,g,unit,x.mode||x.of||'',x.at,x.v,x.category||p.cat);
  })})});
  return rows;
 }
 function poStats(rows,days,platform,category,now){
  var end=poDay(now),start=poDay(new Date(new Date(now).getTime()-(days-1)*86400000));
+ return poRangeStats(rows,start,end,platform,category,now);
+}
+function poRangeStats(rows,start,end,platform,category,now){
  var a=rows.filter(function(r){return r.day>=start&&r.day<=end&&new Date(r.at)<=new Date(now)&&(platform==='all'||r.platform===platform||((platform==='rv'||platform==='cg')&&r.platform==='shared'))&&(!category||r.category===category)});
  var athletes=new Map(),byDay=new Map(),byTeam=new Map(),stations=new Map();
  a.forEach(function(r){
@@ -537,12 +541,12 @@ function poStats(rows,days,platform,category,now){
  var stationRows=Array.from(stations,function(pair){var parts=JSON.parse(pair[0]),p=pair[1],delta=[];p.forEach(function(x){x.sort(function(a,b){return new Date(a.at)-new Date(b.at)});if(x.length>1)delta.push(x[x.length-1].value-x[0].value)});return {platform:parts[0],station:parts[1],unit:parts[2],mode:parts[3],athletes:p.size,pairs:delta.length,change:delta.length?delta.reduce(function(x,y){return x+y},0)/delta.length:null}});
  return {attempts:a.length,active:athletes.size,days:byDay.size,repeat:Array.from(athletes.values()).filter(function(d){return d.size>=2}).length,byDay:Array.from(byDay).sort(),byTeam:Array.from(byTeam,function(x){return [x[0],x[1].size]}).sort(),stations:stationRows};
 }
-function poReset(){poSource='loading';$('po').open=false;$('poResult').textContent='';$('poCategory').innerHTML='<option value=""></option>';$('poCategory').value='';$('poPlatform').value='all';}
+function poReset(){poMonthReset();poSource='loading';$('po').open=false;$('poResult').textContent='';$('poCategory').innerHTML='<option value=""></option>';$('poCategory').value='';$('poPlatform').value='all';}
 function poRender(){
  var el=$('poResult');if(!el)return;
  $('poTitle').textContent=poT('title');$('poPeriodL').textContent=poT('period');$('poPlatformL').textContent=poT('platform');$('poCategoryL').textContent=poT('category');$('poPrint').textContent=poT('print');
  Array.from($('poPeriod').options).forEach(function(o){o.textContent=o.value+' '+poT('days')});$('poPlatform').options[0].textContent=poT('all');$('poPlatform').options[4].textContent=poT('shared');
- if(!CODE||!DATA){el.textContent='';return}
+ if(!CODE||!DATA){el.textContent='';poMonthRender();return}
  $('poScope').textContent=poT('scope')+': '+school+' · '+poT('team')+': '+(TEAM||poT('allTeams'));
  var rows=poRecords(),category=$('poCategory').value,cats=Array.from(new Set(rows.map(function(r){return r.category}).filter(Boolean))).sort();
  $('poCategory').innerHTML='<option value="">'+poT('all')+'</option>'+cats.map(function(c){return '<option value="'+esc(c)+'">'+esc(c)+'</option>'}).join('');
@@ -556,10 +560,50 @@ function poRender(){
  el.innerHTML=(status?'<p class="po-note" role="status">'+esc(status)+'</p>':'')+'<div class="po-grid">'+kpis.map(function(k){return '<div class="po-kpi"><b>'+fmt(k[0])+'</b><span>'+poT(k[1])+'</span></div>'}).join('')+'</div>'+
  (x.attempts?bars(x.byDay,poT('activity'),function(d){return d.slice(5)})+bars(x.byTeam,poT('teams'),function(t){return t||poT('unassigned')})+
  '<h3>'+poT('station')+'</h3><div class="po-scroll"><table><thead><tr><th>'+poT('station')+'</th><th>'+poT('athletes')+'</th><th>'+poT('change')+'</th><th>'+poT('pairs')+'</th></tr></thead><tbody>'+x.stations.map(function(st){return '<tr><td>'+esc(names[st.station]||st.station)+(st.mode?' · '+esc(st.mode):'')+'</td><td>'+fmt(st.athletes)+'</td><td>'+(st.change===null?'—':(st.change>0?'+':'')+fmt(st.change)+' '+poT(st.unit))+'</td><td>'+fmt(st.pairs)+'</td></tr>'}).join('')+'</tbody></table></div>':'<p class="po-note">'+poT('no')+'</p>')+'<p class="po-note">'+poT('note')+'</p>';
+ poMonthRender();
 }
 ['poPeriod','poPlatform','poCategory'].forEach(function(id){$(id).addEventListener('change',poRender)});
 $('poPrint').onclick=function(){document.body.classList.add('po-print');try{window.print()}finally{document.body.classList.remove('po-print')}};
 window.addEventListener('afterprint',function(){document.body.classList.remove('po-print')});
+
+
+var PO_MONTH={es:{toggle:'Informe mensual',title:'Informe mensual del programa',month:'Mes',current:'Mes seleccionado',previous:'Mes anterior',difference:'Cambio',metric:'Indicador',print:'Imprimir informe mensual / PDF',share:'Compartir resumen',copied:'Resumen copiado.',failed:'No se pudo compartir. Puede imprimir el informe.',inProgress:'Mes en curso: comparación con los mismos días del mes anterior.',complete:'Comparación de meses calendario completos.',note:'Los cambios de participación no representan necesariamente mejoras en rendimiento. Los datos de estaciones se comparan solo dentro de la misma modalidad. Informe agregado sin nombres de atletas.',unknown:'Sin datos comparables',stationChange:'Cambio promedio en el mes',reportPeriod:'Período del informe',teamNote:'El informe respeta los filtros activos de plataforma, categoría y equipo.'},en:{toggle:'Monthly report',title:'Monthly program report',month:'Month',current:'Selected month',previous:'Previous month',difference:'Change',metric:'Metric',print:'Print monthly report / PDF',share:'Share summary',copied:'Summary copied.',failed:'Sharing failed. You can print the report.',inProgress:'Month in progress: compared with the same days of the previous month.',complete:'Comparison of complete calendar months.',note:'Participation changes do not necessarily represent performance gains. Station changes compare only like modes. Aggregate report without athlete names.',unknown:'No comparable data',stationChange:'Average change this month',reportPeriod:'Report period',teamNote:'Report respects active platform, category and team filters.'}};
+function poMT(k){return PO_MONTH[LANG][k]}
+function poMonthBounds(month,now){
+ var today=poDay(now);if(!/^\d{4}-(0[1-9]|1[0-2])$/.test(month)||month>today.slice(0,7))return null;
+ var parts=month.split('-').map(Number),y=parts[0],m=parts[1],prev=new Date(Date.UTC(y,m-2,1)).toISOString().slice(0,7);
+ var n=new Date(Date.UTC(y,m,0)).getUTCDate(),p=new Date(Date.UTC(y,m-1,0)).getUTCDate(),partial=month===today.slice(0,7),day=partial?+today.slice(-2):n;
+ function date(k,d){return k+'-'+String(d).padStart(2,'0')}
+ return {start:date(month,1),end:date(month,day),prevStart:date(prev,1),prevEnd:date(prev,partial?Math.min(day,p):p),partial:partial};
+}
+function poMonthReset(){var el=$('poMonthly');if(!el)return;el.hidden=true;$('poMonthToggle').setAttribute('aria-expanded','false');$('poMonthOut').textContent='';$('poMonthStatus').textContent='';$('poMonth').value=poDay(new Date()).slice(0,7);}
+function poMonthRender(){
+ var el=$('poMonthly');if(!el)return;
+ $('poMonthToggle').textContent=poMT('toggle');$('poMonthTitle').textContent=poMT('title');$('poMonthLabel').textContent=poMT('month');$('poMonthPrint').textContent=poMT('print');$('poMonthShare').textContent=poMT('share');
+ var out=$('poMonthOut'),now=new Date(),input=$('poMonth');input.max=poDay(now).slice(0,7);if(!input.value||input.value>input.max)input.value=input.max;
+ if(!CODE||!DATA||el.hidden){out.textContent='';return}
+ var b=poMonthBounds(input.value,now);if(!b){out.textContent='';return}
+ var rows=poRecords(),platform=$('poPlatform').value,category=$('poCategory').value;
+ var a=poRangeStats(rows,b.start,b.end,platform,category,now),p=poRangeStats(rows,b.prevStart,b.prevEnd,platform,category,now);
+ var fmt=function(n){return new Intl.NumberFormat(LANG,{maximumFractionDigits:1}).format(n)},delta=function(v){return (v>0?'+':'')+fmt(v)};
+ var metrics=[['active',a.active,p.active],['attempts',a.attempts,p.attempts],['trainingDays',a.days,p.days],['repeat',a.repeat,p.repeat],['avg',a.active?a.attempts/a.active:0,p.active?p.attempts/p.active:0]];
+ var scope=$('poScope').textContent+' · '+poT('platform')+': '+$('poPlatform').selectedOptions[0].textContent+' · '+poT('category')+': '+$('poCategory').selectedOptions[0].textContent;
+ var status=poSource==='loading'?poT('loading'):poSource==='partial'?poT('partial'):'';
+ var names={recall:'Recall',recognition:'Recognition',replay:'Replay',fortress:'Fortress',rs:'Ritnome BPM',st:'Swipe Test',rv:'Reaction Speed',sw:'Swipe It',zn:'Zona',zr:'Zona Roja',enc:'Encadena'};
+ var summary=[poMT('title'),scope,b.start+' — '+b.end,poMT(b.partial?'inProgress':'complete'),status].filter(Boolean);
+ metrics.forEach(function(m){summary.push(poT(m[0])+': '+fmt(m[1])+' ('+poMT('previous')+': '+fmt(m[2])+', '+delta(m[1]-m[2])+')')});
+ summary.push(poMT('note'));out.dataset.summary=summary.join('\n');
+ out.innerHTML='<p class="po-note">'+esc(scope)+'</p><p class="po-note">'+poMT('reportPeriod')+': '+b.start+' — '+b.end+'<br>'+poMT('previous')+': '+b.prevStart+' — '+b.prevEnd+'<br>'+poMT(b.partial?'inProgress':'complete')+'</p>'+
+ (status?'<p class="po-note" role="status">'+esc(status)+'</p>':'')+
+ '<div class="po-scroll"><table class="po-month-table"><thead><tr><th>'+poMT('metric')+'</th><th>'+poMT('current')+'</th><th>'+poMT('previous')+'</th><th>'+poMT('difference')+'</th></tr></thead><tbody>'+metrics.map(function(m){return '<tr><td>'+poT(m[0])+'</td><td>'+fmt(m[1])+'</td><td>'+fmt(m[2])+'</td><td>'+delta(m[1]-m[2])+'</td></tr>'}).join('')+'</tbody></table></div>'+
+ '<h3>'+poT('teams')+'</h3><table><tbody>'+a.byTeam.map(function(t){return '<tr><td>'+esc(t[0]||poT('unassigned'))+'</td><td>'+fmt(t[1])+' '+poT('athletes')+'</td></tr>'}).join('')+'</tbody></table>'+
+ '<h3>'+poMT('stationChange')+'</h3><div class="po-scroll"><table><thead><tr><th>'+poT('station')+'</th><th>'+poT('pairs')+'</th><th>'+poT('change')+'</th></tr></thead><tbody>'+a.stations.map(function(st){return '<tr><td>'+esc(names[st.station]||st.station)+(st.mode?' · '+esc(st.mode):'')+'</td><td>'+fmt(st.pairs)+'</td><td>'+(st.change===null?'—':delta(st.change)+' '+poT(st.unit))+'</td></tr>'}).join('')+'</tbody></table></div><p class="po-note">'+poT('note')+' '+poMT('note')+'</p>';
+}
+$('poMonthToggle').onclick=function(){var el=$('poMonthly');el.hidden=!el.hidden;this.setAttribute('aria-expanded',String(!el.hidden));poMonthRender()};
+$('poMonth').onchange=poMonthRender;
+$('poMonthPrint').onclick=function(){if(!CODE||!DATA)return;document.body.classList.add('po-print','po-month-print');try{window.print()}finally{document.body.classList.remove('po-print','po-month-print')}};
+window.addEventListener('afterprint',function(){document.body.classList.remove('po-month-print')});
+$('poMonthShare').onclick=async function(){if(!CODE||!DATA||$('poMonthly').hidden)return;var msg=$('poMonthOut').dataset.summary;if(!msg)return;try{if(navigator.share){await navigator.share({title:poMT('title'),text:msg})}else if(navigator.clipboard){await navigator.clipboard.writeText(msg);$('poMonthStatus').textContent=poMT('copied')}else throw Error('unavailable')}catch(e){if(e.name!=='AbortError')$('poMonthStatus').textContent=poMT('failed')}};
 
 var FROM=(function(){var f=(new URLSearchParams(location.search).get('from')||'');
   if(f!=='cognogym'&&f!=='vreaction'){try{f=sessionStorage.getItem('cv-from')||''}catch(e){f=''}}
