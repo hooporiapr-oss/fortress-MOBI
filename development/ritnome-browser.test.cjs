@@ -1,0 +1,55 @@
+'use strict';
+// Real Chromium, real Web Audio, synthetic user interaction; no production services.
+const assert=require('node:assert/strict');
+const http=require('node:http');
+const fs=require('node:fs');
+const path=require('node:path');
+const {chromium}=require('playwright');
+const allowed=new Set(['ritnome-warmup-preview.html','ritnome-warmup-preview.cjs','ritnome-clock.cjs','ritnome-audio.cjs']);
+const server=http.createServer((req,res)=>{
+ const name=req.url.slice(1);
+ if(!allowed.has(name)){res.writeHead(404);res.end();return}
+ res.writeHead(200,{'Content-Type':name.endsWith('.html')?'text/html; charset=utf-8':'text/javascript; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'});
+ res.end(fs.readFileSync(path.join(__dirname,name)));
+});
+(async()=>{
+ let browser;
+ try{
+  await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
+  const origin='http://127.0.0.1:'+server.address().port;
+  browser=await chromium.launch({headless:true});
+  const page=await browser.newPage({viewport:{width:390,height:844},hasTouch:true,isMobile:true});
+  const errors=[],external=[];
+  page.on('pageerror',e=>errors.push(e.message));
+  await page.route('**/*',route=>{if(new URL(route.request().url()).origin!==origin){external.push(route.request().url());return route.abort()}return route.continue()});
+  await page.addInitScript(()=>{
+   window.__ritnomeAudioContexts=[];
+   const Original=window.AudioContext;
+   window.AudioContext=class extends Original{constructor(...args){super(...args);window.__ritnomeAudioContexts.push(this)}};
+  });
+  await page.goto(origin+'/ritnome-warmup-preview.html');
+  await page.waitForFunction(()=>document.getElementById('start').textContent==='Comenzar');
+  assert.equal(await page.locator('html').getAttribute('lang'),'es');
+  assert.ok(await page.locator('#personal').isDisabled());
+  await page.locator('#language').click();assert.equal(await page.locator('#start').textContent(),'Start');
+  await page.locator('#bpm').fill('84');await page.locator('#duration').selectOption('free');
+  await page.locator('#start').click();
+  await page.waitForFunction(()=>document.getElementById('status').textContent==='In rhythm');
+  await page.waitForFunction(()=>document.querySelectorAll('.beat.on').length===1);
+  const audioState=await page.evaluate(()=>window.__ritnomeAudioContexts.map(c=>({state:c.state,currentTime:c.currentTime})));
+  assert.equal(audioState.length,1);assert.equal(audioState[0].state,'running');assert.ok(audioState[0].currentTime>0);
+  await page.locator('#stop').click();assert.equal(await page.locator('#status').textContent(),'Ready');assert.equal(await page.locator('.beat.on').count(),0);
+  await page.locator('#mode').selectOption('tap');assert.ok(await page.locator('#start').isDisabled());
+  for(let i=0;i<4;i++){if(i)await page.waitForTimeout(600);await page.locator('#tap').click()}
+  assert.ok(await page.locator('#start').isEnabled());
+  const tempo=Number((await page.locator('#tempo').textContent()).split(' ')[0]);assert.ok(tempo>=40&&tempo<=200);
+  await page.locator('#start').click();await page.waitForFunction(()=>document.getElementById('status').textContent==='In rhythm');
+  await page.evaluate(()=>window.dispatchEvent(new PageTransitionEvent('pagehide')));
+  await page.waitForFunction(()=>window.__ritnomeAudioContexts[0].state==='closed');
+  assert.ok(await page.locator('#stop').isDisabled());
+  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
+  assert.deepEqual(errors,[]);assert.deepEqual(external,[]);
+  assert.equal(await page.evaluate(()=>localStorage.length+sessionStorage.length),0);
+  console.log('PASS: real Chromium Web Audio context, mobile layout, bilingual manual/tap tempo, beat display, stop, pagehide and network isolation');
+ }finally{if(browser)await browser.close();await new Promise(resolve=>server.close(resolve))}
+})().catch(e=>{console.error(e);process.exitCode=1});
