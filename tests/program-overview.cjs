@@ -45,3 +45,13 @@ assert.equal(c.stabilityStats(stableRows.map(r=>({...r,day:'2026-11-25',at:'2026
 assert.equal(c.stabilityStats(stableRows.concat([row('a','hm','recall','level','','2026-11-26T18:00:00Z',999)]),now).max,5);
 assert.equal(c.apStats(stableRows.concat([row('a','rv','zn','hits',25,'2026-11-25T12:00:00Z',25)]),now).stations.find(s=>s.station==='recall').stability.index,75);
 console.log('PASS: recent performance consistency, minimum sample and days, zeros, future exclusion and station isolation');
+
+let milestones=c.mileStats(stableRows,now);assert.ok(milestones.some(x=>x.kind==='first'&&x.day==='2026-11-24'));assert.ok(milestones.some(x=>x.kind==='level'&&x.value===5));assert.ok(!milestones.some(x=>x.kind==='level'&&x.value===10));
+let history=[row('a','hm','recall','level','','2026-11-22T12:00:00Z',2),row('a','hm','recall','level','','2026-11-23T12:00:00Z',5),row('a','hm','recall','level','','2026-11-23T13:00:00Z',7),row('a','hm','recall','level','','2026-11-24T12:00:00Z',6),row('a','rv','rv','bpm','','2026-11-25T12:00:00Z',120),row('a','rv','rv','bpm','','2026-11-26T18:00:00Z',999)];
+let timeline=c.timelineStats(history,now);assert.equal(timeline.events[0].day,'2026-11-25');assert.equal(timeline.events.filter(e=>e.type==='record').length,1);assert.equal(timeline.events.find(e=>e.type==='record').before,2);assert.equal(timeline.events.find(e=>e.type==='record').value,7);assert.equal(c.timelineStats([],now).total,0);assert.ok(!timeline.events.some(e=>e.value===999));
+assert.ok(c.mileStats(history,now).some(e=>e.kind==='bpm'&&e.value===120));
+const mpSrc=fs.readFileSync('mi-pasaporte.js','utf8');new vm.Script(mpSrc);
+const mpCtx={localStorage:{getItem(){return null}},document:{getElementById(){return {addEventListener(){},setAttribute(){}}},documentElement:{}},window:{addEventListener(){}}};vm.createContext(mpCtx);vm.runInContext(mpSrc,mpCtx);
+const mp=mpCtx.window.MI_PASAPORTE.stats({runs:[{name:'Test',game:'recall',score:2,at:'2026-11-22T12:00:00Z'},{name:'Test',game:'recall',score:5,at:'2026-11-23T12:00:00Z'},{name:'Test',game:'recall',score:7,at:'2026-11-23T13:00:00Z'},{name:'Other',game:'recall',score:100,at:'2026-11-25T12:00:00Z'}]},'Test',now);
+assert.equal(mp.attempts,3);assert.equal(mp.timeline.events.filter(e=>e.type==='record').length,1);assert.equal(mp.timeline.events.find(e=>e.type==='record').value,7);assert.ok(mp.milestones.some(e=>e.kind==='level'&&e.value===5));assert.ok(!mp.milestones.some(e=>e.value===10));
+console.log('PASS: milestones, dated timeline, daily best consolidation and private passport record isolation');
