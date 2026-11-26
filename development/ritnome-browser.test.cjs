@@ -5,7 +5,7 @@ const http=require('node:http');
 const fs=require('node:fs');
 const path=require('node:path');
 const {chromium}=require('playwright');
-const allowed=new Set(['ritnome-warmup-preview.html','ritnome-warmup-preview.cjs','ritnome-clock.cjs','ritnome-audio.cjs','authenticated-ritnome.cjs']);
+const allowed=new Set(['ritnome-warmup-preview.html','ritnome-warmup-preview.cjs','ritnome-clock.cjs','ritnome-audio.cjs','authenticated-ritnome.cjs','personal-bpm-host.cjs']);
 const server=http.createServer((req,res)=>{
  const name=req.url.slice(1);
  if(!allowed.has(name)){res.writeHead(404);res.end();return}
@@ -55,21 +55,25 @@ const server=http.createServer((req,res)=>{
   const personalPage=await browser.newPage({viewport:{width:390,height:844},hasTouch:true,isMobile:true});
   personalPage.on('pageerror',e=>errors.push(e.message));
   await personalPage.route('**/*',route=>{if(new URL(route.request().url()).origin!==origin){external.push(route.request().url());return route.abort()}return route.continue()});
-  await personalPage.addInitScript(()=>{
-   const m='00000000-0000-4000-8000-000000000001',p='00000000-0000-4000-8000-000000000002',c='00000000-0000-4000-8000-000000000003';
-   let selected={membershipId:m,planId:p,sessionEpoch:'one'},listener=null,delayed=null,release=null;
+  await personalPage.addInitScript({content:fs.readFileSync(path.join(__dirname,'personal-bpm-host.cjs'),'utf8')+`
+   ;(()=>{
+   const m='00000000-0000-4000-8000-000000000001',p='00000000-0000-4000-8000-000000000002',c='00000000-0000-4000-8000-000000000003',u='00000000-0000-4000-8000-000000000004';
+   let session={userId:u,sessionEpoch:'one'},listener=null,delayed=null,release=null;
    window.__personalRequests=0;
-   window.__changeSelection=()=>{selected=null;listener?.()};
-   window.__restoreSelection=()=>{selected={membershipId:m,planId:p,sessionEpoch:'two'};listener?.()};
-   window.__delayPrescription=()=>{delayed=new Promise(r=>release=r)};
-   window.__releasePrescription=()=>{release?.();delayed=null};
-   window.ritnomePersonalHost={enabled:true,getSelection:()=>selected,subscribeSelection(fn){listener=fn;return ()=>{listener=null}},client:{invalidate(){},async request(action,fields){
+   const host=createPersonalBpmHost({enabled:true,getSession:()=>session,subscribeSession(fn){listener=fn;return ()=>{listener=null}},client:{invalidate(){},async request(action,fields){
     window.__personalRequests++;
-    if(action!=='get_bpm_plan'||fields.station!=='ritnome'||fields.plan_id!==p||!selected)throw Error('Unexpected request');
+    if(action!=='get_bpm_plan'||fields.station!=='ritnome'||fields.plan_id!==p)throw Error('Unexpected request');
     if(delayed)await delayed;
     return {prescription:{membership_id:m,plan_id:p,confirmation_id:c,bpm:84,station:'ritnome',effective_on:'2020-01-01',stage:'11-12'}};
-   }}};
-  });
+   }}});
+   host.select({membershipId:m,planId:p});
+   window.__changeSelection=()=>{session=null;listener?.()};
+   window.__restoreSelection=()=>{session={userId:u,sessionEpoch:'two'};listener?.();host.select({membershipId:m,planId:p})};
+   window.__delayPrescription=()=>{delayed=new Promise(r=>release=r)};
+   window.__releasePrescription=()=>{release?.();delayed=null};
+   window.ritnomePersonalHost=host;
+   })();
+  `});
   await personalPage.goto(origin+'/ritnome-warmup-preview.html');
   await personalPage.waitForFunction(()=>!document.getElementById('personal').disabled);
   await personalPage.locator('#language').click();
