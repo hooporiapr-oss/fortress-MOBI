@@ -3,11 +3,15 @@ on:
   pull_request:
     paths:
       - 'development/personal-bpm-host*.cjs'
+      - 'development/auth-personal-bpm-host*.cjs'
+      - 'development/coach-memory-client.cjs'
       - '.github/workflows/personal-bpm-host.yml'
   push:
     branches: [feature/coach-memory-developmental-stage]
     paths:
       - 'development/personal-bpm-host*.cjs'
+      - 'development/auth-personal-bpm-host*.cjs'
+      - 'development/coach-memory-client.cjs'
       - '.github/workflows/personal-bpm-host.yml'
 permissions:
   contents: read
@@ -20,4 +24,4 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - run: node --test development/personal-bpm-host.test.cjs
+      - run: node --test development/personal-bpm-host.test.cjs development/auth-personal-bpm-host.test.cjs
