@@ -5,7 +5,7 @@ const http=require('node:http');
 const fs=require('node:fs');
 const path=require('node:path');
 const {chromium}=require('playwright');
-const allowed=new Set(['ritnome-warmup-preview.html','ritnome-warmup-preview.cjs','ritnome-clock.cjs','ritnome-audio.cjs']);
+const allowed=new Set(['ritnome-warmup-preview.html','ritnome-warmup-preview.cjs','ritnome-clock.cjs','ritnome-audio.cjs','authenticated-ritnome.cjs']);
 const server=http.createServer((req,res)=>{
  const name=req.url.slice(1);
  if(!allowed.has(name)){res.writeHead(404);res.end();return}
