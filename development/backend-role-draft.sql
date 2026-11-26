@@ -12,8 +12,10 @@ grant select(id,user_id,not_after) on auth.sessions to coach_memory_executor;
 grant select,update on public.athlete_identity_membership to coach_memory_executor;
 grant select,update on coach_memory_private.coach_grant to coach_memory_executor;
 grant select,insert on coach_memory_private.event to coach_memory_executor;
--- Row locks require UPDATE privileges, but no UPDATE RLS policy is added here.
--- PostgreSQL locking behavior must be verified under the actual role.
+-- SELECT FOR UPDATE requires an applicable UPDATE policy as well as SELECT.
+-- Permit visibility for row locking only; WITH CHECK false prohibits actual updates.
+create policy cm_exec_membership_lock on public.athlete_identity_membership for update to coach_memory_executor using(true) with check(false);
+create policy cm_exec_grant_lock on coach_memory_private.coach_grant for update to coach_memory_executor using(true) with check(false);
 create policy cm_exec_membership_read on public.athlete_identity_membership for select to coach_memory_executor using(true);
 create policy cm_exec_grant_read on coach_memory_private.coach_grant for select to coach_memory_executor using(true);
 create policy cm_exec_event_read on coach_memory_private.event for select to coach_memory_executor using(true);
