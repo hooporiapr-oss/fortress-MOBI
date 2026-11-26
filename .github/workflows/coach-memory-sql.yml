@@ -61,3 +61,8 @@ jobs:
         run: |
           psql -X -v ON_ERROR_STOP=1 -f development/bpm-plan-binding-draft.sql
           psql -X -v ON_ERROR_STOP=1 -f development/bpm-plan-binding-tests.sql
+
+      - name: Test restricted personal BPM backend capability
+        run: |
+          psql -X -v ON_ERROR_STOP=1 -f development/bpm-backend-role-draft.sql
+          psql -X -v ON_ERROR_STOP=1 -f development/bpm-backend-role-tests.sql
