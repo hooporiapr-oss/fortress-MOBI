@@ -1,0 +1,25 @@
+name: Coach Memory controller validation
+on:
+  pull_request:
+    paths:
+      - 'development/auth-coach-memory*.cjs'
+      - 'development/coach-memory-client*.cjs'
+      - '.github/workflows/coach-memory-controller.yml'
+  push:
+    branches: [feature/coach-memory-developmental-stage]
+    paths:
+      - 'development/auth-coach-memory*.cjs'
+      - 'development/coach-memory-client*.cjs'
+      - '.github/workflows/coach-memory-controller.yml'
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --test development/auth-coach-memory.test.cjs development/coach-memory-client.test.cjs
