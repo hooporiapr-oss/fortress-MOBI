@@ -1,0 +1,30 @@
+name: Coach Memory browser validation
+on:
+  pull_request:
+    paths:
+      - 'development/coach-memory-*'
+      - 'development/auth-coach-memory*'
+      - '.github/workflows/coach-memory-browser.yml'
+  push:
+    branches: [feature/coach-memory-developmental-stage]
+    paths:
+      - 'development/coach-memory-*'
+      - 'development/auth-coach-memory*'
+      - '.github/workflows/coach-memory-browser.yml'
+permissions:
+  contents: read
+jobs:
+  chromium:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install isolated browser dependencies
+        run: |
+          npm install --prefix "$RUNNER_TEMP/cm-browser" --no-save --ignore-scripts playwright@1.56.1
+          node "$RUNNER_TEMP/cm-browser/node_modules/playwright/cli.js" install --with-deps chromium
+      - name: Validate mobile Coach Memory interface
+        run: NODE_PATH="$RUNNER_TEMP/cm-browser/node_modules" node development/coach-memory-browser.test.cjs

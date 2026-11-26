@@ -1,0 +1,135 @@
+name: Coach Memory isolated SQL
+on:
+  push:
+    branches: [feature/coach-memory-developmental-stage]
+  pull_request:
+    paths: ['development/**', '.github/workflows/coach-memory-sql.yml']
+permissions:
+  contents: read
+jobs:
+  isolated-postgres:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: synthetic_test_only
+          POSTGRES_DB: coach_memory_test
+        ports: ['5432:5432']
+        options: --health-cmd "pg_isready -U postgres -d coach_memory_test" --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      PGHOST: localhost
+      PGPORT: '5432'
+      PGUSER: postgres
+      PGPASSWORD: synthetic_test_only
+      PGDATABASE: coach_memory_test
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply draft SQL to disposable database
+        run: |
+          set -eu
+          for f in development/sql-test-bootstrap.sql development/athlete-identity-draft.sql development/coach-memory-draft.sql development/access-control-draft.sql development/enrollment-transaction-draft.sql development/coach-memory-engine-draft.sql development/session-authorization-draft.sql development/backend-role-draft.sql development/goal-backend-role-draft.sql development/admin-ops-draft.sql development/enrollment-list-role-draft.sql; do
+            psql -X -v ON_ERROR_STOP=1 -f "$f"
+          done
+      - name: Validate payloads and private privileges
+        run: psql -X -v ON_ERROR_STOP=1 -f development/coach-memory-engine-tests.sql
+      - name: Test synthetic enrollment and memory access
+        run: psql -X -v ON_ERROR_STOP=1 -f development/sql-integration-tests.sql
+
+      - name: Test administrator operations
+        run: psql -X -v ON_ERROR_STOP=1 -f development/admin-ops-tests.sql
+      - name: Test synthetic session authorization
+        run: psql -X -v ON_ERROR_STOP=1 -f development/session-authorization-tests.sql
+      - name: Test authenticated adapter and disabled interface
+        run: node development/coach-memory-service.test.cjs
+
+      - name: Test private HTTP transport
+        run: node development/coach-memory-http.test.cjs
+
+      - name: Test restricted backend database role
+        run: psql -X -v ON_ERROR_STOP=1 -f development/backend-role-tests.sql
+
+      - name: Test server installation and transaction rollback
+        run: node development/coach-memory-install.test.cjs
+
+      - name: Apply and test private personal BPM drafts
+        run: |
+          set -eu
+          for f in bpm-verification-draft bpm-transactions-draft bpm-transactions-tests; do
+            psql -X -v ON_ERROR_STOP=1 -f "development/$f.sql"
+          done
+
+      - name: Test confirmed BPM prescription binding
+        run: |
+          psql -X -v ON_ERROR_STOP=1 -f development/bpm-plan-binding-draft.sql
+          psql -X -v ON_ERROR_STOP=1 -f development/bpm-plan-binding-tests.sql
+
+      - name: Test restricted personal BPM backend capability
+        run: |
+          psql -X -v ON_ERROR_STOP=1 -f development/bpm-backend-role-draft.sql
+          psql -X -v ON_ERROR_STOP=1 -f development/bpm-backend-role-tests.sql
+
+      - name: Test bilingual disabled BPM preview
+        run: node development/bpm-preview.test.cjs
+
+      - name: Test scoped Coach Memory frontend transport
+        run: node development/coach-memory-client.test.cjs
+
+      - name: Test Universal BPM Bridge safeguards
+        run: node development/universal-bpm-bridge.test.cjs
+
+      - name: Test isolated Recall BPM adapter
+        run: node development/recall-bpm-adapter.test.cjs
+
+      - name: Test personalized Recall gameplay engine
+        run: node development/recall-practice-engine.test.cjs
+
+      - name: Test bilingual Recall practice preview
+        run: node development/recall-practice-preview.test.cjs
+
+      - name: Test authenticated Recall launch lifecycle
+        run: node development/authenticated-recall.test.cjs
+
+      - name: Test exact restricted BPM prescription lookup
+        run: |
+          psql -X -v ON_ERROR_STOP=1 -f development/bpm-prescription-lookup-draft.sql
+          psql -X -v ON_ERROR_STOP=1 -f development/bpm-prescription-lookup-tests.sql
+
+      - name: Test personalized Recognition adapter and practice engine
+        run: node development/recognition-practice-engine.test.cjs
+
+      - name: Test bilingual Recognition practice preview
+        run: node development/recognition-practice-preview.test.cjs
+
+      - name: Test authenticated Recognition launch lifecycle
+        run: node development/authenticated-recognition.test.cjs
+
+      - name: Test personalized Replay adapter and practice engine
+        run: node development/replay-practice-engine.test.cjs
+
+      - name: Test bilingual Replay practice preview
+        run: node development/replay-practice-preview.test.cjs
+
+      - name: Test authenticated Replay launch lifecycle
+        run: node development/authenticated-replay.test.cjs
+
+      - name: Test personalized Fortress adapter and practice engine
+        run: node development/fortress-practice-engine.test.cjs
+
+      - name: Test bilingual Fortress practice preview
+        run: node development/fortress-practice-preview.test.cjs
+
+      - name: Test authenticated Fortress launch lifecycle
+        run: node development/authenticated-fortress.test.cjs
+
+      - name: Test shared Ritnome audio and precision clock
+        run: node development/ritnome-core.test.cjs
+
+      - name: Test bilingual Ritnome warm-up preview
+        run: node development/ritnome-warmup-preview.test.cjs
+
+      - name: Test authenticated Ritnome launch lifecycle
+        run: node development/authenticated-ritnome.test.cjs
+
+      - name: Test versioned Ritnome distribution package
+        run: node development/ritnome-package.test.cjs
