@@ -104,3 +104,9 @@ jobs:
 
       - name: Test personalized Replay adapter and practice engine
         run: node development/replay-practice-engine.test.cjs
+
+      - name: Test bilingual Replay practice preview
+        run: node development/replay-practice-preview.test.cjs
+
+      - name: Test authenticated Replay launch lifecycle
+        run: node development/authenticated-replay.test.cjs
