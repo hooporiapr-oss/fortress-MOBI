@@ -75,3 +75,6 @@ jobs:
 
       - name: Test Universal BPM Bridge safeguards
         run: node development/universal-bpm-bridge.test.cjs
+
+      - name: Test isolated Recall BPM adapter
+        run: node development/recall-bpm-adapter.test.cjs
