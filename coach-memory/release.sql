@@ -421,6 +421,8 @@ begin;
 -- License Admin provides public.is_admin() in production. A disposable database without it gets a stub that admits nobody.
 do $$ begin if not exists(select 1 from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='public' and p.proname='is_admin') then
  execute 'create function public.is_admin() returns boolean language sql stable as $f$ select false $f$'; end if; end $$;
+-- License Admin's own is_admin() reads its admins table unqualified; pin its search path so it also works when called from functions that run with an empty one.
+alter function public.is_admin() set search_path = public;
 alter table public.athlete_identity_membership add column if not exists label text check(label is null or length(btrim(label)) between 1 and 80);
 
 -- The acting administrator: a verified, non-anonymous License Admin session.
