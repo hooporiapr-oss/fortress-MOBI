@@ -24,3 +24,14 @@ let plan=c.tpBuild(ap,120,3,'balanced');assert.equal(plan.days.length,3);assert.
 let samples=[row('a','rv','rv','bpm','','2026-11-13T12:00:00Z',90),row('a','rv','rv','bpm','','2026-11-14T12:00:00Z',110),row('a','rv','rv','bpm','','2026-11-20T12:00:00Z',120),row('a','rv','rv','bpm','','2026-11-21T12:00:00Z',128),row('a','rv','rv','bpm','','2026-11-26T12:00:00Z',900),row('a','rv','zn','hits',10,'2026-11-20T12:00:00Z',8)];
 let assess=c.paStats(samples,7,now);let st=assess.stations.find(s=>s.station==='rv');assert.equal(st.before,100);assert.equal(st.after,124);assert.equal(st.change,24);assert.equal(st.pct,24);assert.equal(assess.stations.find(s=>s.station==='zn').change,null);assert.equal(assess.after[1],'2026-11-25');
 console.log('PASS: monthly boundaries, athlete profile, confirmed BPM planner and equal-period progress assessment');
+
+loadPart('var CI_TEXT=','$(\'ciOut\').onclick');
+loadPart('var GC_TEXT=','$(\'gcMetric\').onchange');
+loadPart('var ACH_TEXT=','$(\'achCopy\').onclick');
+loadPart('var PASS_TEXT=','$(\'pass\').addEventListener');
+assert.equal(c.gcProgress({start:100,target:130},124).pct,80);
+assert.equal(c.gcProgress({start:100,target:130},130).status,'achieved');
+assert.equal(c.gcProgress({start:100,target:130},null).status,'unknown');
+let passport=c.passStats(samples,now);assert.equal(passport.months.length,12);assert.equal(passport.attempts,6);assert.equal(passport.first,'2026-11-13');assert.equal(passport.last,'2026-11-26');assert.equal(passport.months[11].bpm,900);assert.equal(passport.profile.baseline,90);assert.equal(c.passStats([],now).first,null);assert.equal(c.passStats([],now).months.length,12);
+assert.match(html,/id="passName" type="checkbox"/);assert.ok(!/id="passName"[^>]*checked/.test(html));
+console.log('PASS: goal calculations, passport history, calendar months and anonymous export default');
