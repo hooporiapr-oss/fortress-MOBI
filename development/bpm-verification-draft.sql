@@ -13,6 +13,7 @@ create table coach_memory_private.bpm_measurement (
  check(measured_at <= received_at),
  unique(id,athlete_id)
 );
+alter table public.athlete_identity_membership add constraint cm_membership_athlete_unique unique(id,athlete_id);
 create table coach_memory_private.bpm_confirmation (
  id uuid primary key default gen_random_uuid(),
  measurement_id uuid not null,
@@ -22,6 +23,7 @@ create table coach_memory_private.bpm_confirmation (
  confirmed_at timestamptz not null default now(),
  request_id uuid not null unique,
  foreign key(measurement_id,athlete_id) references coach_memory_private.bpm_measurement(id,athlete_id),
+ foreign key(membership_id,athlete_id) references public.athlete_identity_membership(id,athlete_id),
  unique(measurement_id,membership_id)
 );
 alter table coach_memory_private.bpm_measurement enable row level security;
