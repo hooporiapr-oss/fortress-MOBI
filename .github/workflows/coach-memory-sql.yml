@@ -40,3 +40,6 @@ jobs:
         run: psql -X -v ON_ERROR_STOP=1 -f development/session-authorization-tests.sql
       - name: Test authenticated adapter and disabled interface
         run: node development/coach-memory-service.test.cjs
+
+      - name: Test private HTTP transport
+        run: node development/coach-memory-http.test.cjs
