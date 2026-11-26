@@ -125,3 +125,6 @@ jobs:
 
       - name: Test bilingual Ritnome warm-up preview
         run: node development/ritnome-warmup-preview.test.cjs
+
+      - name: Test authenticated Ritnome launch lifecycle
+        run: node development/authenticated-ritnome.test.cjs
