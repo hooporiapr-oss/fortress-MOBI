@@ -24,11 +24,12 @@ const server=http.createServer((req,res)=>{try{
   if(location.pathname!=='/'+hub)return;
   sessionStorage.setItem(hub==='mobile-hub.html'?'rm-gate-pass':'fortress-mobile-gate-pass','1');
   sessionStorage.setItem('gym-player-ok','1');localStorage.setItem('gym-player','Synthetic Test');
+  if(hub==='fortress-mobile-hub.html'){localStorage.setItem('hooporia-player',JSON.stringify({name:'Synthetic Test',age:12,grade:'6',school:localStorage.getItem('rct-mobile-school')||'',key:'synthetic-test-only'}));sessionStorage.removeItem('hm-fresh-login')}
  },{hub});
  await page.goto(origin+'/'+hub);
- const link=page.locator('a[href="'+prefix+'index.html"]');await link.waitFor({state:'visible'});
+ const link=page.locator('a[href^="'+prefix+'index.html"]');await link.waitFor({state:'visible'});
  const storage=await page.evaluate(()=>({local:Object.entries(localStorage).sort(),session:Object.entries(sessionStorage).sort()}));
- await Promise.all([page.waitForURL(origin+'/'+prefix+'index.html'),link.click()]);
+ await Promise.all([page.waitForURL(u=>u.origin===origin&&u.pathname==='/'+prefix+'index.html'),link.click()]);
  inRitnome=true;
  await page.waitForFunction(()=>document.getElementById('start').textContent==='Comenzar');
  assert.ok(await page.locator('#personal').isDisabled());
@@ -38,7 +39,7 @@ const server=http.createServer((req,res)=>{try{
  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
  assert.deepEqual(await page.evaluate(()=>({local:Object.entries(localStorage).sort(),session:Object.entries(sessionStorage).sort()})),storage);
  await page.locator('#stop').click();assert.equal(await page.locator('.beat.on').count(),0);
- inRitnome=false;await page.goBack();await page.waitForURL(origin+'/'+hub);await link.waitFor({state:'visible'});
+ inRitnome=false;await page.goBack();await page.waitForURL(u=>u.origin===origin&&u.pathname==='/'+hub);await link.waitFor({state:'visible'});
  assert.deepEqual(errors,[]);assert.deepEqual(external,[]);
  console.log('PASS: installed package integrity, synthetic hub navigation, real Web Audio playback, storage isolation and browser return');
  }finally{if(browser)await browser.close();await new Promise(r=>server.close(r))}})().catch(e=>{console.error(e);process.exitCode=1});
