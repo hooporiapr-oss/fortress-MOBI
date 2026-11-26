@@ -116,3 +116,17 @@ assert.equal(c.cyStats([],'2026-11-12',14,now).pending,false);
 assert.equal(c.cyStats([],'2026-10-27',30,now).pending,false);
 assert.match(html,/id="tpPrescription"/);assert.match(html,/id="cyOut"/);assert.match(html,/id="cyNext"/);
 console.log('PASS: prescription prioritization, BPM confirmation, cycle boundaries, incomplete dates, and follow-up plan safeguards');
+
+loadPart('var STAGE_TEXT=','$(\'stageSelect\').onchange');
+assert.equal(c.stageAge(5),'5-6');assert.equal(c.stageAge(8),'7-8');assert.equal(c.stageAge(17),'15-17');assert.equal(c.stageAge(18),'');
+assert.equal(c.stageSuggest([{cat:'5-6 años'}]).value,'5-6');
+assert.equal(c.stageSuggest([{age:6},{cat:'5–6 years'}]).value,'5-6');
+assert.equal(c.stageSuggest([{age:6},{cat:'15-17 años'}]).conflict,true);
+assert.equal(c.stageSuggest([{age:6},{cat:'15-17 años'}]).value,'');
+assert.equal(c.stageSuggest([{grade:'5'}]).value,'');
+const youngPlan=c.rxBuild(rxProfile,rxWeek,120,3,true,'5-6');
+assert.equal(youngPlan.bpm,120);assert.ok(youngPlan.days.every(d=>d.rhythm.length===0));assert.equal(youngPlan.days[0].memory[0],'Recognition');assert.equal(youngPlan.days[1].memory[0],'Recall');
+const olderPlan=c.rxBuild(rxProfile,rxWeek,120,3,true,'15-17');assert.ok(olderPlan.days.some(d=>d.rhythm.length));assert.equal(olderPlan.bpm,120);
+assert.ok(c.rxBuild(rxProfile,rxWeek,null,3,true,'15-17').days.every(d=>!d.rhythm.length));
+assert.match(html,/id="stageSelect"/);
+console.log('PASS: developmental stage suggestions, conflicts, young athlete practice and individual BPM preservation');
