@@ -19,7 +19,7 @@ const {randomUUID}=require('node:crypto');
  const broken=createRecallBpmAdapter({host:{...host,configureTiming(){throw Error('failure')}}});
  assert.throws(()=>broken.apply({bpm:84,planId}));assert.equal(broken.getTiming(),null);assert.equal(timing,null);
  let selected={membershipId:randomUUID(),planId,sessionEpoch:'one'};
- const client={invalidate(){},async request(){return {records:[{id:planId,kind:'training_plan',effective_on:'2020-01-01',payload:{bpm:84,stations:['recall']}}]}}};
+ const client={invalidate(){},async request(){return {prescription:{plan_id:planId,membership_id:selected.membershipId,confirmation_id:randomUUID(),effective_on:'2020-01-01',bpm:84,station:'recall',stage:'11-12'}}}};
  const bridge=createBpmBridge({client,getSelection:()=>selected,programs:{recall:adapter},enabled:true});
  assert.equal((await bridge.launch('recall')).bpm,84);assert.equal(timing.responseMs,7143);
  idle=false;selected={...selected,membershipId:randomUUID()};bridge.invalidate();assert.equal(timing,null);assert.equal(idle,true);assert.ok(cancelled>=7);assert.equal(cancelled,cleared);
