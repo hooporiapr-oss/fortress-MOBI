@@ -1,0 +1,45 @@
+'use strict';
+const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),http=require('node:http'),crypto=require('node:crypto');
+const {chromium}=require('playwright');
+const root=process.cwd(),prefix='ritnome/v0.1.0-dev/',manifest=JSON.parse(fs.readFileSync(prefix+'manifest.json','utf8'));
+const hub=process.argv[2];assert.ok(['mobile-hub.html','fortress-mobile-hub.html'].includes(hub));
+assert.equal(manifest.version,'0.1.0-dev');assert.equal(manifest.status,'development_only');
+assert.deepEqual(Object.keys(manifest.files).sort(),['authenticated-ritnome.js','index.html','ritnome-audio.js','ritnome-clock.js','ritnome-warmup.js']);
+for(const [name,digest] of Object.entries(manifest.files))assert.equal(crypto.createHash('sha256').update(fs.readFileSync(prefix+name)).digest('hex'),digest,name);
+const mime={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.json':'application/json','.css':'text/css','.png':'image/png','.svg':'image/svg+xml','.jpg':'image/jpeg','.webp':'image/webp'};
+const server=http.createServer((req,res)=>{try{
+ const pathname=decodeURIComponent(new URL(req.url,'http://localhost').pathname);
+ const file=path.resolve(root,'.'+pathname),ext=path.extname(file);
+ if(!file.startsWith(root+path.sep)||!mime[ext]||!fs.statSync(file).isFile())throw Error('not served');
+ res.writeHead(200,{'Content-Type':mime[ext],'X-Content-Type-Options':'nosniff','Cache-Control':'no-store'});res.end(fs.readFileSync(file));
+ }catch{res.writeHead(404);res.end()}});
+(async()=>{let browser;try{
+ await new Promise(r=>server.listen(0,'127.0.0.1',r));const origin='http://127.0.0.1:'+server.address().port;
+ browser=await chromium.launch({headless:true});
+ const page=await browser.newPage({viewport:{width:390,height:844},hasTouch:true,isMobile:true});
+ const errors=[],external=[];let inRitnome=false;
+ page.on('pageerror',e=>errors.push(e.message));
+ await page.route('**/*',route=>{if(new URL(route.request().url()).origin!==origin){if(inRitnome)external.push(route.request().url());return route.abort()}return route.continue()});
+ await page.addInitScript(({hub})=>{
+  if(location.pathname!=='/'+hub)return;
+  sessionStorage.setItem(hub==='mobile-hub.html'?'rm-gate-pass':'fortress-mobile-gate-pass','1');
+  sessionStorage.setItem('gym-player-ok','1');localStorage.setItem('gym-player','Synthetic Test');
+  if(hub==='fortress-mobile-hub.html'){localStorage.setItem('hooporia-player',JSON.stringify({name:'Synthetic Test',age:12,grade:'6',school:localStorage.getItem('rct-mobile-school')||'',key:'synthetic-test-only'}));sessionStorage.removeItem('hm-fresh-login')}
+ },{hub});
+ await page.goto(origin+'/'+hub);
+ const link=page.locator('a[href^="'+prefix+'index.html"]');await link.waitFor({state:'visible'});
+ const storage=await page.evaluate(()=>({local:Object.entries(localStorage).sort(),session:Object.entries(sessionStorage).sort()}));
+ await Promise.all([page.waitForURL(u=>u.origin===origin&&u.pathname==='/'+prefix+'index.html'),link.click()]);
+ inRitnome=true;
+ await page.waitForFunction(()=>document.getElementById('start').textContent==='Comenzar');
+ assert.ok(await page.locator('#personal').isDisabled());
+ await page.locator('#bpm').fill('84');await page.locator('#duration').selectOption('free');await page.locator('#start').click();
+ await page.waitForFunction(()=>document.querySelectorAll('.beat.on').length===1);
+ assert.equal(await page.locator('#tempo').textContent(),'84 BPM');
+ assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
+ assert.deepEqual(await page.evaluate(()=>({local:Object.entries(localStorage).sort(),session:Object.entries(sessionStorage).sort()})),storage);
+ await page.locator('#stop').click();assert.equal(await page.locator('.beat.on').count(),0);
+ inRitnome=false;await page.goBack();await page.waitForURL(u=>u.origin===origin&&u.pathname==='/'+hub);await link.waitFor({state:'visible'});
+ assert.deepEqual(errors,[]);assert.deepEqual(external,[]);
+ console.log('PASS: installed package integrity, synthetic hub navigation, real Web Audio playback, storage isolation and browser return');
+ }finally{if(browser)await browser.close();await new Promise(r=>server.close(r))}})().catch(e=>{console.error(e);process.exitCode=1});

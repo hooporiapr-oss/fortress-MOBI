@@ -1,0 +1,14 @@
+{
+  "name": "ritnome",
+  "version": "0.1.0-dev",
+  "status": "development_only",
+  "entry": "index.html",
+  "personalMode": "explicit_authorized_host_only",
+  "files": {
+    "index.html": "a1353fddd7d99a234cb8a149e9ced7bd9e6ee649660b930520e418ba6a1976eb",
+    "ritnome-audio.js": "22dfd81f7026decb1b8cd9dce643802a452e07b5aeeb9e2071e6a1ac98ce0474",
+    "ritnome-clock.js": "5fc34c8c766149e75b9b509a112ea96c7424ba9e489f4c13d62ec6d587c00056",
+    "authenticated-ritnome.js": "e8c185ff94c0ec6739ad92b7018f6b39aad914a4bb74b4987104941a10f21cfb",
+    "ritnome-warmup.js": "759fb4d5c7f1c5f8e252b42572241035b7bfaff0de3ea95c1231b9ae5a80429c"
+  }
+}
