@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
 <script>
 /* Signed in, with player info on this device (jugador-hm.js) — otherwise back to the door */
@@ -11,7 +11,7 @@ if ((function(){ try { return sessionStorage.getItem('fortress-mobile-gate-pass'
 <script src="report.js"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>My Progress | Cognitivo Gym</title>
+<title>Mi Pasaporte | Cognitivo Gym</title>
 <!-- The player's own progress report: his info and every score he has made at his
      program, by station, with a chart. Opened with his device's private key
      (hooporia_my_report) — it shows nobody else. Print or save as PDF to share. -->
@@ -25,28 +25,30 @@ body{min-height:100vh;padding:20px 16px 40px}
 #msg{max-width:760px;margin:30px auto;text-align:center;color:#a7adba;line-height:1.5}
 @media print{.top,#msg{display:none}html,body{background:#fff}}
 </style>
-</head>
+<style>
+[hidden]{display:none!important}#mp{max-width:760px;margin:0 auto 18px;border:1px solid #554b24;border-radius:16px;padding:16px;background:#13141e}#mp h1{color:#FFD700;font-size:1.5rem}#mp h2{font-size:1rem;margin:18px 0 8px}#mp p{font-size:.82rem;color:#c5c7d1;line-height:1.5;margin:8px 0}#mp .mp-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}#mp .mp-cell{background:#202130;border-radius:10px;padding:12px}#mp .mp-cell b{display:block;color:#FFD700;font-size:1.6rem}#mp .mp-cell span{font-size:.78rem;color:#c5c7d1}#mp .mp-scroll{overflow:auto}#mp table{width:100%;border-collapse:collapse;font-size:.8rem;font-variant-numeric:tabular-nums}#mp th,#mp td{padding:8px 4px;border-bottom:1px solid #383849;text-align:left}#mp button{min-height:44px;border:1px solid #FFD700;background:transparent;color:#FFD700;border-radius:9px;padding:8px 12px;margin:10px 5px 0 0;font-weight:bold;cursor:pointer}#mp label{font-size:.8rem;display:block;margin-top:12px}#mp .mp-ach{background:#202130;border-radius:9px;padding:10px;margin:8px 0;color:#FFD700}#mpPrintRoot{display:none}@media print{#mp{display:none!important}body.mp-print>*{display:none!important}body.mp-print #mpPrintRoot{display:block!important;color:#111;background:#fff;width:100%;font:10pt Arial,sans-serif}#mpPrintRoot h1,#mpPrintRoot h2{margin:12pt 0 6pt}#mpPrintRoot p{margin:6pt 0;line-height:1.4}#mpPrintRoot table{width:100%;border-collapse:collapse}#mpPrintRoot th,#mpPrintRoot td{padding:5pt;text-align:left;border-bottom:1px solid #ccc}#mpPrintRoot tr{break-inside:avoid}#mpPrintRoot .mp-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8pt}#mpPrintRoot .mp-cell{border:1px solid #ccc;padding:8pt}#mpPrintRoot .mp-cell b,#mpPrintRoot .mp-cell span{display:block}#mpPrintRoot .mp-ach{margin:6pt 0}}
+</style></head>
 <body>
 <div class="top">
-  <a class="pill" href="fortress-mobile-hub.html">← THE GYM</a>
+  <a class="pill" id="mpBack" href="fortress-mobile-hub.html">← EL GYM</a><span><button class="pill" type="button" id="mpEs" aria-pressed="true">ES</button> <button class="pill" type="button" id="mpEn" aria-pressed="false">EN</button></span>
 </div>
 <div id="msg">Cargando tu reporte… · Loading your report…</div>
-<div id="out"></div>
+<section id="mp" hidden><div id="mpOut"></div><label><input type="checkbox" id="mpName"> <span id="mpNameText">Incluir mi nombre en el informe</span></label><button type="button" id="mpPrint">Imprimir / PDF</button><button type="button" id="mpCopy">Copiar resumen</button><p id="mpStatus" role="status"></p></section><div id="out"></div><div id="mpPrintRoot" aria-hidden="true"></div><script src="mi-pasaporte.js"></script>
 <script>
 var SB='https://sdaphocueugzfvjovuxd.supabase.co';
 var KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNkYXBob2N1ZXVnemZ2am92dXhkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM2MjQyMDgsImV4cCI6MjA5OTIwMDIwOH0.pDAzf4P6dD9eNEBlnP95SdF5BI-R84-Rdc0vKzYcn7M';
 var me=HM_PLAYER.get();
-if(!me){ location.replace('fortress-mobile-hub.html') }
+if(!me || sessionStorage.getItem('fortress-mobile-gate-pass')!=='1'){ location.replace('fortress-mobile-hub.html') }
 else {
   fetch(SB+'/rest/v1/rpc/hooporia_my_report',{method:'POST',headers:{apikey:KEY,Authorization:'Bearer '+KEY,'Content-Type':'application/json'},body:JSON.stringify({p_key:HM_PLAYER.key(me)})})
     .then(function(r){if(!r.ok)throw 0;return r.json()})
     .then(function(d){
       // nothing saved yet under this key: an empty report with the player's own info
       if(!d) d={school:me.school,players:[{name:me.name,age:me.age,grade:me.grade,at:new Date().toISOString()}],runs:[]};
-      HM_REPORT.mount(document.getElementById('out'),d,me.name);   // Spanish first, EN switch, Share, Print / PDF
-      document.getElementById('msg').textContent=(d.runs||[]).length?'':'Juega las estaciones y tu progreso aparece aquí · Play the stations and your progress shows up here.';
+      HM_REPORT.mount(document.getElementById('out'),d,me.name); MI_PASAPORTE.mount(d,me.name);   // Spanish first, EN switch, Share, Print / PDF
+      document.getElementById('msg').textContent='';
     })
-    .catch(function(){document.getElementById('msg').textContent='Could not load your report — check your connection and try again.'});
+    .catch(function(){MI_PASAPORTE.error()});
 }
 </script>
 </body>
