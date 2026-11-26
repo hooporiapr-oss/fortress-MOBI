@@ -69,3 +69,6 @@ jobs:
 
       - name: Test bilingual disabled BPM preview
         run: node development/bpm-preview.test.cjs
+
+      - name: Test scoped Coach Memory frontend transport
+        run: node development/coach-memory-client.test.cjs
