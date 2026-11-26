@@ -1,0 +1,15 @@
+name: Program Overview tests
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [feature/program-overview]
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - run: node tests/program-overview.cjs
