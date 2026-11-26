@@ -79,3 +79,14 @@ assert.ok(Object.values(c.actStats(history,['b'],now,true)).every(g=>g.every(x=>
 assert.equal(c.actStats(history,['a'],now,false).review.length,0);
 assert.match(html,/id="act"/);assert.match(html,/id="actOut"/);
 console.log('PASS: action groups, per-category uniqueness, authorized athlete scope and incomplete-data advancement safeguard');
+
+loadPart('var WK_TEXT=','$(\'wkOut\').onclick');
+const weeklyRows=[row('a','hm','recall','level','','2026-11-14T12:00:00Z',2),row('a','hm','recall','level','','2026-11-15T12:00:00Z',3),row('a','hm','recall','level','','2026-11-22T12:00:00Z',5),row('a','hm','recall','level','','2026-11-23T12:00:00Z',7),row('b','hm','recall','level','','2026-11-15T12:00:00Z',4),row('c','hm','recall','level','','2026-11-24T12:00:00Z',5),row('a','hm','recall','level','','2026-11-26T12:00:00Z',99),row('outside','hm','recall','level','','2026-11-24T12:00:00Z',99)];
+const weekly=c.wkStats(weeklyRows,['a','b','c'],now,true);
+assert.equal(weekly.period.join(','),'2026-11-19,2026-11-25');assert.equal(weekly.prior.join(','),'2026-11-12,2026-11-18');
+assert.equal(weekly.active.join(','),'2,2');assert.equal(weekly.attempts.join(','),'3,3');assert.equal(weekly.days.join(','),'2,3');
+assert.equal(weekly.progress.length,1);assert.equal(weekly.progress[0].key,'a');assert.equal(weekly.progress[0].stations[0].change,3.5);
+assert.ok(weekly.attention.some(x=>x.key==='b'&&x.after===0));assert.ok(weekly.trained.some(x=>x.key==='c'&&x.newly));
+assert.ok(weekly.milestones.some(x=>x.key==='c'));assert.ok(!weekly.milestones.some(x=>x.key==='outside'));assert.equal(c.wkStats(weeklyRows,['a'],now,false).priorities.review.length,0);
+assert.match(html,/id="wkPrintRoot"/);assert.match(html,/id="wkOut"/);
+console.log('PASS: weekly completed days, participation, comparable improvement, milestones and scope');
