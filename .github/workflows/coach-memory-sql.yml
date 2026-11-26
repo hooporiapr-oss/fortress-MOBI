@@ -128,3 +128,6 @@ jobs:
 
       - name: Test authenticated Ritnome launch lifecycle
         run: node development/authenticated-ritnome.test.cjs
+
+      - name: Test versioned Ritnome distribution package
+        run: node development/ritnome-package.test.cjs
