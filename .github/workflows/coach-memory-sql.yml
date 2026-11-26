@@ -95,3 +95,6 @@ jobs:
 
       - name: Test personalized Recognition adapter and practice engine
         run: node development/recognition-practice-engine.test.cjs
+
+      - name: Test bilingual Recognition practice preview
+        run: node development/recognition-practice-preview.test.cjs
