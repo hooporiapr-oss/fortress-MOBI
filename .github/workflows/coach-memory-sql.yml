@@ -78,3 +78,6 @@ jobs:
 
       - name: Test isolated Recall BPM adapter
         run: node development/recall-bpm-adapter.test.cjs
+
+      - name: Test personalized Recall gameplay engine
+        run: node development/recall-practice-engine.test.cjs
