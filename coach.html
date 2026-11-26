@@ -115,7 +115,7 @@ svg.chart{width:100%;height:auto;display:block}
 <style>
 #ap{margin:12px 0 20px;border:1px solid #554b24;border-radius:16px;background:#13141e;color:white;overflow:hidden}
 #ap summary{padding:15px;color:#FFD700;font-weight:900;cursor:pointer}#apBody{padding:0 14px 16px}#ap label{display:block;font-size:.8rem;color:#c5c7d1;margin:10px 0 6px}#ap select{width:100%;min-height:44px;background:#202130;color:#fff;border:1px solid #6c6c7f;border-radius:9px;padding:8px;font:inherit}#ap .ap-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:12px 0}#ap .ap-cell{background:#202130;border-radius:10px;padding:12px;min-width:0}#ap .ap-cell b{display:block;color:#FFD700;font-size:1.4rem}#ap .ap-cell span,#ap p{color:#c5c7d1;font-size:.78rem;line-height:1.5}#ap p{margin:8px 0}#ap h3{font-size:.9rem;margin:16px 0 8px}#ap .ap-scroll{overflow:auto}#ap table{width:100%;border-collapse:collapse;font-size:.78rem}#ap th,#ap td{text-align:left;padding:8px 4px;border-bottom:1px solid #383849}#ap th{color:#c5c7d1}#ap .ap-station{margin:10px 0;padding:10px;background:#202130;border-radius:10px}#ap .ap-station h4{font-size:.86rem}#ap .chart{width:100%;max-width:560px}
-</style><style>#tp{margin-top:18px;padding:12px;border:1px solid #554b24;border-radius:12px}#tp input[type=number]{min-height:44px;width:100%;padding:9px;background:#202130;border:1px solid #6c6c7f;color:#fff;border-radius:9px;font:inherit}#tp input[type=checkbox]{width:18px;height:18px;vertical-align:middle}#tp button{min-height:44px;border:1px solid #FFD700;color:#FFD700;background:transparent;padding:9px 14px;border-radius:9px;margin:10px 6px 0 0;font-weight:bold}#tp .tp-day{background:#202130;border-radius:10px;padding:10px;margin:8px 0}#tp .tp-day ul{padding-left:20px;font-size:.85rem;line-height:1.6}</style><style>#pa{margin-top:18px;padding:12px;border:1px solid #554b24;border-radius:12px}#pa button{min-height:44px;border:1px solid #FFD700;color:#FFD700;background:transparent;padding:9px 14px;border-radius:9px;margin-top:10px;font-weight:bold}#pa .pa-dates{font-variant-numeric:tabular-nums}#pa .pa-scroll{overflow:auto}#pa .pa-delta{font-weight:bold;color:#FFD700}</style></head>
+</style><style>#tp{margin-top:18px;padding:12px;border:1px solid #554b24;border-radius:12px}#tp input[type=number]{min-height:44px;width:100%;padding:9px;background:#202130;border:1px solid #6c6c7f;color:#fff;border-radius:9px;font:inherit}#tp input[type=checkbox]{width:18px;height:18px;vertical-align:middle}#tp button{min-height:44px;border:1px solid #FFD700;color:#FFD700;background:transparent;padding:9px 14px;border-radius:9px;margin:10px 6px 0 0;font-weight:bold}#tp .tp-day{background:#202130;border-radius:10px;padding:10px;margin:8px 0}#tp .tp-day ul{padding-left:20px;font-size:.85rem;line-height:1.6}</style><style>#pa{margin-top:18px;padding:12px;border:1px solid #554b24;border-radius:12px}#pa button{min-height:44px;border:1px solid #FFD700;color:#FFD700;background:transparent;padding:9px 14px;border-radius:9px;margin-top:10px;font-weight:bold}#pa .pa-dates{font-variant-numeric:tabular-nums}#pa .pa-scroll{overflow:auto}#pa .pa-delta{font-weight:bold;color:#FFD700}</style><style>#ci{margin:12px 0 20px;border:1px solid #554b24;border-radius:16px;background:#13141e;color:white;overflow:hidden}#ci summary{padding:15px;color:#FFD700;font-weight:900;cursor:pointer}#ciBody{padding:0 14px 16px}#ci p{color:#c5c7d1;font-size:.78rem;line-height:1.5;margin:8px 0}#ci h3{font-size:.9rem;margin:16px 0 8px}#ci .ci-group{border-top:1px solid #383849;margin-top:10px}#ci .ci-row{width:100%;display:flex;flex-direction:column;align-items:flex-start;gap:5px;background:#202130;color:#fff;border:1px solid #383849;border-radius:9px;padding:11px;margin:6px 0;text-align:left;font:inherit;cursor:pointer;min-height:44px;overflow-wrap:anywhere}#ci .ci-row b{color:#FFD700;font-size:.88rem}#ci .ci-row span{font-size:.78rem;color:#c5c7d1}#ci .ci-empty{padding:8px 0;color:#a7adba}</style></head>
 <body>
 <div class="top">
   <a class="pill" id="gymBack" href="index.html" data-cv="gym">← EL GYM</a>
@@ -149,7 +149,7 @@ svg.chart{width:100%;height:auto;display:block}
     <div id="spList"></div>
     <div class="count" id="spCount"></div>
   </div>
-  <details id="ap"><summary id="apTitle">Perfil de rendimiento del atleta</summary><div id="apBody"><label for="apSelect" id="apLabel">Seleccionar atleta</label><select id="apSelect"></select><div id="apOut" aria-live="polite"></div><section id="pa" hidden><h3 id="paTitle">Evaluación de progreso</h3><p id="paIntro"></p><label for="paPeriod" id="paLabel">Período de comparación</label><select id="paPeriod"><option value="7">7 días</option><option value="14">14 días</option><option value="30" selected>30 días</option><option value="60">60 días</option><option value="90">90 días</option></select><div id="paOut" aria-live="polite"></div><button type="button" id="paCopy" hidden>Copiar evaluación</button><p id="paStatus" role="status"></p></section><section id="tp" hidden><h3 id="tpTitle">Centro de entrenamiento personalizado</h3><p id="tpIntro"></p><label for="tpBpm" id="tpBpmLabel">BPM confirmado por el entrenador</label><input id="tpBpm" type="number" inputmode="numeric" min="1" max="10000" step="1" placeholder="BPM"><label><input type="checkbox" id="tpConfirm"> <span id="tpConfirmLabel">Confirmo el BPM personal</span></label><label for="tpDays" id="tpDaysLabel">Días por semana</label><select id="tpDays"><option value="2">2</option><option value="3" selected>3</option><option value="4">4</option><option value="5">5</option></select><label for="tpFocus" id="tpFocusLabel">Enfoque</label><select id="tpFocus"><option value="balanced">Equilibrado</option><option value="memory">Memoria</option><option value="reaction">Reacción y control</option></select><button id="tpGenerate" type="button">Crear plan</button><div id="tpOut" aria-live="polite"></div><button id="tpCopy" type="button" hidden>Copiar plan</button><p id="tpStatus" role="status"></p></section></div></details>
+  <details id="ci"><summary id="ciTitle">Inteligencia del entrenador</summary><div id="ciBody"><p id="ciIntro"></p><div id="ciOut" aria-live="polite"></div></div></details><details id="ap"><summary id="apTitle">Perfil de rendimiento del atleta</summary><div id="apBody"><label for="apSelect" id="apLabel">Seleccionar atleta</label><select id="apSelect"></select><div id="apOut" aria-live="polite"></div><section id="pa" hidden><h3 id="paTitle">Evaluación de progreso</h3><p id="paIntro"></p><label for="paPeriod" id="paLabel">Período de comparación</label><select id="paPeriod"><option value="7">7 días</option><option value="14">14 días</option><option value="30" selected>30 días</option><option value="60">60 días</option><option value="90">90 días</option></select><div id="paOut" aria-live="polite"></div><button type="button" id="paCopy" hidden>Copiar evaluación</button><p id="paStatus" role="status"></p></section><section id="tp" hidden><h3 id="tpTitle">Centro de entrenamiento personalizado</h3><p id="tpIntro"></p><label for="tpBpm" id="tpBpmLabel">BPM confirmado por el entrenador</label><input id="tpBpm" type="number" inputmode="numeric" min="1" max="10000" step="1" placeholder="BPM"><label><input type="checkbox" id="tpConfirm"> <span id="tpConfirmLabel">Confirmo el BPM personal</span></label><label for="tpDays" id="tpDaysLabel">Días por semana</label><select id="tpDays"><option value="2">2</option><option value="3" selected>3</option><option value="4">4</option><option value="5">5</option></select><label for="tpFocus" id="tpFocusLabel">Enfoque</label><select id="tpFocus"><option value="balanced">Equilibrado</option><option value="memory">Memoria</option><option value="reaction">Reacción y control</option></select><button id="tpGenerate" type="button">Crear plan</button><div id="tpOut" aria-live="polite"></div><button id="tpCopy" type="button" hidden>Copiar plan</button><p id="tpStatus" role="status"></p></section></div></details>
   <div id="hmBlock">
   <div class="gtitle" data-cv="gtitle">🏀 Jugadores · mejor nivel en cada estación</div>
   <button class="gbtn" type="button" data-guide="hm" data-cv="gBtn">📖 Guía de juegos</button>
@@ -238,7 +238,7 @@ function applyLang(){
 }
 document.querySelectorAll('#cvLang button').forEach(function(b){b.onclick=function(){
   LANG=b.getAttribute('data-l'); try{localStorage.setItem('rp-lang',LANG)}catch(e){}
-  applyLang();poRender();apRender();
+  applyLang();poRender();apRender();ciRender();
   if(!$('view').hidden){render();renderCg();renderSp();}
   if(GOPEN)openGuide(GOPEN[0],GOPEN[1]);
   if(!$('player').hidden&&CUR)showPlayer(CUR);
@@ -350,7 +350,7 @@ $('spClose').onclick=function(){$('spBox').classList.remove('on')};
 $('spBox').onclick=function(e){if(e.target===this)this.classList.remove('on')};
 function loadCg(){
   var my=++CGOK, sc='school_name=eq.'+encodeURIComponent(school)+'&hidden=is.false&order=logged_at.asc&limit=5000';
-  CG=null; poSource='loading'; poRender();apRender(); $('cgBlock').hidden=true; $('rvBlock').hidden=true;
+  CG=null; poSource='loading'; poRender();apRender();ciRender(); $('cgBlock').hidden=true; $('rvBlock').hidden=true;
   Promise.all([
     cgGet('vr_reaction_speed_standings',sc+'&speed=like.free-*&select=player_name,speed,category,logged_at'),
     cgGet('vr_mobile_standings',sc+'&select=player_name,game_key,bpm,hits,level,category,logged_at')
@@ -398,7 +398,7 @@ function renderSet(id,gs,countKey){
   blk.hidden=false;
 }
 function render(){
-  renderTeams();poRender();apRender();
+  renderTeams();poRender();apRender();ciRender();
   var keys=Object.keys(players).filter(function(k){return inTeam(players[k].name)}).sort(function(a,b){return players[a].name.localeCompare(players[b].name,undefined,{sensitivity:'base'})});
   $('list').innerHTML=keys.length?keys.map(function(k){var p=players[k];
     return '<button class="row" type="button" data-k="'+esc(k)+'"><span class="nm">'+esc(p.name)+'<small>'+esc([teamOf(p.name),infoShort(p)].filter(Boolean).join(' · '))+'</small></span>'+
@@ -545,7 +545,7 @@ function poRangeStats(rows,start,end,platform,category,now){
  var stationRows=Array.from(stations,function(pair){var parts=JSON.parse(pair[0]),p=pair[1],delta=[];p.forEach(function(x){x.sort(function(a,b){return new Date(a.at)-new Date(b.at)});if(x.length>1)delta.push(x[x.length-1].value-x[0].value)});return {platform:parts[0],station:parts[1],unit:parts[2],mode:parts[3],athletes:p.size,pairs:delta.length,change:delta.length?delta.reduce(function(x,y){return x+y},0)/delta.length:null}});
  return {attempts:a.length,active:athletes.size,days:byDay.size,repeat:Array.from(athletes.values()).filter(function(d){return d.size>=2}).length,byDay:Array.from(byDay).sort(),byTeam:Array.from(byTeam,function(x){return [x[0],x[1].size]}).sort(),stations:stationRows};
 }
-function poReset(){apReset();poMonthReset();poSource='loading';$('po').open=false;$('poResult').textContent='';$('poCategory').innerHTML='<option value=""></option>';$('poCategory').value='';$('poPlatform').value='all';}
+function poReset(){ciReset();apReset();poMonthReset();poSource='loading';$('po').open=false;$('poResult').textContent='';$('poCategory').innerHTML='<option value=""></option>';$('poCategory').value='';$('poPlatform').value='all';}
 function poRender(){
  var el=$('poResult');if(!el)return;
  $('poTitle').textContent=poT('title');$('poPeriodL').textContent=poT('period');$('poPlatformL').textContent=poT('platform');$('poCategoryL').textContent=poT('category');$('poPrint').textContent=poT('print');
@@ -707,12 +707,51 @@ function paRender(){
 $('paPeriod').onchange=paRender;
 $('paCopy').onclick=async function(){if(!PA_KEY||!CODE||!DATA||$('apSelect').value!==PA_KEY)return;try{await navigator.clipboard.writeText($('paOut').dataset.summary||'');$('paStatus').textContent=paT('copied')}catch(e){$('paStatus').textContent=paT('fail')}};
 
+
+var CI_TEXT={es:{title:'Inteligencia del entrenador',intro:'Señales de seguimiento basadas en los últimos 14 días completos y los 14 anteriores. No son diagnósticos ni clasificaciones de atletas.',progress:'Atletas en progreso',records:'Nuevos récords personales',participation:'Seguimiento de participación',bpm:'Reevaluación de BPM',practice:'Estaciones para reforzar',empty:'Sin señales con los datos disponibles.',partial:'Datos incompletos o en carga: las señales pueden cambiar.',missing:'Sin medición válida de Reaction Speed registrada',stale:'Última medición hace 30 días o más',days:'días activos',attempts:'intentos',previous:'anterior',record:'Récord previo',current:'nuevo',decline:'Mediana menor en modalidad comparable',improved:'Mediana mayor en modalidad comparable',repeat:'Revisar el ejercicio y las condiciones antes de cambiar la dificultad.',identity:'Se excluyen perfiles duplicados conocidos; confirme coincidencias de nombres entre plataformas.',note:'Récord: supera un resultado anterior al período reciente. Participación: al menos dos días activos antes y menos días después. Reevaluación de BPM: sugerencia de revisión, no caducidad fisiológica.'},en:{title:'Coach Intelligence',intro:'Follow-up signals based on the last 14 complete days and the preceding 14. These are not diagnoses or athlete rankings.',progress:'Athletes making progress',records:'New personal records',participation:'Participation follow-up',bpm:'BPM reassessment',practice:'Stations to revisit',empty:'No signals in the available data.',partial:'Data incomplete or loading: signals may change.',missing:'No valid recorded Reaction Speed measurement',stale:'Last measurement 30 or more days ago',days:'active days',attempts:'attempts',previous:'previous',record:'Previous record',current:'new',decline:'Lower median in comparable mode',improved:'Higher median in comparable mode',repeat:'Review exercise and conditions before changing difficulty.',identity:'Known duplicate profiles excluded; verify matching names across platforms.',note:'Record: exceeds a result before the recent period. Participation: at least two prior active days and fewer recent days. BPM reassessment is a review suggestion, not physiological expiration.'}};
+function ciT(k){return CI_TEXT[LANG][k]}
+function ciReset(){var el=$('ci');if(!el)return;el.open=false;$('ciOut').textContent=''}
+function ciStats(rows,keys,now){
+ var end=Date.parse(poDay(now)),date=function(n){return new Date(end-n*86400000).toISOString().slice(0,10)},recent=date(14),last=date(1),stale=date(30),by=new Map();
+ keys.forEach(function(k){by.set(k,[])});
+ rows.forEach(function(r){if(by.has(r.key)&&r.day<=last&&Number.isFinite(r.value)&&(r.unit!=='bpm'||r.value>0))by.get(r.key).push(r)});
+ var out={progress:[],records:[],participation:[],bpm:[],practice:[]};
+ by.forEach(function(a,key){
+ var p=paStats(a,14,now);
+ p.stations.forEach(function(s){if(s.change>0)out.progress.push({key:key,station:s.station,mode:s.mode,unit:s.unit,before:s.before,after:s.after});else if(s.change<0)out.practice.push({key:key,station:s.station,mode:s.mode,unit:s.unit,before:s.before,after:s.after})});
+ if(p.active[0]>=2&&p.active[1]<p.active[0])out.participation.push({key:key,before:p.active[0],after:p.active[1]});
+ var bpm=a.filter(function(r){return r.station==='rv'&&r.value>0}).sort(function(x,y){return y.day.localeCompare(x.day)});
+ if(!bpm.length||bpm[0].day<=stale)out.bpm.push({key:key,day:bpm.length?bpm[0].day:null});
+ var modes=new Map();a.forEach(function(r){var k=JSON.stringify([r.station,r.mode,r.unit]);if(!modes.has(k))modes.set(k,[null,null]);var v=modes.get(k),i=r.day<recent?0:1;v[i]=v[i]===null?r.value:Math.max(v[i],r.value)});
+ modes.forEach(function(v,k){if(v[0]!==null&&v[1]!==null&&v[1]>v[0]){var parts=JSON.parse(k);out.records.push({key:key,station:parts[0],mode:parts[1],unit:parts[2],before:v[0],after:v[1]})}});
+ });return out;
+}
+function ciRender(){
+ var el=$('ci'),out=$('ciOut');if(!el)return;
+ $('ciTitle').textContent=ciT('title');$('ciIntro').textContent=ciT('intro');
+ if(!CODE||!DATA){out.textContent='';return}
+ var names=new Map(),counts=new Map();
+ function add(p,hm){var key=String(p.name||'').trim().toLowerCase(),team=teamOf(p.name);if(!key||!inTeam(p.name)||(TEAMSOK&&(!team||!TEAMSOK.includes(team))))return;names.set(key,p.name);if(hm)counts.set(key,(counts.get(key)||0)+1)}
+ Object.values(players||{}).forEach(function(p){add(p,true)});Object.values(CG||{}).forEach(function(p){add(p,false)});
+ var keys=Array.from(names.keys()).filter(function(k){return (counts.get(k)||0)<2});
+ var groups=ciStats(poRecords(),keys,new Date()),fmt=function(v){return new Intl.NumberFormat(LANG,{maximumFractionDigits:1}).format(v)};
+ var stationNames={recall:'Recall',recognition:'Recognition',replay:'Replay',fortress:'Fortress',rs:'Ritnome BPM',st:'Swipe Test',rv:'Reaction Speed',sw:'Swipe It',zn:'Zona',zr:'Zona Roja',enc:'Encadena'};
+ out.innerHTML=(poSource!=='complete'?'<p>'+ciT('partial')+'</p>':'')+Object.keys(groups).map(function(g){
+ var a=groups[g].sort(function(x,y){return names.get(x.key).localeCompare(names.get(y.key))||String(x.station||'').localeCompare(String(y.station||''))});
+ return '<section class="ci-group"><h3>'+ciT(g)+' · '+new Set(a.map(function(x){return x.key})).size+'</h3>'+(a.length?a.map(function(x){
+ var label='';if(g==='bpm')label=x.day?ciT('stale')+': '+x.day:ciT('missing');else if(g==='participation')label=fmt(x.before)+' → '+fmt(x.after)+' '+ciT('days');else label=(stationNames[x.station]||x.station)+(x.mode?' · '+x.mode:'')+' — '+fmt(x.before)+' → '+fmt(x.after)+' '+poT(x.unit);
+ return '<button class="ci-row" type="button" data-ci-key="'+esc(x.key)+'"><b>'+esc(names.get(x.key))+'</b><span>'+esc(label)+'</span></button>'
+ }).join(''):'<p class="ci-empty">'+ciT('empty')+'</p>')+'</section>'
+ }).join('')+'<p>'+ciT('note')+'</p><p>'+ciT('identity')+'</p>';
+}
+$('ciOut').onclick=function(e){var b=e.target.closest('[data-ci-key]');if(!b||!CODE||!DATA)return;apRender();var sel=$('apSelect');sel.value=b.dataset.ciKey;if(!sel.value)return;$('ap').open=true;apRender();$('ap').scrollIntoView({block:'start'})};
+
 var FROM=(function(){var f=(new URLSearchParams(location.search).get('from')||'');
   if(f!=='cognogym'&&f!=='vreaction'){try{f=sessionStorage.getItem('cv-from')||''}catch(e){f=''}}
   if(f==='cognogym'||f==='vreaction'){try{sessionStorage.setItem('cv-from',f)}catch(e){}return f}return ''})();
 var BACK={cognogym:'https://cognogym.com/dynamic-hub.html',vreaction:'https://vreaction.com/reaction-velocity.html'};
 if(FROM)$('gymBack').href=BACK[FROM];
-applyLang();poRender();apRender();
+applyLang();poRender();apRender();ciRender();
 $('repBack').onclick=function(){$('report').hidden=true;$('player').hidden=false};
 
 </script>
