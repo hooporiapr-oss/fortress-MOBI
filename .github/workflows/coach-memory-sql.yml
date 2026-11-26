@@ -122,3 +122,6 @@ jobs:
 
       - name: Test shared Ritnome audio and precision clock
         run: node development/ritnome-core.test.cjs
+
+      - name: Test bilingual Ritnome warm-up preview
+        run: node development/ritnome-warmup-preview.test.cjs
