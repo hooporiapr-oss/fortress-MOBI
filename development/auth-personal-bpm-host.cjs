@@ -21,7 +21,7 @@ function createAuthPersonalBpmHost({auth,endpoint,enabled=false,fetchImpl}={}){
   if(!enabled||closed||g!==generation)return;
   try{
    const credential=session?.access_token,expiry=Number(session?.expires_at)*1000;
-   if(typeof credential!=='string'||!/^[-\\w]+\\.[-\\w]+\\.[-\\w]+$/.test(credential)||!Number.isFinite(expiry)||expiry<=Date.now())return;
+   if(typeof credential!=='string'||!/^[A-Za-z0-9_-]+[.][A-Za-z0-9_-]+[.][A-Za-z0-9_-]+$/.test(credential)||!Number.isFinite(expiry)||expiry<=Date.now())return;
    const {data,error}=await auth.getUser(credential);
    if(closed||g!==generation||error||data?.user?.id!==session.user?.id||data?.user?.is_anonymous!==false||expiry<=Date.now())return;
    current=Object.freeze({userId:data.user.id,sessionEpoch:String(g)});token=credential;expires=expiry;
