@@ -101,3 +101,6 @@ jobs:
 
       - name: Test authenticated Recognition launch lifecycle
         run: node development/authenticated-recognition.test.cjs
+
+      - name: Test personalized Replay adapter and practice engine
+        run: node development/replay-practice-engine.test.cjs
