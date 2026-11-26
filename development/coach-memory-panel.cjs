@@ -32,6 +32,6 @@ function mountCoachMemoryPanel({root,controller,getDraft,randomUUID=()=>globalTh
  }
  save.onclick=()=>void run('save');history.onclick=()=>void run('history');more.onclick=()=>void run('history',true);
  sync();
- return Object.freeze({refresh(){reset();lastScope=scope();render()},setLanguage(value){lang=value==='en'?'en':'es';sync()},dispose(){closed=true;reset();root.replaceChildren();save.onclick=history.onclick=more.onclick=null}});
+ return Object.freeze({history(){void run('history')},refresh(){reset();lastScope=scope();render()},setLanguage(value){lang=value==='en'?'en':'es';sync()},dispose(){closed=true;reset();root.replaceChildren();save.onclick=history.onclick=more.onclick=null}});
 }
 module.exports={mountCoachMemoryPanel};

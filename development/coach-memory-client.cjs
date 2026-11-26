@@ -29,7 +29,7 @@ function createCoachMemoryClient({endpoint,enabled=false,getContext,fetchImpl=gl
   if(!res.ok)throw fail(({400:'invalid_request',401:'authentication_required',403:'forbidden'})[res.status]||'unavailable');
   let data;try{data=await res.json()}catch{throw fail('unavailable')}
   if(g!==generation)throw fail('selection_changed');
-  if(listing){const rows=data?.enrollments;if(!Array.isArray(rows)||rows.length>(fields.page_size??25)||rows.some(r=>!uuid(r.membership_id)||typeof r.program_key!=='string'||!r.program_key.trim()||r.program_key.length>200))throw fail('unavailable');return {enrollments:rows.map(r=>({membership_id:r.membership_id,program_key:r.program_key}))};}
+  if(listing){const rows=data?.enrollments;if(!Array.isArray(rows)||rows.length>(fields.page_size??25)||rows.some(r=>!uuid(r.membership_id)||typeof r.program_key!=='string'||!r.program_key.trim()||r.program_key.length>200||(r.label!=null&&(typeof r.label!=='string'||r.label.length>80))))throw fail('unavailable');return {enrollments:rows.map(r=>({membership_id:r.membership_id,program_key:r.program_key,label:typeof r.label==='string'&&r.label.trim()?r.label:null}))};}
   if(action==='get_bpm_plan'){
    const p=data?.prescription;
    if(!p||p.membership_id!==ctx.membershipId||p.plan_id!==fields.plan_id||p.station!==fields.station||!uuid(p.confirmation_id)||!Number.isInteger(p.bpm)||p.bpm<1||p.bpm>1000||typeof p.effective_on!=='string'||!/^\d{4}-\d{2}-\d{2}$/.test(p.effective_on)||!['5-6','7-8','9-10','11-12','13-14','15-17','other'].includes(p.stage))throw fail('unavailable');
