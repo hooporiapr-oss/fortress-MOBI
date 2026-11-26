@@ -110,3 +110,6 @@ jobs:
 
       - name: Test authenticated Replay launch lifecycle
         run: node development/authenticated-replay.test.cjs
+
+      - name: Test personalized Fortress adapter and practice engine
+        run: node development/fortress-practice-engine.test.cjs
