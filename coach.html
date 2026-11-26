@@ -112,7 +112,10 @@ svg.chart{width:100%;height:auto;display:block}
 #poBody{padding:0 14px 16px}#po .po-controls{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:12px 0}#po label{font-size:.72rem;color:#c5c7d1;display:flex;flex-direction:column;gap:6px}#po select{width:100%;min-height:44px;border:1px solid #6c6c7f;border-radius:9px;background:#202130;color:white;padding:8px;font:inherit;font-size:.86rem}#po .po-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:12px 0}#po .po-kpi{background:#202130;padding:12px;border-radius:10px;min-width:0}#po .po-kpi b{display:block;font-size:1.7rem;color:#FFD700;font-variant-numeric:tabular-nums}#po .po-kpi span{font-size:.78rem;color:#c5c7d1}#po .po-row{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,2fr) auto;gap:8px;align-items:center;margin:9px 0;font-size:.78rem}#po .po-bar{height:8px;background:#303244;border-radius:99px;overflow:hidden}#po .po-bar i{display:block;height:100%;background:#FFD700;border-radius:99px}#po h3{font-size:.9rem;margin:16px 0 8px}#po .po-note{font-size:.74rem;line-height:1.5;color:#c5c7d1;margin:8px 0}#po table{width:100%;border-collapse:collapse;font-size:.78rem;text-align:left}#po th,#po td{padding:8px 4px;border-bottom:1px solid #383849;vertical-align:top}#po th{color:#c5c7d1}#po button{min-height:44px;margin-top:12px;border:1px solid #FFD700;background:transparent;color:#FFD700;border-radius:10px;padding:8px 15px;font-weight:bold;cursor:pointer}#po .po-scroll{overflow:auto} @media(max-width:400px){#po .po-controls{grid-template-columns:1fr 1fr}#po .po-controls label:last-child{grid-column:1/-1}} @media print{body.po-print *{visibility:hidden!important}body.po-print #po,body.po-print #po *{visibility:visible!important}body.po-print #po{position:absolute;top:0;left:0;width:100%;color:#000;background:#fff;border:0;margin:0}body.po-print #po .po-controls,body.po-print #po button{display:none!important}body.po-print #po summary,body.po-print #po .po-kpi b{color:#000}body.po-print #po .po-kpi{background:#eee}body.po-print #po .po-note,body.po-print #po .po-kpi span,body.po-print #po th{color:#333}body.po-print #po .po-bar i{background:#555;print-color-adjust:exact}}
 #po #poMonthly{margin-top:14px;padding-top:12px;border-top:1px solid #554b24}#po #poMonth{width:100%;min-height:44px;border:1px solid #6c6c7f;border-radius:9px;background:#202130;color:white;padding:8px;font:inherit;color-scheme:dark}#po #poMonthToggle,#po #poMonthShare{margin-left:8px}#po .po-month-table td:nth-child(n+2),#po .po-month-table th:nth-child(n+2){text-align:right}#po .po-month-table tr{break-inside:avoid}#po .po-month-table{font-variant-numeric:tabular-nums}@media print{body.po-month-print #po>*{display:none!important}body.po-month-print #po #poBody{display:block!important}body.po-month-print #poBody>*{display:none!important}body.po-month-print #poBody #poMonthly{display:block!important}body.po-month-print #poMonthly label,body.po-month-print #poMonthStatus{display:none!important}body.po-month-print #poMonthly{border:0;margin:0;padding:0}body.po-month-print #poMonthly h3{color:#000}body.po-month-print #poMonthly table{color:#000}body.po-month-print #poMonthly .po-note{color:#333}}
 </style>
-</head>
+<style>
+#ap{margin:12px 0 20px;border:1px solid #554b24;border-radius:16px;background:#13141e;color:white;overflow:hidden}
+#ap summary{padding:15px;color:#FFD700;font-weight:900;cursor:pointer}#apBody{padding:0 14px 16px}#ap label{display:block;font-size:.8rem;color:#c5c7d1;margin:10px 0 6px}#ap select{width:100%;min-height:44px;background:#202130;color:#fff;border:1px solid #6c6c7f;border-radius:9px;padding:8px;font:inherit}#ap .ap-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:12px 0}#ap .ap-cell{background:#202130;border-radius:10px;padding:12px;min-width:0}#ap .ap-cell b{display:block;color:#FFD700;font-size:1.4rem}#ap .ap-cell span,#ap p{color:#c5c7d1;font-size:.78rem;line-height:1.5}#ap p{margin:8px 0}#ap h3{font-size:.9rem;margin:16px 0 8px}#ap .ap-scroll{overflow:auto}#ap table{width:100%;border-collapse:collapse;font-size:.78rem}#ap th,#ap td{text-align:left;padding:8px 4px;border-bottom:1px solid #383849}#ap th{color:#c5c7d1}#ap .ap-station{margin:10px 0;padding:10px;background:#202130;border-radius:10px}#ap .ap-station h4{font-size:.86rem}#ap .chart{width:100%;max-width:560px}
+</style></head>
 <body>
 <div class="top">
   <a class="pill" id="gymBack" href="index.html" data-cv="gym">← EL GYM</a>
@@ -138,7 +141,7 @@ svg.chart{width:100%;height:auto;display:block}
   </div>
   <!-- 🏀 the program's teams (Team 5 … Team 18): what this code may see, set in License Admin -->
   <div id="teamBar" hidden></div>
-  <details id="po"><summary id="poTitle">Resumen del programa</summary><div id="poBody"><div class="po-note" id="poScope"></div><div class="po-controls"><label><span id="poPeriodL">Período</span><select id="poPeriod"><option value="7">7 días</option><option value="30" selected>30 días</option><option value="90">90 días</option></select></label><label><span id="poPlatformL">Plataforma</span><select id="poPlatform"><option value="all">Todas</option><option value="hm">Hooporia.mobi</option><option value="rv">Reaction Velocity</option><option value="cg">Cognitivo Gym</option><option value="shared">Estaciones compartidas</option></select></label><label><span id="poCategoryL">Categoría</span><select id="poCategory"><option value="">Todas</option></select></label></div><div id="poResult" aria-live="polite"></div><button id="poPrint" type="button">Imprimir / PDF</button><button id="poMonthToggle" type="button" aria-expanded="false" aria-controls="poMonthly">Informe mensual</button><section id="poMonthly" hidden><h3 id="poMonthTitle">Informe mensual del programa</h3><label><span id="poMonthLabel">Mes</span><input type="month" id="poMonth"></label><div id="poMonthOut" aria-live="polite"></div><button id="poMonthPrint" type="button">Imprimir informe mensual / PDF</button><button id="poMonthShare" type="button">Compartir resumen</button><p id="poMonthStatus" class="po-note" role="status"></p></section></div></details>
+  <details id="po"><summary id="poTitle">Resumen del programa</summary><div id="poBody"><div class="po-note" id="poScope"></div><div class="po-controls"><label><span id="poPeriodL">Período</span><select id="poPeriod"><option value="7">7 días</option><option value="30" selected>30 días</option><option value="90">90 días</option></select></label><label><span id="poPlatformL">Plataforma</span><select id="poPlatform"><option value="all">Todas</option><option value="hm">Hooporia.mobi</option><option value="rv">Reaction Velocity</option><option value="cg">Cognitivo Gym</option></select></label><label><span id="poCategoryL">Categoría</span><select id="poCategory"><option value="">Todas</option></select></label></div><div id="poResult" aria-live="polite"></div><button id="poPrint" type="button">Imprimir / PDF</button><button id="poMonthToggle" type="button" aria-expanded="false" aria-controls="poMonthly">Informe mensual</button><section id="poMonthly" hidden><h3 id="poMonthTitle">Informe mensual del programa</h3><label><span id="poMonthLabel">Mes</span><input type="month" id="poMonth"></label><div id="poMonthOut" aria-live="polite"></div><button id="poMonthPrint" type="button">Imprimir informe mensual / PDF</button><button id="poMonthShare" type="button">Compartir resumen</button><p id="poMonthStatus" class="po-note" role="status"></p></section></div></details>
   <!-- 📸 the school's player cards, published from Player Spotlight Studio -->
   <button id="spTog" class="sptog" type="button" hidden></button>
   <div id="spBlock" hidden>
@@ -146,6 +149,7 @@ svg.chart{width:100%;height:auto;display:block}
     <div id="spList"></div>
     <div class="count" id="spCount"></div>
   </div>
+  <details id="ap"><summary id="apTitle">Perfil de rendimiento del atleta</summary><div id="apBody"><label for="apSelect" id="apLabel">Seleccionar atleta</label><select id="apSelect"></select><div id="apOut" aria-live="polite"></div></div></details>
   <div id="hmBlock">
   <div class="gtitle" data-cv="gtitle">🏀 Jugadores · mejor nivel en cada estación</div>
   <button class="gbtn" type="button" data-guide="hm" data-cv="gBtn">📖 Guía de juegos</button>
@@ -234,7 +238,7 @@ function applyLang(){
 }
 document.querySelectorAll('#cvLang button').forEach(function(b){b.onclick=function(){
   LANG=b.getAttribute('data-l'); try{localStorage.setItem('rp-lang',LANG)}catch(e){}
-  applyLang();poRender();
+  applyLang();poRender();apRender();
   if(!$('view').hidden){render();renderCg();renderSp();}
   if(GOPEN)openGuide(GOPEN[0],GOPEN[1]);
   if(!$('player').hidden&&CUR)showPlayer(CUR);
@@ -346,7 +350,7 @@ $('spClose').onclick=function(){$('spBox').classList.remove('on')};
 $('spBox').onclick=function(e){if(e.target===this)this.classList.remove('on')};
 function loadCg(){
   var my=++CGOK, sc='school_name=eq.'+encodeURIComponent(school)+'&hidden=is.false&order=logged_at.asc&limit=5000';
-  CG=null; poSource='loading'; poRender(); $('cgBlock').hidden=true; $('rvBlock').hidden=true;
+  CG=null; poSource='loading'; poRender();apRender(); $('cgBlock').hidden=true; $('rvBlock').hidden=true;
   Promise.all([
     cgGet('vr_reaction_speed_standings',sc+'&speed=like.free-*&select=player_name,speed,category,logged_at'),
     cgGet('vr_mobile_standings',sc+'&select=player_name,game_key,bpm,hits,level,category,logged_at')
@@ -394,7 +398,7 @@ function renderSet(id,gs,countKey){
   blk.hidden=false;
 }
 function render(){
-  renderTeams();poRender();
+  renderTeams();poRender();apRender();
   var keys=Object.keys(players).filter(function(k){return inTeam(players[k].name)}).sort(function(a,b){return players[a].name.localeCompare(players[b].name,undefined,{sensitivity:'base'})});
   $('list').innerHTML=keys.length?keys.map(function(k){var p=players[k];
     return '<button class="row" type="button" data-k="'+esc(k)+'"><span class="nm">'+esc(p.name)+'<small>'+esc([teamOf(p.name),infoShort(p)].filter(Boolean).join(' · '))+'</small></span>'+
@@ -520,7 +524,7 @@ function poRecords(){
  }
  Object.keys(players||{}).forEach(function(k){var p=players[k];Object.keys(p.games||{}).forEach(function(g){(p.games[g]||[]).forEach(function(x){add(p.name,'hm',g,'level','',x.at,x.v,p.grade)})})});
  Object.keys(CG||{}).forEach(function(k){var p=CG[k];Object.keys(p.g||{}).forEach(function(g){(p.g[g]||[]).forEach(function(x){
- var platform=['zn','zr','enc'].includes(g)?'shared':['rs','st'].includes(g)?'cg':'rv',unit=['rs','st','rv','sw'].includes(g)?'bpm':'level';
+ var platform=['rs','st'].includes(g)?'cg':'rv',unit=['rs','st','rv','sw'].includes(g)?'bpm':['zn','zr'].includes(g)?'hits':'level';
  add(p.name,platform,g,unit,x.mode||x.of||'',x.at,x.v,x.category||p.cat);
  })})});
  return rows;
@@ -541,11 +545,11 @@ function poRangeStats(rows,start,end,platform,category,now){
  var stationRows=Array.from(stations,function(pair){var parts=JSON.parse(pair[0]),p=pair[1],delta=[];p.forEach(function(x){x.sort(function(a,b){return new Date(a.at)-new Date(b.at)});if(x.length>1)delta.push(x[x.length-1].value-x[0].value)});return {platform:parts[0],station:parts[1],unit:parts[2],mode:parts[3],athletes:p.size,pairs:delta.length,change:delta.length?delta.reduce(function(x,y){return x+y},0)/delta.length:null}});
  return {attempts:a.length,active:athletes.size,days:byDay.size,repeat:Array.from(athletes.values()).filter(function(d){return d.size>=2}).length,byDay:Array.from(byDay).sort(),byTeam:Array.from(byTeam,function(x){return [x[0],x[1].size]}).sort(),stations:stationRows};
 }
-function poReset(){poMonthReset();poSource='loading';$('po').open=false;$('poResult').textContent='';$('poCategory').innerHTML='<option value=""></option>';$('poCategory').value='';$('poPlatform').value='all';}
+function poReset(){apReset();poMonthReset();poSource='loading';$('po').open=false;$('poResult').textContent='';$('poCategory').innerHTML='<option value=""></option>';$('poCategory').value='';$('poPlatform').value='all';}
 function poRender(){
  var el=$('poResult');if(!el)return;
  $('poTitle').textContent=poT('title');$('poPeriodL').textContent=poT('period');$('poPlatformL').textContent=poT('platform');$('poCategoryL').textContent=poT('category');$('poPrint').textContent=poT('print');
- Array.from($('poPeriod').options).forEach(function(o){o.textContent=o.value+' '+poT('days')});$('poPlatform').options[0].textContent=poT('all');$('poPlatform').options[4].textContent=poT('shared');
+ Array.from($('poPeriod').options).forEach(function(o){o.textContent=o.value+' '+poT('days')});$('poPlatform').options[0].textContent=poT('all');
  if(!CODE||!DATA){el.textContent='';poMonthRender();return}
  $('poScope').textContent=poT('scope')+': '+school+' · '+poT('team')+': '+(TEAM||poT('allTeams'));
  var rows=poRecords(),category=$('poCategory').value,cats=Array.from(new Set(rows.map(function(r){return r.category}).filter(Boolean))).sort();
@@ -605,12 +609,43 @@ $('poMonthPrint').onclick=function(){if(!CODE||!DATA)return;document.body.classL
 window.addEventListener('afterprint',function(){document.body.classList.remove('po-month-print')});
 $('poMonthShare').onclick=async function(){if(!CODE||!DATA||$('poMonthly').hidden)return;var msg=$('poMonthOut').dataset.summary;if(!msg)return;try{if(navigator.share){await navigator.share({title:poMT('title'),text:msg})}else if(navigator.clipboard){await navigator.clipboard.writeText(msg);$('poMonthStatus').textContent=poMT('copied')}else throw Error('unavailable')}catch(e){if(e.name!=='AbortError')$('poMonthStatus').textContent=poMT('failed')}};
 
+
+var AP_TEXT={es:{title:'Perfil de rendimiento del atleta',select:'Seleccionar atleta',choose:'Seleccione un atleta',baseline:'BPM inicial registrado',current:'BPM más reciente',record:'Récord personal BPM',attempts:'Intentos en 30 días',days:'Días activos en 30 días',weeks:'Semanas con actividad (últimas 4)',stations:'Progreso por estación y modalidad',first:'Inicial',last:'Último',best:'Mejor',change:'Cambio',n:'Intentos',no:'Sin medición válida de Reaction Speed',note:'El BPM inicial es la primera medición válida registrada de Reaction Speed; el último BPM no necesariamente es el ajuste actual de entrenamiento. No se combinan BPM con niveles ni modalidades distintas.',recommend:'Próximo entrenamiento sugerido',measure:'Realizar Reaction Speed para establecer su BPM personal antes de ajustar los ejercicios que dependen del ritmo.',recheck:'Repetir Reaction Speed en condiciones comparables para confirmar su BPM personal.',practice:'Practicar al BPM personal confirmado por el entrenador. Priorizar precisión antes de aumentar dificultad.',repeat:'Repetir las estaciones con una sola medición para establecer una comparación.',regular:'Planificar prácticas regulares, adaptadas a la disponibilidad del atleta.',identity:'Los registros se agrupan por nombre normalizado; verifique que no haya atletas con nombres idénticos.',unavailable:'No hay registros para esta selección.',ambiguous:'Hay más de un perfil con el mismo nombre. No se combinarán sus datos.',recent:'Actividad reciente',percent:'Cambio %',partial:'Los datos disponibles pueden estar incompletos.'},en:{title:'Athlete Performance Profile',select:'Select athlete',choose:'Choose an athlete',baseline:'First recorded BPM',current:'Latest recorded BPM',record:'Personal BPM record',attempts:'Attempts in 30 days',days:'Active days in 30 days',weeks:'Active weeks (last 4)',stations:'Progress by station and mode',first:'First',last:'Latest',best:'Best',change:'Change',n:'Attempts',no:'No valid Reaction Speed measurement',note:'Initial BPM is the first valid recorded Reaction Speed measurement; latest BPM is not necessarily the current training setting. BPM, levels and different modes are not combined.',recommend:'Suggested next training',measure:'Complete Reaction Speed to establish personal BPM before adjusting rhythm-dependent exercises.',recheck:'Repeat Reaction Speed under comparable conditions to confirm personal BPM.',practice:'Practice at the personal BPM confirmed by the coach. Prioritize accuracy before raising difficulty.',repeat:'Repeat stations with only one measurement to establish a comparison.',regular:'Plan regular practice suited to the athlete’s availability.',identity:'Records are grouped by normalized name; verify there are no athletes with identical names.',unavailable:'No records for this selection.',ambiguous:'More than one profile has the same name. Their data will not be combined.',recent:'Recent activity',percent:'Change %',partial:'Available records may be incomplete.'}};
+function apT(k){return AP_TEXT[LANG][k]}
+function apReset(){var el=$('ap');if(!el)return;el.open=false;$('apSelect').innerHTML='';$('apOut').textContent='';}
+function apStats(rows,now){
+ var cutoff=poDay(new Date(+new Date(now)-29*86400000)),today=poDay(now),recent=rows.filter(function(r){return r.day>=cutoff&&r.day<=today&&+new Date(r.at)<=+new Date(now)}),valid=rows.filter(function(r){return +new Date(r.at)<=+new Date(now)});
+ var bpm=valid.filter(function(r){return r.station==='rv'&&r.value>0}).sort(function(a,b){return +new Date(a.at)-+new Date(b.at)});
+ var groups=new Map(),weeks=new Set(),days=new Set();
+ recent.forEach(function(r){days.add(r.day);var age=(Date.parse(today)-Date.parse(r.day))/86400000;if(age>=0&&age<28)weeks.add(Math.floor(age/7))});
+ valid.forEach(function(r){var k=JSON.stringify([r.station,r.mode,r.unit]);if(!groups.has(k))groups.set(k,[]);groups.get(k).push(r)});
+ var stations=Array.from(groups,function(pair){var k=JSON.parse(pair[0]),a=pair[1].sort(function(x,y){return +new Date(x.at)-+new Date(y.at)}),f=a[0].value,l=a[a.length-1].value;return {station:k[0],mode:k[1],unit:k[2],first:f,last:l,best:Math.max.apply(null,a.map(function(x){return x.value})),n:a.length,change:a.length>1?l-f:null,pct:a.length>1&&f>0?(l-f)/f*100:null,points:a.slice(-40).map(function(x){return {v:x.value,at:x.at}})}});
+ return {baseline:bpm.length?bpm[0].value:null,current:bpm.length?bpm[bpm.length-1].value:null,best:bpm.length?Math.max.apply(null,bpm.map(function(r){return r.value})):null,bpmN:bpm.length,attempts:recent.length,days:days.size,weeks:weeks.size,stations:stations};
+}
+function apRender(){
+ var el=$('ap'),sel=$('apSelect'),out=$('apOut');if(!el)return;
+ $('apTitle').textContent=apT('title');$('apLabel').textContent=apT('select');
+ if(!CODE||!DATA){out.textContent='';sel.innerHTML='';return}
+ var rows=poRecords(),names=new Map(),duplicates=new Map(),selected=sel.value;
+ function add(p,hm){var key=String(p.name||'').trim().toLowerCase(),team=teamOf(p.name);if(!key||!inTeam(p.name)||(TEAMSOK&&(!team||!TEAMSOK.includes(team))))return;names.set(key,p.name);if(hm)duplicates.set(key,(duplicates.get(key)||0)+1)}
+ Object.values(players||{}).forEach(function(p){add(p,true)});Object.values(CG||{}).forEach(function(p){add(p,false)});
+ sel.innerHTML='<option value="">'+apT('choose')+'</option>'+Array.from(names).sort(function(a,b){return a[1].localeCompare(b[1])}).map(function(p){return '<option value="'+esc(p[0])+'">'+esc(p[1])+'</option>'}).join('');
+ sel.value=names.has(selected)?selected:'';out.textContent='';if(!sel.value)return;
+ if((duplicates.get(sel.value)||0)>1){out.textContent=apT('ambiguous');return}
+ var a=apStats(rows.filter(function(r){return r.key===sel.value}),new Date()),fmt=function(v){return v===null?'—':new Intl.NumberFormat(LANG,{maximumFractionDigits:1}).format(v)},delta=function(v){return v===null?'—':(v>0?'+':'')+fmt(v)};
+ var cells=[[a.baseline,'baseline'],[a.current,'current'],[a.best,'record'],[a.attempts,'attempts'],[a.days,'days'],[a.weeks,'weeks']];
+ var namesByStation={recall:'Recall',recognition:'Recognition',replay:'Replay',fortress:'Fortress',rs:'Ritnome BPM',st:'Swipe Test',rv:'Reaction Speed',sw:'Swipe It',zn:'Zona',zr:'Zona Roja',enc:'Encadena'};
+ var advice=[a.bpmN===0?'measure':a.bpmN===1?'recheck':'practice'];if(a.stations.some(function(s){return s.n===1}))advice.push('repeat');if(a.weeks<2)advice.push('regular');
+ out.innerHTML='<p>'+esc(names.get(sel.value))+' · '+esc(teamOf(names.get(sel.value))||poT('unassigned'))+'</p>'+(poSource!=='complete'?'<p>'+apT('partial')+'</p>':'')+'<div class="ap-grid">'+cells.map(function(c){return '<div class="ap-cell"><b>'+fmt(c[0])+(['baseline','current','record'].includes(c[1])&&c[0]!==null?' BPM':'')+'</b><span>'+apT(c[1])+'</span></div>'}).join('')+'</div><p>'+apT('note')+'</p><h3>'+apT('stations')+'</h3>'+a.stations.map(function(st){return '<div class="ap-station"><h4>'+esc(namesByStation[st.station]||st.station)+(st.mode?' · '+esc(st.mode):'')+' · '+poT(st.unit)+'</h4><div class="ap-scroll"><table><thead><tr>'+['first','last','best','change','percent','n'].map(function(k){return '<th>'+apT(k)+'</th>'}).join('')+'</tr></thead><tbody><tr><td>'+fmt(st.first)+'</td><td>'+fmt(st.last)+'</td><td>'+fmt(st.best)+'</td><td>'+delta(st.change)+'</td><td>'+delta(st.pct)+(st.pct===null?'':'%')+'</td><td>'+st.n+'</td></tr></tbody></table></div>'+chart(st.points)+'</div>'}).join('')+'<h3>'+apT('recommend')+'</h3>'+advice.map(function(k){return '<p>• '+apT(k)+'</p>'}).join('')+'<p>'+apT('identity')+'</p>';
+}
+$('apSelect').onchange=apRender;
+
 var FROM=(function(){var f=(new URLSearchParams(location.search).get('from')||'');
   if(f!=='cognogym'&&f!=='vreaction'){try{f=sessionStorage.getItem('cv-from')||''}catch(e){f=''}}
   if(f==='cognogym'||f==='vreaction'){try{sessionStorage.setItem('cv-from',f)}catch(e){}return f}return ''})();
 var BACK={cognogym:'https://cognogym.com/dynamic-hub.html',vreaction:'https://vreaction.com/reaction-velocity.html'};
 if(FROM)$('gymBack').href=BACK[FROM];
-applyLang();poRender();
+applyLang();poRender();apRender();
 $('repBack').onclick=function(){$('report').hidden=true;$('player').hidden=false};
 
 </script>
