@@ -114,6 +114,7 @@ if ((function(){ try { return sessionStorage.getItem('fortress-mobile-gate-pass'
   .court-line{margin-top:8px;font-size:.78rem;line-height:1.35;color:#FFD700}
   .court-line b{font-weight:800}
   .court-line i{display:block;font-style:normal;color:var(--muted);font-size:.7rem;margin-top:3px}
+#mp-summary{margin:12px 0;padding:16px;border:1px solid #ef914b;border-radius:14px;background:#172331;color:#fff;text-align:left}#mp-summary[hidden]{display:none}#mp-summary h2{font:800 20px system-ui;margin:6px 0;color:#ffab66}#mp-summary p{font:15px/1.5 system-ui;margin:8px 0}#mp-summary a{display:block;background:#ff9b43;color:#101c2a;font:800 14px system-ui;text-align:center;padding:14px;border-radius:9px;text-decoration:none;margin-top:12px}#mp-summary button{float:right;background:transparent;border:1px solid #8795a4;border-radius:6px;color:#fff;padding:8px;cursor:pointer}#mp-summary small{font:800 11px system-ui;letter-spacing:1px;color:#ffab66}#mp-summary a:focus-visible,#mp-summary button:focus-visible{outline:3px solid white;outline-offset:2px}
 </style>
 </head>
 <body>
@@ -207,6 +208,7 @@ if ((function(){ try { return sessionStorage.getItem('fortress-mobile-gate-pass'
     </div>
   </a>
 
+<section id="mp-summary" hidden aria-live="polite"><button type="button" id="mp-lang" lang="en" aria-label="Switch to English">EN</button><small>MI PROGRESO · MY PROGRESS</small><h2 id="mp-head"></h2><p id="mp-body"></p><p id="mp-encourage"></p><a id="mp-link" href="report.html"></a></section>
   <!-- the player's own progress report (report.html): every station over time, to print or share -->
   <a class="board-card" href="report.html" style="margin-bottom:12px">
     <div class="board-name">📈 MY PROGRESS REPORT</div>
@@ -227,6 +229,21 @@ if ((function(){ try { return sessionStorage.getItem('fortress-mobile-gate-pass'
   </div>
 </div>
 
+<script>
+(function(){
+'use strict';
+const $=id=>document.getElementById(id);
+let generation=0,lang='es',state=null;
+try{if(localStorage.getItem('rp-lang')==='en')lang='en'}catch(e){}
+const words={es:{head:'¡Cada entrenamiento cuenta!',new:'Hoy es una buena oportunidad para comenzar. Completa tu primer ejercicio para empezar a registrar tu progreso.',empty:'No registraste intentos durante los últimos 7 días. ¡Hoy es un buen día para retomar!',error:'Tu resumen no está disponible por el momento. Puedes intentar abrir tu informe.',positive:'¡Sigue practicando a tu ritmo!',link:'Ver mi informe de progreso →',summary:(n,d)=>'En los últimos 7 días registraste '+n+(n===1?' intento':' intentos')+' en '+d+(d===1?' día de entrenamiento.':' días de entrenamiento.')},en:{head:'Every practice counts!',new:'Today is a great opportunity to start. Complete your first exercise to begin tracking your progress.',empty:'No attempts were recorded in the last 7 days. Today is a great day to get back into practice!',error:'Your summary is temporarily unavailable. You can try opening your report.',positive:'Keep practicing at your own pace!',link:'View my progress report →',summary:(n,d)=>'In the last 7 days you recorded '+n+(n===1?' attempt':' attempts')+' across '+d+(d===1?' training day.':' training days.')}};
+function render(){if(!state)return;const w=words[lang];$('mp-summary').lang=lang;$('mp-head').textContent=w.head;$('mp-body').textContent=state.type==='summary'?w.summary(state.n,state.d):w[state.type];$('mp-encourage').textContent=w.positive;$('mp-link').textContent=w.link;$('mp-lang').textContent=lang==='es'?'EN':'ES';$('mp-lang').lang=lang==='es'?'en':'es';$('mp-lang').setAttribute('aria-label',lang==='es'?'Switch to English':'Cambiar a español');$('mp-summary').hidden=false}
+function clear(){generation++;state=null;$('mp-summary').hidden=true;$('mp-body').textContent='';$('mp-head').textContent='';$('mp-encourage').textContent=''}
+window.MI_PROGRESO_SUMMARY={clear,load:async function(p){clear();if(!p||HM_PLAYER.admin()||sessionStorage.getItem('fortress-mobile-gate-pass')!=='1')return;const request=generation;const playerKey=HM_PLAYER.key(p);if(!playerKey)return;const same=()=>request===generation&&!HM_PLAYER.admin()&&HM_PLAYER.get()?.key===playerKey&&sessionStorage.getItem('fortress-mobile-gate-pass')==='1';try{const response=await fetch("https://sdaphocueugzfvjovuxd.supabase.co/rest/v1/rpc/hooporia_my_report",{method:'POST',headers:{apikey:"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNkYXBob2N1ZXVnemZ2am92dXhkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM2MjQyMDgsImV4cCI6MjA5OTIwMDIwOH0.pDAzf4P6dD9eNEBlnP95SdF5BI-R84-Rdc0vKzYcn7M",Authorization:"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNkYXBob2N1ZXVnemZ2am92dXhkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM2MjQyMDgsImV4cCI6MjA5OTIwMDIwOH0.pDAzf4P6dD9eNEBlnP95SdF5BI-R84-Rdc0vKzYcn7M",'Content-Type':'application/json'},body:JSON.stringify({p_key:playerKey}),cache:'no-store'});if(!response.ok)throw Error('Report unavailable');const report=await response.json();if(!same())return;if(report!==null&&(!report||!Array.isArray(report.runs)))throw Error('Unexpected report');const runs=(report?.runs||[]).filter(r=>String(r.name||'').trim().toLowerCase()===String(p.name||'').trim().toLowerCase());const now=Date.now(),start=now-7*86400000;const recent=runs.filter(r=>{const t=Date.parse(r.at);return Number.isFinite(t)&&t>=start&&t<=now});const days=new Set(recent.map(r=>new Date(r.at).toLocaleDateString('en-CA',{timeZone:'America/Puerto_Rico'})));state=recent.length?{type:'summary',n:recent.length,d:days.size}:{type:runs.length?'empty':'new'};render()}catch(e){if(same()){state={type:'error'};render()}}}};
+$('mp-lang').addEventListener('click',()=>{lang=lang==='es'?'en':'es';try{localStorage.setItem('rp-lang',lang)}catch(e){}render()});
+window.addEventListener('pagehide',clear);
+window.addEventListener('pageshow',e=>{if(e.persisted)window.MI_PROGRESO_SUMMARY.load(HM_PLAYER.get())});
+})();
+</script>
 <script>
 /* ── THE TEAM, DECIDED HERE AND ONCE ──────────────────────────────
    A player's team is fixed when his code is issued and never changes
@@ -263,8 +280,9 @@ var EQUIPO_ABIERTO = 'demo';
 var $=function(id){return document.getElementById(id)};
 /* Who is training: asked once after signing in, before any station (jugador-hm.js) */
 function hmShow(p){ if(HM_PLAYER.admin()){ $('hm-who').textContent='🛠 Admin · scores not saved'; $('hm-chg').hidden=true; $('hm-pill').hidden=false; $('hm-pill').style.display='inline-flex'; return } if(!p)return; $('hm-who').textContent='👤 '+HM_PLAYER.line(p); $('hm-pill').hidden=false; $('hm-pill').style.display='inline-flex' }
-HM_PLAYER.ensure(hmShow);
-$('hm-chg').onclick=function(){ HM_PLAYER.change(hmShow) };
+function hmShowWithProgress(p){hmShow(p);MI_PROGRESO_SUMMARY.load(p)}
+HM_PLAYER.ensure(hmShowWithProgress);
+$('hm-chg').onclick=function(){ MI_PROGRESO_SUMMARY.clear(); HM_PLAYER.change(hmShowWithProgress) };
 var BPM=120, beatMs=60000/BPM;
 var audioCtx=null, audioReady=false, soundOn=true;
 function toggleSound(){
