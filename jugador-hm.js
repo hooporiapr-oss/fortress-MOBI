@@ -16,6 +16,8 @@
    Coaches read them in Coach View with a Coach code.
    ══════════════════════════════════════════════════════════════════ */
 (function(){
+  // Institutional launch (Ritnome desk): no player and no athlete database — this script does nothing.
+  if (window.RITNOME_INST === true) return;
   var SB = 'https://sdaphocueugzfvjovuxd.supabase.co';
   var KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNkYXBob2N1ZXVnemZ2am92dXhkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM2MjQyMDgsImV4cCI6MjA5OTIwMDIwOH0.pDAzf4P6dD9eNEBlnP95SdF5BI-R84-Rdc0vKzYcn7M';
   var LS = 'hooporia-player';
