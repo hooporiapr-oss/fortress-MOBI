@@ -26,6 +26,6 @@
   document.addEventListener('ritnome:ready', function(){
     R = window.RitnomeInstitutional; if (!R || R.mode !== 'active') { R = null; return; }
     R.collect = function(){ return { games_completed: games, interactions: taps, levels: best }; };
-    R.start({ mode: 'individual' });
+    R.start({ mode: (window.INSTITUCIONAL && window.INSTITUCIONAL.mode) || 'individual' });
   });
 })();
