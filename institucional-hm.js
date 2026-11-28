@@ -7,7 +7,7 @@
   var s = document.createElement('script'); s.src = 'https://institutional.ritnome.com/ritnome-institutional.js'; s.defer = true; document.head.appendChild(s);
   var games = 0, taps = 0, best = 0, R = null;
   document.addEventListener('pointerup', function(){ taps++ }, true);
-  function finished(level){ games++; if (level > best) best = level; if (R) R.checkpoint({}); }
+  function finished(level){ games++; if (level > best) best = level; if (R) { R.checkpoint({}); R.progress({ setting: 'default', result: { level: level } }); } }
   // fin-hm.js end screen: count the game and point "← Home" at the desk
   if (window.HM_FIN && typeof HM_FIN.show === 'function') {
     var show = HM_FIN.show;
