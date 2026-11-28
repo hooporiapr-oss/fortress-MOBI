@@ -17,6 +17,11 @@
   // pages without fin-hm: the game's own end screen
   var end = document.getElementById('screen-end');
   if (end && !window.HM_FIN) new MutationObserver(function(){ if (end.classList.contains('show')) finished(parseInt((document.getElementById('endNum') || {}).textContent, 10) || 0) }).observe(end, { attributes: true, attributeFilter: ['class'] });
+  // The Fortress: the win/lose screen; The Reset: the "done" screen (no score — one routine run counts as one game)
+  var fc = document.getElementById('challengeComplete');
+  if (fc) new MutationObserver(function(){ if (fc.classList.contains('show')) finished(0) }).observe(fc, { attributes: true, attributeFilter: ['class'] });
+  var rd = document.getElementById('s-done');
+  if (rd) new MutationObserver(function(){ if (rd.classList.contains('on')) finished(0) }).observe(rd, { attributes: true, attributeFilter: ['class'] });
   document.querySelectorAll('a[href="fortress-mobile-hub.html"], a[href="index.html"]').forEach(function(a){ a.href = 'https://institutional.ritnome.com/desk' });
   document.addEventListener('ritnome:ready', function(){
     R = window.RitnomeInstitutional; if (!R || R.mode !== 'active') { R = null; return; }

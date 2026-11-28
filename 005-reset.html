@@ -10,6 +10,8 @@
    the other games look for. What guards The Reset is the team code
    below, not this. */
 try { localStorage.setItem('rct-mobile-pass', '1') } catch(e){}
+/* Institutional launch from the Ritnome desk (code in the URL fragment): reported through the desk session; nothing else changes. */
+window.RITNOME_INST = /(^|[#&])rl=/.test(location.hash);
 </script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
@@ -873,5 +875,6 @@ ver('s-start');
 pintar();
 })();
 </script>
+<script src="institucional-hm.js"></script>
 </body>
 </html>

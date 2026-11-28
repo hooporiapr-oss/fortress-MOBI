@@ -2,8 +2,11 @@
 <html lang="en">
 <head>
 <script>
+/* Institutional launch from the Ritnome desk (code in the URL fragment): no access code, no player, no athlete database. */
+window.RITNOME_INST = /(^|[#&])rl=/.test(location.hash);
 /* Access code (index.html): a sign-in lasts until this browser tab/app is closed, like vreaction.com */
-if ((function(){ try { return sessionStorage.getItem('fortress-mobile-gate-pass') } catch(e){ return null } })() !== '1') {
+if (window.RITNOME_INST) { /* institutional: nothing to redirect */ }
+else if ((function(){ try { return sessionStorage.getItem('fortress-mobile-gate-pass') } catch(e){ return null } })() !== '1') {
   window.location.replace('index.html');
 }
 /* No player info yet (name, age, grade): the hub asks for it first (jugador-hm.js) */
@@ -1562,6 +1565,7 @@ function gymCodigo(){
 /* The one call the games make. Everything it can do wrong, it does
    quietly. */
 function gymAnotar(puntos){
+  if (window.RITNOME_INST) return;   /* institutional: nothing goes to the gym server or the athlete database */
   try {
     var juego = gymJuego();
     var p = parseInt(puntos, 10);
@@ -2388,5 +2392,6 @@ if (warmOn()){
   startDemo();
 }
 </script>
+<script src="institucional-hm.js"></script>
 </body>
 </html>
